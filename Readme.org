@@ -1,0 +1,13 @@
+* Guix Config
+Sets up a complete system with most packages required for personal use installed to the users home.
+
+Build system:
+#+begin_src sh
+    sudo guix pull
+    sudo guix system reconfigure ./system.scm
+#+end_src
+
+Build home:
+#+begin_src sh
+  guix home reconfigure -I . ./home.scm
+#+end_src
