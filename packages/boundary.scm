@@ -9,13 +9,13 @@
 (define-public boundary
   (package
    (name "boundary")
-   (version "0.12.0")
+   (version "0.19.0")
    (source (origin
             (method url-fetch/zipbomb)
             (uri (string-append "https://releases.hashicorp.com/boundary/" version "/boundary_" version "_linux_amd64.zip"))
             (sha256
              (base32
-             "1qzfd593i538np6520sdijihxg0zgnvjll1kc2pjrc46msvvnjzp"))))
+             "08406w83bd7f5pg8ggsi07ndfkgmsdnsl6dyjihnv7j1zg9p7jiq"))))
    (build-system copy-build-system)
    (arguments
     '(#:install-plan '(("boundary" "bin/boundary"))))

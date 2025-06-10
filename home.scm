@@ -83,12 +83,16 @@
 		    "awscliv2"
 		    "bottom"
 		    "boundary"
+		    "dex"
 		    "emacs"
 		    "feh"
 		    "font-dejavu"
 		    "glibc-locales"
+		    "gnupg"
 		    "gawk"
 		    "git"
+		    "git:credential-libsecret"
+		    "git-lfs"
 		    "jq"
 		    "keepassxc"
 		    "kubectl"
@@ -98,6 +102,7 @@
 		    "obsidian"
 		    "openssh"
 		    "protonup-ng"
+		    "ripgrep"
 		    "scrot"
 		    "skim"
 		    "starship"
@@ -114,12 +119,27 @@
 	  (service home-pipewire-service-type)
 	  (service home-syncthing-service-type)
 	  (service home-redshift-service-type)
+(service home-openssh-service-type
+         (home-openssh-configuration
+          (hosts
+           (list (openssh-host (name "*")
+                               (identity-file "~/.ssh/tom.pub"))
+                 (openssh-host (name "gitlab.com")
+                               (identity-file "~/.ssh/work.pub"))))))
+(service home-ssh-agent-service-type)
 	  (service home-files-service-type
 		   `((".themes/Dracula" ,dracula-gtk-theme-repo)
 		     (".Xresources" ,dracula-xresources-theme-repo)
 		     (".gitconfig" ,(local-file "files/git/gitconfig"))
 		     (".gitignore" ,(local-file "files/git/gitignore"))
 		     ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
+		     (".emacs.d/init.el" ,(local-file "files/emacs/init.el"))
+		     ;; For some reason this does not work when we pass directories to it
+		     (".stumpwm.d/init.lisp" ,(local-file "files/stumpwm/init.lisp"))
+		     (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
+		     (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
+		     (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
+		     (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
 		     ;; Ensure screenshot directory exists
 		     ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
 	  (service home-xdg-configuration-files-service-type
@@ -129,23 +149,21 @@
 		     ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
 		     ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
 		     ("nnn/plugins" ,nnn-plugins-repo)
-		     ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))))
-	  ;; We want to keep emacs.d and stumpwm.d activaly editable
-	  (service home-dotfiles-service-type
-                   (home-dotfiles-configuration
-                    (directories '("./dotfiles"))))
+		     ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
+		     ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
 	  (simple-service 'some-useful-env-vars-service
 			  home-environment-variables-service-type
 			  `(("GUIX_HOME_PATH" . "$HOME/.guix-home/profile")
-			    ("PATH" . ,(string-join '("${HOME}/.cargo/bin/"             ; Cargo
+			    ("PATH" . ,(string-join '("${HOME}/.cargo/bin/" ; Cargo
 						      "${KREW_ROOT:-$HOME/.krew}/bin" ; Krew
-						      "${HOME}/src/shell-scripts/"      ; Custom Shell Scripts
-						      "${HOME}/.local/bin"              ; Locally Installed Binarys
-						      "${PATH}")                        ; Original Value
+						      "${HOME}/src/shell-scripts/" ; Custom Shell Scripts
+						      "${HOME}/.local/bin" ; Locally Installed Binarys
+						      "${PATH}") ; Original Value
 						    ":"))
 			    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam")
 			    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
-			    ("NNN_FIFO" . "/tmp/nnn.fifo")))
+			    ("NNN_FIFO" . "/tmp/nnn.fifo")
+			    ("TZ" . "Australia/Sydney")))
 	  (simple-service 'variant-packages-service
 			  home-channels-service-type
 			  (list

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=KeePassXC
+Exec=keepassxc
+Icon=keepassxc
+Comment=Secure Password Manager
+Terminal=false
+Categories=Security;Utility;

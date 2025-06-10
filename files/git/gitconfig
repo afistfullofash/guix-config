@@ -3,9 +3,11 @@
 	email = tnatkinson95@gmail.com
 
 [includeIf "gitdir:~/work/**"]
-  path = ~/work/.gitconfig
+	path = ~/work/.gitconfig
 [core]
 	excludesFile = ~/.gitignore
+[credential]
+	helper = libsecret
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f

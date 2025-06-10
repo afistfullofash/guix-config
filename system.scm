@@ -1,3 +1,5 @@
+(define-module (system))
+
 (use-modules (gnu)
 	     (gnu services)
 	     (gnu packages shells)
@@ -36,8 +38,7 @@
              %base-packages))
 
   (services
-   (append (list (service xfce-desktop-service-type)
-		 (service bluetooth-service-type)
+   (append (list (service bluetooth-service-type)
 		 (service gnome-desktop-service-type)
 		 (service containerd-service-type)
 		 (service docker-service-type)
