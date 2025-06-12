@@ -1,0 +1,32 @@
+[global]
+    log_verbosity = "info"
+    startup_notification = true
+    geometry = "493x1078+5118+0"
+    wrap_content = true
+    font = "DejaVu Sans 15"
+    template = """
+    [{{app_name}}] <b>{{summary}}</b>\
+    {% if body %} {{body}}{% endif %} \
+    {% if now(timestamp=true) - timestamp > 60 %} \
+        ({{ (now(timestamp=true) - timestamp) | humantime }} ago)\
+    {% endif %}\
+    {% if unread_count > 1 %} ({{unread_count}}){% endif %}
+    """
+
+[urgency_low]
+    background = "#282A36"
+    foreground = "#BD93F9"
+    timeout = 5
+    text = "low"
+
+[urgency_normal]
+    background = "#6272A4"
+    foreground = "#FF79C6"
+    timeout = 10
+    text = "normal"
+
+[urgency_critical]
+    background = "#6272A4"
+    foreground = "#FF5555"
+    timeout = 0
+    text = "critical"

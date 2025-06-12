@@ -35,6 +35,7 @@
 		"blueman"
 		"bluez"
 		"bluez-alsa"
+		"glibc-locales"
 		"alsa-plugins"
 		"xdg-utils"
 		"firefox"
