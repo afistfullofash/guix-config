@@ -42,12 +42,18 @@ C-keybinding n creates a new instance of the program"
 
 (make-program-binding "keepassxc" "keepassxc")
 
+(make-program-binding "steam" "steam")
+
+(make-program-binding "icedove" "Icedove")
+
 (defparameter *program-map*
   (let ((m (make-sparse-keymap)))
     (define-key m (kbd "f") |*firefox-map*|)
     (define-key m (kbd "e") |*emacs-map*|)
     (define-key m (kbd "c") |*alacritty-map*|)
     (define-key m (kbd "p") |*keepassxc-map*|)
+    (define-key m (kbd "s") |*steam-map*|)
+    (define-key m (kbd "i") |*icedove-map*|)
     m))
 
 (define-key *root-map* (kbd "p") *program-map*)

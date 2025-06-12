@@ -88,8 +88,20 @@
   :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
 
+(use-package expand-region
+  :ensure t                          ;; auto-install from MELPA/ELPA
+  :bind (("C-=" . er/expand-region)  ;; grow region (like many IDEs)
+         ("C--" . er/contract-region)) ;; shrink region
+  :init
+  (setq expand-region-fast-keys-enabled t))
+
+(use-package treesit
+  :mode (("\\.tsx\\'" . tsx-ts-mode))
+  :config
+  (setq treesit-extra-load-path '("~/.guix-home/profile/lib")))
+
 (use-package guix
-  :ensure t ; Install 'guix' package if not already
+  :ensure t		       ; Install 'guix' package if not already
   :config
   ;; Assuming Guix is installed and its environment variables are set up
   ;; (e.g., through your shell's .profile or Guix Home configuration)
@@ -98,13 +110,13 @@
   ;; Optional: If you want to use Emacs-Guix for developing Guix itself
   ;; and have a Guix source checkout, similar to the 'geiser-guile' example.
   ;; Replace "~/src/guix" with the actual path to your Guix source.
-  (setq guix-load-path "~/src/guix") ; For Guile modules
+  (setq guix-load-path "~/src/guix")	; For Guile modules
 
   ;; Auto-prettify store file names (e.g., /gnu/store/hash-package-version -> /gnu/store/...-package-version)
   ;;(guix-prettify-store-paths-mode 1)
 
   ;; Keybindings (optional, often M-x guix is enough to get to the popup)
-  (global-set-key (kbd "C-c p") 'guix) ; Example global binding
+  (global-set-key (kbd "C-c p") 'guix)	; Example global binding
 
   ;; You might want to enable `guix-devel-mode` for .scm files
   ;; to get better Guix-specific features when editing package definitions.

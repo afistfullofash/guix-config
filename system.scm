@@ -4,9 +4,12 @@
 	     (gnu services)
 	     (gnu packages shells)
 	     (nongnu packages linux)
-	     (nongnu system linux-initrd))
+	     (nongnu system linux-initrd)
+	     (srfi srfi-1))
 
 (use-service-modules cups desktop networking ssh xorg docker)
+
+(define base-services)
 
 (operating-system
   (kernel linux)
@@ -23,42 +26,44 @@
                  (group "users")
                  (home-directory "/home/thomas")
 		 (shell (file-append zsh "/bin/zsh"))
-                 (supplementary-groups '("wheel" "netdev" "audio" "video" "docker")))
+                 (supplementary-groups '("wheel" "netdev" "audio" "video" "docker" "lp")))
                 %base-user-accounts))
 
   (packages (append
 	     (specifications->packages
 	      '("stumpwm"
 		"blueman"
+		"bluez"
+		"bluez-alsa"
+		"alsa-plugins"
 		"xdg-utils"
 		"firefox"
 		"zsh"
 		"font-google-noto"
-		"font-liberation"))
+		"font-liberation"
+		"hicolor-icon-theme"))
              %base-packages))
 
   (services
-   (append (list (service bluetooth-service-type)
-		 (service gnome-desktop-service-type)
-		 (service containerd-service-type)
-		 (service docker-service-type)
-                 (service cups-service-type)
-		 (service gnome-keyring-service-type)
-                 (set-xorg-configuration
-                  (xorg-configuration (keyboard-layout keyboard-layout))))
-
-           ;; This is the default list of services we
-           ;; are appending to.
-	   ;; (modify-services %desktop-services
-           ;;   (guix-service-type config => (guix-configuration
-           ;;     (inherit config)
-           ;;     (substitute-urls
-           ;;      (append (list "https://substitutes.nonguix.org")
-           ;;        %default-substitute-urls))
-           ;;     (authorized-keys
-           ;;      (append (list (local-file "./signing-key.pub"))
-           ;;        %default-authorized-guix-keys)))))
-           %desktop-services))
+   (append (list
+	    (service bluetooth-service-type
+		     (bluetooth-configuration (auto-enable? #t)
+					      (multi-profile 'multiple)))	    
+	    (service iwd-service-type)
+	    (service connman-service-type
+		     (connman-configuration
+		      (disable-vpn? #t)
+		      (shepherd-requirement '(iwd))))
+	    (service containerd-service-type)
+	    (service docker-service-type)
+	    (service cups-service-type)
+	    (service gnome-keyring-service-type)
+	    (service gnome-desktop-service-type)
+	    (set-xorg-configuration
+	     (xorg-configuration (keyboard-layout keyboard-layout))))
+	   (modify-services %desktop-services
+	     (delete wpa-supplicant-service-type)
+	     (delete network-manager-service-type))))
   
   (bootloader (bootloader-configuration
                (bootloader grub-efi-bootloader)

@@ -1,1 +1,20 @@
 general.import = ["themes/dracula/dracula.toml"]
+
+[font.bold]
+family = "DejaVuSansM Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "DejaVuSansM Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "DejaVuSansM Nerd Font Mono"
+style = "Italic"
+
+[font.normal]
+family = "DejaVuSansM Nerd Font Mono"
+style = "Regular"
+
+[window]
+opacity = 0.8
