@@ -64,7 +64,15 @@
 	     (xorg-configuration (keyboard-layout keyboard-layout))))
 	   (modify-services %desktop-services
 	     (delete wpa-supplicant-service-type)
-	     (delete network-manager-service-type))))
+	     (delete network-manager-service-type)
+	     (guix-service-type config => (guix-configuration
+               (inherit config)
+               (substitute-urls
+                (append (list "https://substitutes.nonguix.org")
+                  %default-substitute-urls))
+               (authorized-keys
+                (append (list (local-file "./files/nonguix/signing-key.pub"))
+                  %default-authorized-guix-keys)))))))
   
   (bootloader (bootloader-configuration
                (bootloader grub-efi-bootloader)

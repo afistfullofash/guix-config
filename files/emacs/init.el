@@ -97,8 +97,11 @@
 
 (use-package treesit
   :mode (("\\.tsx\\'" . tsx-ts-mode))
-  :config
-  (setq treesit-extra-load-path '("~/.guix-home/profile/lib")))
+  :init
+   (let ((paths (split-string (or (getenv "TREE_SITTER_GRAMMAR_PATH") "") ":" t)))
+    (setq treesit-extra-load-path
+          (append paths treesit-extra-load-path)))
+)
 
 (use-package guix
   :ensure t		       ; Install 'guix' package if not already
@@ -168,16 +171,6 @@
     (setq undo-tree-history-directory-alist `((".*" . ,undo-dir))
 	  undo-tree-auto-save-history t))
   (global-undo-tree-mode))
-
-
-(use-package combobulate
-  :ensure t
-  :custom
-  ;; You can customize Combobulate's key prefix here.
-  ;; Note that you may have to restart Emacs for this to take effect!
-  (combobulate-key-prefix "C-c o")
-  :hook ((prog-mode . combobulate-mode))
-  :straight (combobulate :type git :host github :repo "mickeynp/combobulate"))
 
 (use-package paredit
   :ensure t
@@ -252,6 +245,12 @@
 ;;; yaml
 (use-package yaml-ts-mode
   :mode ("\\.yml\\'" "\\.yaml\\'"))
+
+(use-package json-ts-mode
+  :mode ("\\.json\\'"))
+
+(use-package dockerfile-ts-mode
+  :mode ("\\Dockerfile\\'"))
 
 ;;; Prettier
 (use-package prettier-js

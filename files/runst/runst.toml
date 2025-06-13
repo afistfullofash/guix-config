@@ -1,7 +1,7 @@
 [global]
     log_verbosity = "info"
     startup_notification = true
-    geometry = "493x1078+5118+0"
+    geometry = "1918x182+5122+0"
     wrap_content = true
     font = "DejaVu Sans 15"
     template = """
@@ -20,13 +20,13 @@
     text = "low"
 
 [urgency_normal]
-    background = "#6272A4"
+    background = "#282A36"
     foreground = "#FF79C6"
     timeout = 10
     text = "normal"
 
 [urgency_critical]
-    background = "#6272A4"
+    background = "#282A36"
     foreground = "#FF5555"
     timeout = 0
     text = "critical"

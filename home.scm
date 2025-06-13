@@ -10,6 +10,7 @@
   #:use-module (gnu home services syncthing)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu packages)
+  #:use-module (gnu packages tree-sitter)
   #:use-module (gnu services)
 
   #:use-module (guix channels)
@@ -79,6 +80,16 @@
      (base32
       "13i6alr7djb9h3vzav199i2kkxmzn004815z5cbc41lf7xvx2nc0"))))
 
+(define dracula-lsd-theme-repo
+  (origin
+    (uri (git-reference
+	  (url "https://github.com/dracula/lsd.git")
+	  (commit "2b87711bdce8c89a882db720e4f47d95877f83a7")))
+    (method git-fetch)
+    (sha256
+     (base32
+      "10id0n5c9jyrah295dv2zahl97851kp24d513k3pyxbsy9nv0qml"))))
+
 (define dracula-xresources-theme-repo
   (origin
     (uri (git-reference
@@ -135,27 +146,27 @@
 	"terraform"))
 
 (define tree-sitter-grammars
-  (list "tree-sitter-typescript"
-	"tree-sitter-scheme"
-	"tree-sitter-rust"
-	"tree-sitter-ruby"
-	"tree-sitter-python"
-	"tree-sitter-php"
-	"tree-sitter-org"
-	"tree-sitter-nix"
-	"tree-sitter-meson"
-	"tree-sitter-markdown"
-	"tree-sitter-json"
-	"tree-sitter-javascript"
-	"tree-sitter-html"
-	"tree-sitter-hcl"
-	"tree-sitter-gomod"
-	"tree-sitter-go"
-	"tree-sitter-dockerfile"
-	"tree-sitter-css"
-	"tree-sitter-cmake"
-	"tree-sitter-c-sharp"
-	"tree-sitter-bash"))
+  (list tree-sitter-typescript
+	tree-sitter-scheme
+	tree-sitter-rust
+	tree-sitter-ruby
+	tree-sitter-python
+	tree-sitter-php
+	tree-sitter-org
+	tree-sitter-nix
+	tree-sitter-meson
+	tree-sitter-markdown
+	tree-sitter-json
+	tree-sitter-javascript
+	tree-sitter-html
+	tree-sitter-hcl
+	tree-sitter-gomod
+	tree-sitter-go
+	tree-sitter-dockerfile
+	tree-sitter-css
+	tree-sitter-cmake
+	tree-sitter-c-sharp
+	tree-sitter-bash))
 
 (define desktop-packages
   (list
@@ -200,7 +211,7 @@
    'runst home-shepherd-service-type
    (list
     (shepherd-service
-     (documentation "Run the syslog daemon (syslogd).")
+     (documentation "Run the runst notification daemon")
      (auto-start? #t)
      (provision '(runst))
      (start #~(make-forkexec-constructor
@@ -209,13 +220,13 @@
 
 (define-public default  
   (home-environment
-   (packages (specifications->packages
-	      (append terminal-packages
-		      development-packages
-		      desktop-packages
-		      zsh-plugins
-		      tree-sitter-grammars
-		      misc-packages)))
+   (packages (append (specifications->packages
+		      (append terminal-packages
+			      development-packages
+			      desktop-packages
+			      zsh-plugins
+			      misc-packages))
+		     tree-sitter-grammars))
    (services
     (list (service home-dbus-service-type)
 	  (service home-pipewire-service-type)
@@ -259,6 +270,7 @@
 		     ;; Specific Programs
 		     ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
 		     ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
+		     ("lsd" ,dracula-lsd-theme-repo)
 		     ("nnn/plugins" ,nnn-plugins-repo)
 		     ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
 		     ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
@@ -269,17 +281,21 @@
 			  home-environment-variables-service-type
 			  `(("GTK_THEME" .  "Dracula")
 			    ("GUIX_HOME_PATH" . "$HOME/.guix-home/profile")
-			    ("PATH" . ,(string-join '("${HOME}/.cargo/bin/" ; Cargo
-						      "${KREW_ROOT:-$HOME/.krew}/bin" ; Krew
-						      "${HOME}/src/shell-scripts/" ; Custom Shell Scripts
-						      "${HOME}/.local/bin" ; Locally Installed Binarys
+			    ("PATH" . ,(string-join '("${HOME}/src/shell-scripts/" ; Custom Shell Scripts
 						      "${PATH}") ; Original Value
 						    ":"))
 			    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam")
 			    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
 			    ("BAT_THEME" . "Dracula")
 			    ("NNN_FIFO" . "/tmp/nnn.fifo")
-			    ("TZ" . "Australia/Sydney")))
+			    ("TREE_SITTER_LIBDIR"
+			     . ,#~(string-join (map (lambda (pkg)
+						    (string-append pkg "/lib"))
+						  '#$tree-sitter-grammars)
+					     ":"))
+			    ;; Locale
+			    ("TZ" . "Australia/Sydney")
+			    ("LC_ALL" . "en_AU.utf8")))
 	  (simple-service 'variant-packages-service
 			  home-channels-service-type
 			  (list
