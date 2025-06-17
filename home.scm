@@ -11,6 +11,7 @@
   #:use-module (gnu home services shepherd)
   #:use-module (gnu packages)
   #:use-module (gnu packages tree-sitter)
+  #:use-module (gnu packages xdisorg)
   #:use-module (gnu services)
 
   #:use-module (guix channels)
@@ -51,7 +52,7 @@
       "00qlajbxj25w1bdhj8wc5r57g25gas6f1ax6wrzb4xcypw0j7xdm"))))
 
 (define dracula-gtk-icons
-    (origin
+  (origin
     (uri (git-reference
 	  (url "https://github.com/m4thewz/dracula-icons.git")
 	  (commit "6232e5217429a3ae6396c9e054f5338cecdbb7a5")))
@@ -178,8 +179,9 @@
    ;; Notetaking Tool
    "obsidian"
    "steam"
+   "calibre"
    ;; Screenshot tool
-   "scrot"
+   "maim"
    ;; Image Viewer
    "sxiv"
    ;; Document Viewer
@@ -194,6 +196,7 @@
 (define misc-packages
   (list "fonts-nerd-fonts-dejavu"
 	"font-dejavu"
+	"autorandr"
 	"protonup-ng"
 	"glibc-locales"
 	"gnupg"
@@ -212,11 +215,116 @@
    (list
     (shepherd-service
      (documentation "Run the runst notification daemon")
+     (requirement '(x11-display))
      (auto-start? #t)
      (provision '(runst))
      (start #~(make-forkexec-constructor
                (list #$(file-append runst "/bin/runst"))))
      (stop #~(make-kill-destructor))))))
+
+(define autorandr-service
+  (simple-service
+   'autorandr home-shepherd-service-type
+   (list
+    (shepherd-service
+     (documentation "Run autorandr to set screens")
+     (requirement '(x11-display))
+     (auto-start? #t)
+     (one-shot? #t)
+     (provision '(autorandr))
+     (start #~(make-forkexec-constructor
+               (list #$(file-append autorandr "/bin/autorandr") "--change")))
+     (stop #~(make-kill-destructor))))))
+
+(define variant-packages-service
+  (simple-service 'variant-packages-service
+		  home-channels-service-type
+		  (list
+		    (channel
+		     (name 'afistfullofash)
+		     (url (string-append "file://" home-directory "/src/guix-config/afistfullofash"))
+		     (branch "main"))
+		   (channel
+
+		    (name 'nonguix)
+		    (url "https://gitlab.com/nonguix/nonguix")
+		    ;; Enable signature verification:
+		    (introduction
+		     (make-channel-introduction
+		      "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+		      (openpgp-fingerprint
+		       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))))
+
+(define environment-variables-service
+  (simple-service 'some-useful-env-vars-service
+		  home-environment-variables-service-type
+		  `(("GTK_THEME" .  "Dracula")
+		    ("GUIX_HOME_PATH" . ,(string-append home-directory
+							"/.guix-home/profile"))
+		    ("PATH" . ,(string-join (list (string-append home-directory
+							     "/src/shell-scripts/") ; Custom Shell Scripts
+					      "${PATH}") ; Original Value
+					    ":"))
+		    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam")
+		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
+		    ("BAT_THEME" . "Dracula")
+		    ("NNN_FIFO" . "/tmp/nnn.fifo")
+		    ("TREE_SITTER_LIBDIR"
+		     . ,#~(string-join (map (lambda (pkg)
+					      (string-append pkg "/lib"))
+					    '#$tree-sitter-grammars)
+				       ":"))
+		    ;; Locale
+		    ("TZ" . "Australia/Sydney")
+		    ("LC_ALL" . "en_AU.utf8"))))
+
+(define home-file-locations
+  `((".themes/Dracula" ,dracula-gtk-theme-repo)
+   (".icons/Dracula" ,dracula-gtk-icons)
+   (".Xresources" ,dracula-xresources-theme-repo)
+   (".gitconfig" ,(local-file "files/git/gitconfig"))
+   (".gitignore" ,(local-file "files/git/gitignore"))
+   ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
+   (".emacs.d/init.el" ,(local-file "files/emacs/init.el"))
+   ;; For some reason this does not work when we pass directories to it
+   (".stumpwm.d/init.lisp" ,(local-file "files/stumpwm/init.lisp"))
+   (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
+   (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
+   (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
+   (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
+   ;; Ensure screenshot directory exists
+   ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
+
+(define xdg-config-file-locations
+  ;; This Stats with a heap of THEMEING
+  `(("assets" ,(symlink-to "$HOME/.themes/Dracula/assets"))
+   ;; GTK
+   ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
+   ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
+   ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
+   ;; QT5
+   ("qt5ct/colors" ,dracula-qt5-theme-repo)
+   ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
+   ;; Specific Programs
+   ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
+   ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
+   ("lsd" ,dracula-lsd-theme-repo)
+   ("nnn/plugins" ,nnn-plugins-repo)
+   ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
+   ("config/autorandr" ,(local-file "files/autorandr"
+				    #:recursive? #t))
+   ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
+
+   ;; Autostarts
+   ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
+
+(define ssh-configuration
+  (home-openssh-configuration
+   (hosts
+    (list (openssh-host (name "*")
+			(identity-file "~/.ssh/tom.pub"))
+	  (openssh-host (name "gitlab.com")
+			(identity-file "~/.ssh/work.pub"))))))
 
 (define-public default  
   (home-environment
@@ -228,90 +336,24 @@
 			      misc-packages))
 		     tree-sitter-grammars))
    (services
-    (list (service home-dbus-service-type)
-	  (service home-pipewire-service-type)
-	  (service home-syncthing-service-type)
-	  (service home-redshift-service-type)
-	  runst-service
-	  (service home-openssh-service-type
-		   (home-openssh-configuration
-		    (hosts
-		     (list (openssh-host (name "*")
-					 (identity-file "~/.ssh/tom.pub"))
-			   (openssh-host (name "gitlab.com")
-					 (identity-file "~/.ssh/work.pub"))))))
-	  (service home-ssh-agent-service-type)
-	  (service home-files-service-type
-		   `((".themes/Dracula" ,dracula-gtk-theme-repo)
-		     (".icons/Dracula" ,dracula-gtk-icons)
-		     (".Xresources" ,dracula-xresources-theme-repo)
-		     (".gitconfig" ,(local-file "files/git/gitconfig"))
-		     (".gitignore" ,(local-file "files/git/gitignore"))
-		     ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
-		     (".emacs.d/init.el" ,(local-file "files/emacs/init.el"))
-		     ;; For some reason this does not work when we pass directories to it
-		     (".stumpwm.d/init.lisp" ,(local-file "files/stumpwm/init.lisp"))
-		     (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
-		     (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
-		     (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
-		     (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
-		     ;; Ensure screenshot directory exists
-		     ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
-	  (service home-xdg-configuration-files-service-type
-		   ;; This Stats with a heap of THEMEING
-		   `(("assets" ,(symlink-to "$HOME/.themes/Dracula/assets"))
-		     ;; GTK
-		     ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
-		     ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
-		     ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
-		     ;; QT5
-		     ("qt5ct/colors" ,dracula-qt5-theme-repo)
-		     ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
-		     ;; Specific Programs
-		     ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
-		     ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
-		     ("lsd" ,dracula-lsd-theme-repo)
-		     ("nnn/plugins" ,nnn-plugins-repo)
-		     ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
-		     ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
+    (list
 
-		     ;; Autostarts
-		     ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
-	  (simple-service 'some-useful-env-vars-service
-			  home-environment-variables-service-type
-			  `(("GTK_THEME" .  "Dracula")
-			    ("GUIX_HOME_PATH" . "$HOME/.guix-home/profile")
-			    ("PATH" . ,(string-join '("${HOME}/src/shell-scripts/" ; Custom Shell Scripts
-						      "${PATH}") ; Original Value
-						    ":"))
-			    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam")
-			    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
-			    ("BAT_THEME" . "Dracula")
-			    ("NNN_FIFO" . "/tmp/nnn.fifo")
-			    ("TREE_SITTER_LIBDIR"
-			     . ,#~(string-join (map (lambda (pkg)
-						    (string-append pkg "/lib"))
-						  '#$tree-sitter-grammars)
-					     ":"))
-			    ;; Locale
-			    ("TZ" . "Australia/Sydney")
-			    ("LC_ALL" . "en_AU.utf8")))
-	  (simple-service 'variant-packages-service
-			  home-channels-service-type
-			  (list
-			   (channel
-			    (name 'nonguix)
-			    (url "https://gitlab.com/nonguix/nonguix")
-			    ;; Enable signature verification:
-			    (introduction
-			     (make-channel-introduction
-			      "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-			      (openpgp-fingerprint
-			       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))))
+     runst-service
+     autorandr-service
+     environment-variables-service
+     variant-packages-service
 
-	  (service home-zsh-service-type
-		   (home-zsh-configuration
-		    (zshrc (list
-			    (local-file "files/zsh/zshrc.sh")))))))))
+     (service home-dbus-service-type)
+     (service home-pipewire-service-type)
+     (service home-syncthing-service-type)
+     (service home-redshift-service-type)
+     (service home-ssh-agent-service-type)
+     (service home-openssh-service-type ssh-configuration)
+     (service home-files-service-type home-file-locations)
+     (service home-xdg-configuration-files-service-type xdg-config-file-locations)
+     (service home-zsh-service-type
+	      (home-zsh-configuration
+	       (zshrc (list
+		       (local-file "files/zsh/zshrc.sh")))))))))
 
 default

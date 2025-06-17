@@ -38,5 +38,3 @@
     "A dark theme for GTK.")
    (home-page "https://github.com/dracula/gtk")
    (license license:isc)))
-
-dracula-gtk-theme

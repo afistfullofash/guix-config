@@ -3,13 +3,45 @@
 (use-modules (gnu)
 	     (gnu services)
 	     (gnu packages shells)
+	     (gnu packages wm)
+	     (gnu packages lisp-xyz)
+
+	     (guix packages)
+	     (guix utils)
+     
 	     (nongnu packages linux)
 	     (nongnu system linux-initrd)
+
 	     (srfi srfi-1))
 
 (use-service-modules cups desktop networking ssh xorg docker)
 
-(define base-services)
+(define-public stumpwm-with-local-time
+  (package
+    (inherit stumpwm)
+    (name "stumpwm-with-local-time")
+    (inputs
+     (list sbcl-local-time stumpwm))
+    (arguments
+     (substitute-keyword-arguments (package-arguments stumpwm)
+       ((#:phases phases)
+        `(modify-phases ,phases
+           (replace 'build-program
+             (lambda* (#:key inputs outputs #:allow-other-keys)
+               (let* ((out (assoc-ref outputs "out"))
+                      (program (string-append out "/bin/stumpwm")))
+                 (setenv "HOME" "/tmp")
+                 (build-program program outputs
+                                #:entry-program '((stumpwm:stumpwm) 0)
+                                #:dependencies '("stumpwm" "local-time")
+                                #:dependency-prefixes
+                                (map (lambda (input) (assoc-ref inputs input))
+                                     '("stumpwm" "sbcl-local-time"))))))
+           (delete 'copy-source)
+           (delete 'build)
+           (delete 'check)
+           (delete 'remove-temporary-cache)
+           (delete 'cleanup)))))))
 
 (operating-system
   (kernel linux)
@@ -31,8 +63,7 @@
 
   (packages (append
 	     (specifications->packages
-	      '("stumpwm"
-		"blueman"
+	      '("blueman"
 		"bluez"
 		"bluez-alsa"
 		"glibc-locales"
@@ -42,7 +73,10 @@
 		"zsh"
 		"font-google-noto"
 		"font-liberation"
-		"hicolor-icon-theme"))
+		"hicolor-icon-theme"
+		;; For setting the screenshot time
+		"sbcl-local-time"))
+	     (list stumpwm-with-local-time)
              %base-packages))
 
   (services
@@ -66,13 +100,13 @@
 	     (delete wpa-supplicant-service-type)
 	     (delete network-manager-service-type)
 	     (guix-service-type config => (guix-configuration
-               (inherit config)
-               (substitute-urls
-                (append (list "https://substitutes.nonguix.org")
-                  %default-substitute-urls))
-               (authorized-keys
-                (append (list (local-file "./files/nonguix/signing-key.pub"))
-                  %default-authorized-guix-keys)))))))
+					   (inherit config)
+					   (substitute-urls
+					    (append (list "https://substitutes.nonguix.org")
+						    %default-substitute-urls))
+					   (authorized-keys
+					    (append (list (local-file "./files/nonguix/signing-key.pub"))
+						    %default-authorized-guix-keys)))))))
   
   (bootloader (bootloader-configuration
                (bootloader grub-efi-bootloader)

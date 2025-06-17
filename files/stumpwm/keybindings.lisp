@@ -1,5 +1,5 @@
 (in-package :stumpwm)
-
+(asdf:load-system "local-time")
 ;; Double check prefix-key is set correctly
 (set-prefix-key (kbd "C-t"))
 
@@ -58,18 +58,26 @@ C-keybinding n creates a new instance of the program"
 
 (define-key *root-map* (kbd "p") *program-map*)
 
-(defvar screenshot-cmd
-  (format nil "scrot -F '~a/Pictures/Screenshots/%Y-%m-%d-%a-%I_%M_%S_%p.png'"
-	  (getenv "HOME")))
+(defun timestamp-string ()
+  (local-time:format-timestring
+   nil (local-time:now)
+   :format '(:YEAR "-" (:MONTH 2) "-" :DAY "-" :SHORT-WEEKDAY "-" :HOUR12 "_" :MIN "_" :SEC "_" :AMPM)))
+
+(defparameter *screenshot-path*
+  (format nil "~a/Pictures/Screenshots/~a.png"
+          (getenv "HOME")
+          (timestamp-string)))
 
 ;; Setup bindings for less common aplications which would be opened then closed
 (defcommand screenshot () ()
-  "Do we wanna Scrot? Yeah! We wanna Scrot!"
-  (run-shell-command screenshot-cmd))
+  "Take a screenshot and save it to screenshot directory"
+  (run-shell-command (format nil "maim ~a"
+			     *screenshot-path*)))
 
 (defcommand screenshot-select () ()
-  "Do we wanna Scrot? Yeah! We wanna Scrot!"
-  (run-shell-command (format nil "~a -s" screenshot-cmd)))
+  "Select a area for a screenshot and save it to screenshot directory"
+  (run-shell-command (format nil "maim --select ~a"
+			     *screenshot-path*)))
 
 (defcommand volume-control () ()
 	    "Start volume control"

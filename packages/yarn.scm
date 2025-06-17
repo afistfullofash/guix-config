@@ -55,5 +55,3 @@ Secure: Yarn uses checksums to verify the integrity of every installed package
 before its code is executed.")
     (license license:bsd-2)
     (home-page "https://yarnpkg.com")))
-
-yarn

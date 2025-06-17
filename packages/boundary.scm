@@ -2,9 +2,7 @@
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module ((guix licenses) #:prefix license:)
-  #:use-module (guix build-system copy)
-
-  #:export (boundary))
+  #:use-module (guix build-system copy))
 
 (define-public boundary
   (package

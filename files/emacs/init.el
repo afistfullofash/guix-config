@@ -83,6 +83,13 @@
   (nyan-mode))
 
 
+(use-package dirvish
+  :ensure t
+  :init (dirvish-override-dired-mode) ; swaps Dired transparently
+  :custom
+  (dirvish-preview-enabled t)   ; live previews
+  (dirvish-use-header-line t))
+
 ;;; Rainbow Delimeters
 (use-package rainbow-delimiters
   :ensure t

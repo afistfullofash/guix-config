@@ -1,6 +1,4 @@
-;;; Swap Caps with Ctrl
-(run-shell-command "~/fix-screens.sh")
-(setq *startup-message* (format nil "Welcome Thomas!~%Slynk is on port 4004~%Happy Hacking!"))
+(setq *startup-message* (format nil "Welcome Natalie!"))
 
 (load "~/.stumpwm.d/visual.lisp")
 (load "~/.stumpwm.d/keybindings.lisp")
