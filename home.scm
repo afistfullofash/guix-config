@@ -26,6 +26,7 @@
   #:use-module (packages boundary)
   #:use-module (packages runst)
   #:use-module (packages kubectl)
+  #:use-module (packages emacs-xyz)
   #:use-module (packages fonts)
   #:use-module (packages terraform))
 
@@ -145,6 +146,29 @@
 	"kubectl"
 	"make"
 	"terraform"))
+
+(define emacs-packages
+  (list "emacs-doom-themes"
+	"emacs-nyan-mode-1.1.4"
+	"emacs-expand-region"
+	"emacs-dirvish"
+	"emacs-rainbow-delimiters"
+	"emacs-guix"
+	"emacs-geiser"
+	"emacs-geiser-guile"
+	"emacs-indent-bars"
+	"emacs-dired-hacks"
+	"emacs-undo-tree"
+	"emacs-paredit"
+	"emacs-ivy"
+	"emacs-counsel"
+	"emacs-smartparens"
+	"emacs-magit"
+	"emacs-rustic"
+	"emacs-terraform-mode"
+	"emacs-web-mode"
+	"emacs-prettier"
+	"emacs-lsp-ui"))
 
 (define tree-sitter-grammars
   (list tree-sitter-typescript
@@ -332,6 +356,7 @@
 		      (append terminal-packages
 			      development-packages
 			      desktop-packages
+			      emacs-packages
 			      zsh-plugins
 			      misc-packages))
 		     tree-sitter-grammars))

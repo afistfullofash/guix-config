@@ -29,36 +29,11 @@
 (setq inhibit-startup-message t)
 (setq initial-scratch-message "")
 
-;; Bootstrap straight
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name
-        "straight/repos/straight.el/bootstrap.el"
-        (or (bound-and-true-p straight-base-dir)
-            user-emacs-directory)))
-      (bootstrap-version 7))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-;;; Set up package
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
-(package-initialize)
-
 (defun internet-up-p (&optional host)
   (= 0 (call-process "ping" nil nil nil "-c" "1" "-W" "1" 
 		     (if host host "www.google.com"))))
-
 ;;; Themeing
 (use-package doom-themes
-  :ensure t
   :init
   (progn 
     (require 'doom-themes)
@@ -74,29 +49,17 @@
     ;; Corrects (and improves) org-mode's native fontification.
     (doom-themes-org-config)))
 
-(use-package nyan-mode
-  :ensure t
-  :init
-  ;; Fix up Nyan Cat cause she's pretty
-  (setq nyan-animate-nyancat t
-	nyan-wavy-trail t)
-  (nyan-mode))
-
-
 (use-package dirvish
-  :ensure t
-  :init (dirvish-override-dired-mode) ; swaps Dired transparently
+  :config (dirvish-override-dired-mode 1) ; swaps Dired transparently
   :custom
   (dirvish-preview-enabled t)   ; live previews
   (dirvish-use-header-line t))
 
 ;;; Rainbow Delimeters
 (use-package rainbow-delimiters
-  :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package expand-region
-  :ensure t                          ;; auto-install from MELPA/ELPA
   :bind (("C-=" . er/expand-region)  ;; grow region (like many IDEs)
          ("C--" . er/contract-region)) ;; shrink region
   :init
@@ -111,7 +74,6 @@
 )
 
 (use-package guix
-  :ensure t		       ; Install 'guix' package if not already
   :config
   ;; Assuming Guix is installed and its environment variables are set up
   ;; (e.g., through your shell's .profile or Guix Home configuration)
@@ -141,7 +103,6 @@
   )
 
 (use-package geiser
-  :ensure t
   :custom
   (geiser-default-implementation 'guile)
   (geiser-active-implementations '(guile))
@@ -150,26 +111,22 @@
   (scheme-mode . geiser-mode))
 
 (use-package geiser-guile
-  :ensure t ; Install geiser-guile if it's not already
   :config
   ;; Assuming the Guix checkout is in ~/src/guix.
   (add-to-list 'geiser-guile-load-path "~/src/guix"))
 
 (use-package indent-bars
-  :ensure t
   :hook ((yaml-mode . indent-bars-mode)
 	 (python-mode . indent-bars-mode)))
 
 ;;; Dired
 (use-package dired-narrow
-  :ensure t
   :config
   (bind-keys :map dired-mode-map
 	     ("f" . dired-narrow-fuzzy)))
 
 ;;; Undo-tree
 (use-package undo-tree
-  :ensure t
   :diminish undo-tree-mode
   :init
   (let ((undo-dir (expand-file-name "undo-tree/" (getenv "XDG_CACHE_HOME"))))
@@ -180,7 +137,6 @@
   (global-undo-tree-mode))
 
 (use-package paredit
-  :ensure t
   ;; enable in all the major Lisp modes you care about
   :hook ((emacs-lisp-mode
           lisp-mode
@@ -202,37 +158,20 @@
 
 ;;; Ivy and Consel
 (use-package ivy
-  :ensure t
   :bind (("C-s" . swiper)
 	 ("C-S-s" . isearch-forward))
   :diminish ivy-mode
   :init (ivy-mode 1))
 
 (use-package counsel
-  :ensure t
   :bind (("C-c g" . counsel-rg)))
-
-;;; SmartParens
-(use-package smartparens-mode
-  :ensure smartparens  ;; install the package
-  :hook (prog-mode
-	 text-mode
-	 markdown-mode
-	 rustic-mode
-	 terraform-mode) ;; add `smartparens-mode` to these hooks
-  :bind ("C-<left>" . sp-forward-slurp-sexp)
-  :config
-  ;; load default config
-  (require 'smartparens-config))
 
 ;;; Magit
 (use-package magit
-  :ensure t
   :bind (("C-c m" . magit-status)))
 
 ;;; Rust
 (use-package rustic
-  :ensure t
   :config
   (setq rustic-format-on-save t)
   :custom
@@ -240,13 +179,11 @@
 
 ;;; Terraform
 (use-package terraform-mode
-  :ensure t
    :hook (terraform-mode . (lambda ()
                             (add-hook 'before-save-hook #'terraform-format-buffer nil t))))
 
 ;;; web-mode
 (use-package web-mode
-  :ensure t
   :mode (".svelte$"))
 
 ;;; yaml
@@ -261,7 +198,6 @@
 
 ;;; Prettier
 (use-package prettier-js
-  :ensure t
   :mode (("\\.tsx\\'" . prettier-js-mode)
 	 ("\\.json\\'" . prettier-js-mode)))
 
@@ -270,7 +206,6 @@
 
 ;;; Lsp-mode
 (use-package lsp-mode
-  :ensure t
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
@@ -279,12 +214,7 @@
   :magic (".svelte$" . lsp)
   :commands lsp)
 
-(use-package lsp-ui
-  :ensure t)
-
-(use-package devcontainer
-  :ensure t
-  :straight (devcontainer :type git :host github :repo "johannes-mueller/devcontainer.el"))
+(use-package lsp-ui)
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -294,6 +224,13 @@
  '(default ((t (:family "DejaVu Sans Mono" :foundry "unknown" :slant normal :weight bold :height 98 :width normal)))))
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
+
+(use-package nyan-mode
+  :init
+  ;; Fix up Nyan Cat cause she's pretty
+  (setq nyan-animate-nyancat t
+	nyan-wavy-trail t)
+  (nyan-mode))
 
 (provide 'init.el)
 ;;; init.el ends here
