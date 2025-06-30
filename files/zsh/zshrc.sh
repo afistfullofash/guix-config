@@ -83,21 +83,31 @@ ssh_network() {
 ghr() {
     wd=$(pwd)
     cd ${HOME}/src/guix-config/
-    guix home reconfigure -L . ./home.scm
+    guix pull
+    hash guix
+    guix home reconfigure ./home.scm
     cd ${wd}
 }
+
+ghrq() {
+    wd=$(pwd)
+    cd ${HOME}/src/guix-config/
+    guix home reconfigure ./home.scm
+    cd ${wd}
+}
+
 
 gsr() {
     wd=$(pwd)
     cd ${HOME}/src/guix-config/
     sudo guix pull
-    sudo guix system reconfigure -L . ./system.scm
+    sudo guix system reconfigure ./system.scm
     cd ${wd}
 }
 
 gsrq() {
     wd=$(pwd)
     cd ${HOME}/src/guix-config/
-    sudo guix system reconfigure -L . ./system.scm
+    sudo guix system reconfigure ./system.scm
     cd ${wd}
 }

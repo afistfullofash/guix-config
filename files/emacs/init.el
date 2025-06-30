@@ -1,3 +1,4 @@
+;;; init.el --- Summary
 ;;; Commentary:
 ;;; Entry Point for Emacs customization
 
@@ -5,52 +6,88 @@
 
 ;;; Begin initialization
 ;; Turn off mouse interface early in startup to avoid momentary display
-(when window-system
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
+(use-package emacs             ; the built-in pseudo-package
+  ;; --------------------------------------------------------- ;;
+  ;; Code that must run early (before other packages load)
+  ;; --------------------------------------------------------- ;;
+  :init
+  ;; Minor modes / commands ----------------------------------
+  (context-menu-mode 1)
+  (global-hl-line-mode 1)
+  (global-display-line-numbers-mode 1)
+  (menu-bar-mode   -1)
+  (tool-bar-mode   -1)
   (scroll-bar-mode -1)
-  (tooltip-mode -1))
-;; Add Line numbers onto a sidebar
-(global-display-line-numbers-mode)
+  (tooltip-mode    -1)
 
-;; Backup File Directory
-(let* ((home-dir (getenv "HOME"))
-      (backup-dir "~/.tmp/emacs/backups")
-      (auto-saves-dir "~/.tmp/emacs/auto-saves/"))
-  (dolist (dir (list backup-dir auto-saves-dir))
-    (when (file-directory-p dir)
-      (make-directory dir t)))
-  (setq backup-directory-alist `(("." . ,backup-dir))
-        auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
-        auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
-        tramp-backup-directory-alist `((".*" . ,backup-dir))
-        tramp-auto-save-directory auto-saves-dir))
+  ;; Backup & auto-save directories --------------------------
+  (let* ((backup-dir      (expand-file-name "~/.tmp/emacs/backups/"))
+         (auto-saves-dir  (expand-file-name "~/.tmp/emacs/auto-saves/")))
+    (dolist (dir (list backup-dir auto-saves-dir))
+      (unless (file-directory-p dir)      ; create if missing
+        (make-directory dir t)))
+    (setq backup-directory-alist        `(("." . ,backup-dir))
+          auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+          auto-save-list-file-prefix     (concat auto-saves-dir ".saves-")
+          tramp-backup-directory-alist   `((".*" . ,backup-dir))
+          tramp-auto-save-directory      auto-saves-dir))
 
-(setq inhibit-startup-message t)
-(setq initial-scratch-message "")
+  ;; Enable region case-changing commands without prompt -----
+  (put 'upcase-region   'disabled nil)
+  (put 'downcase-region 'disabled nil)
 
-(defun internet-up-p (&optional host)
-  (= 0 (call-process "ping" nil nil nil "-c" "1" "-W" "1" 
-		     (if host host "www.google.com"))))
+  ;; --------------------------------------------------------- ;;
+  ;; Plain variable customisations
+  ;; --------------------------------------------------------- ;;
+  :custom
+  (enable-recursive-minibuffers   t)
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  (minibuffer-prompt-properties
+   '(read-only t cursor-intangible t face minibuffer-prompt))
+  (inhibit-startup-message t)
+  (initial-scratch-message  "")
+  (enable-local-variables :all)
+  (enable-local-eval       t)
+
+  ;; --------------------------------------------------------- ;;
+  ;; Faces
+  ;; --------------------------------------------------------- ;;
+  :custom-face
+  (default
+   ((t (:family "DejaVuSansM Nerd Font Mono"
+                :weight bold
+                :height 98)))))
+
 ;;; Themeing
 (use-package doom-themes
   :init
-  (progn 
-    (require 'doom-themes)
+  (load-theme 'doom-dracula t)
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
+	doom-themes-enable-italic t
+	doom-vibrant-brighter-modeline nil
+	org-hide-leading-stars nil) ; if nil, italics is universally disabled
 
-    ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	  doom-themes-enable-italic t
-	  doom-vibrant-brighter-modeline nil
-	  org-hide-leading-stars nil) ; if nil, italics is universally disabled
-    (load-theme 'doom-dracula t)
-    ;; Enable flashing mode-line on errors
-    (doom-themes-visual-bell-config)
-    ;; Corrects (and improves) org-mode's native fontification.
-    (doom-themes-org-config)))
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
 
 (use-package dirvish
-  :config (dirvish-override-dired-mode 1) ; swaps Dired transparently
+  :config
+  (dirvish-override-dired-mode 1) ; swaps Dired transparently
+  (dirvish-define-preview lsd (file)
+    "Use `lsd` to generate a colourful directory preview for Dirvish."
+    :require ("lsd")                    ; ensure the binary is present
+    (when (file-directory-p file)       ; only preview for directories
+      `(shell . ("lsd"
+                 "-al"                  ; long list + hidden files
+                 "--color=always"
+                 "--icon=always"
+                 "--group-dirs=first"
+                 ,file))))
+  (push 'lsd dirvish-preview-dispatchers)
+  :bind (("C-x d" . dirvish))
   :custom
   (dirvish-preview-enabled t)   ; live previews
   (dirvish-use-header-line t))
@@ -68,10 +105,10 @@
 (use-package treesit
   :mode (("\\.tsx\\'" . tsx-ts-mode))
   :init
-   (let ((paths (split-string (or (getenv "TREE_SITTER_GRAMMAR_PATH") "") ":" t)))
+  (let ((paths (split-string (or (getenv "TREE_SITTER_GRAMMAR_PATH") "") ":" t)))
     (setq treesit-extra-load-path
           (append paths treesit-extra-load-path)))
-)
+  )
 
 (use-package guix
   :config
@@ -156,15 +193,61 @@
   ;; optional: show mismatched parens in fringe
   (show-paren-mode +1))
 
-;;; Ivy and Consel
-(use-package ivy
-  :bind (("C-s" . swiper)
-	 ("C-S-s" . isearch-forward))
-  :diminish ivy-mode
-  :init (ivy-mode 1))
+(use-package vertico
+  :init (vertico-mode))
 
-(use-package counsel
-  :bind (("C-c g" . counsel-rg)))
+;; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+  :init
+  (savehist-mode))
+
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package marginalia
+  :init (marginalia-mode))
+
+(use-package consult
+  :bind (("C-s" . consult-line)
+	 ("C-y" . consult-yank-from-kill-ring)
+	 ("C-x b" . consult-buffer)
+	 ("C-c g" . consult-ripgep)))
+
+;; CORFU: Popup UI for in-buffer completion
+(use-package corfu
+  :init
+  (global-corfu-mode) ;; enables Corfu in all buffers
+  ;; :custom
+  ;; (corfu-auto t)                ;; enable auto popup
+  ;; (corfu-cycle t)               ;; allow cycling through candidates
+  ;; (corfu-preselect-first t)
+  ;; (corfu-quit-at-boundary nil)
+  ;; (corfu-quit-no-match 'separator)
+  ;; (corfu-scroll-margin 5)
+  ;; (corfu-max-width 80)
+  ;; :bind
+  ;; (:map corfu-map
+  ;;       ("TAB" . corfu-next)
+  ;;       ([tab] . corfu-next)
+  ;;       ("S-TAB" . corfu-previous)
+  ;;       ([backtab] . corfu-previous))
+  )
+
+;; CAPE: Add extra completion sources to completion-at-point-functions
+(use-package cape
+  :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+  :init
+  ;; Add useful defaults to `completion-at-point-functions`
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-keyword)
+  ;; Optionally:
+  ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
+  ;; (add-to-list 'completion-at-point-functions #'cape-line)
+  )
 
 ;;; Magit
 (use-package magit
@@ -179,7 +262,7 @@
 
 ;;; Terraform
 (use-package terraform-mode
-   :hook (terraform-mode . (lambda ()
+  :hook (terraform-mode . (lambda ()
                             (add-hook 'before-save-hook #'terraform-format-buffer nil t))))
 
 ;;; web-mode
@@ -210,20 +293,29 @@
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
   :hook ((terraform-mode . lsp)
-	 (tsx-ts-mode . lsp))
+	 (tsx-ts-mode . lsp)
+	 (scheme-mode . lsp))
   :magic (".svelte$" . lsp)
   :commands lsp)
 
-(use-package lsp-ui)
+(use-package lsp-ui
+  :commands lsp-ui-mode)
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:family "DejaVu Sans Mono" :foundry "unknown" :slant normal :weight bold :height 98 :width normal)))))
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
+(use-package flycheck
+  :hook (after-init . global-flycheck-mode))
+
+(use-package lsp-scheme
+  :after lsp-mode
+  :custom
+  ;; One of: "guile"  "chicken"  "gambit"  "chez"  "racket" …
+  ;; Pick the implementation you'll use most often.
+  (lsp-scheme-implementation "guile")  ; change to "chicken" etc. if needed
+  ;; If you keep multiple Schemes, make it project-specific:
+  ;; (dir-locals-set-class-variables
+  ;;  'my-scheme
+  ;;  '((scheme-mode . ((lsp-scheme-implementation . "chicken")))))
+  ;; (dir-locals-set-directory-class "/path/to/project/" 'my-scheme)
+  )
 
 (use-package nyan-mode
   :init
@@ -231,6 +323,42 @@
   (setq nyan-animate-nyancat t
 	nyan-wavy-trail t)
   (nyan-mode))
+
+(use-package org
+  :defer t
+  :config
+  ;; Enable shell, Scheme and Emacs-Lisp in Org Babel
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((shell       . t)
+     (scheme      . t)
+     (emacs-lisp  . t)))
+
+  ;; Suppress confirmation prompts
+  (setq org-confirm-babel-evaluate nil
+
+        ;; Shell defaults
+        org-babel-sh-command "bash"
+        org-babel-default-header-args:sh
+        '((:results . "output replace")
+          (:exports . "both")
+          (:session . nil)
+          (:cache . "no"))
+
+        ;; Scheme defaults (override `org-babel-scheme-command` if you use another impl)
+        org-babel-scheme-command "guile"
+        org-babel-default-header-args:scheme
+        '((:results . "output replace")
+          (:exports . "both")
+          (:session . nil)
+          (:cache . "no"))
+
+        ;; Emacs-Lisp defaults
+        ;; (no external REPL, just evaluates in the current Emacs session)
+        org-babel-default-header-args:emacs-lisp
+        '((:results . "output replace")
+          (:exports . "both")
+          (:cache   . "no"))))
 
 (provide 'init.el)
 ;;; init.el ends here

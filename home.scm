@@ -20,15 +20,16 @@
   #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (guix store)
+    #:use-module (guix utils)
   
   #:use-module (ice-9 popen)
   
-  #:use-module (packages boundary)
-  #:use-module (packages runst)
-  #:use-module (packages kubectl)
-  #:use-module (packages emacs-xyz)
-  #:use-module (packages fonts)
-  #:use-module (packages terraform))
+  #:use-module (afistfullofash packages boundary)
+  #:use-module (afistfullofash packages runst)
+  #:use-module (afistfullofash packages kubectl)
+  #:use-module (afistfullofash packages emacs-xyz)
+  #:use-module (afistfullofash packages fonts)
+  #:use-module (afistfullofash packages terraform))
 
 (define home-directory (getenv "HOME"))
 
@@ -160,15 +161,22 @@
 	"emacs-dired-hacks"
 	"emacs-undo-tree"
 	"emacs-paredit"
-	"emacs-ivy"
-	"emacs-counsel"
 	"emacs-smartparens"
 	"emacs-magit"
 	"emacs-rustic"
 	"emacs-terraform-mode"
 	"emacs-web-mode"
 	"emacs-prettier"
-	"emacs-lsp-ui"))
+	"emacs-lsp-mode"
+	"emacs-lsp-ui"
+	"emacs-lsp-scheme"
+	"emacs-flycheck"
+	"emacs-vertico"
+	"emacs-orderless"
+	"emacs-marginalia"
+	"emacs-consult"
+	"emacs-cape"
+	"emacs-corfu"))
 
 (define tree-sitter-grammars
   (list tree-sitter-typescript
@@ -192,6 +200,12 @@
 	tree-sitter-cmake
 	tree-sitter-c-sharp
 	tree-sitter-bash))
+
+(define language-server-packages
+  (list "rust-analyzer"
+	"python-lsp-server"
+	"guile-lsp-server"
+	"sqls"))
 
 (define desktop-packages
   (list
@@ -224,6 +238,10 @@
 	"protonup-ng"
 	"glibc-locales"
 	"gnupg"
+	;; Required by dirvish
+	"vips"
+	"poppler"
+	"mediainfo"
 	"openssh"
 	;; Background Setter
 	"feh"
@@ -264,12 +282,11 @@
   (simple-service 'variant-packages-service
 		  home-channels-service-type
 		  (list
-		    (channel
-		     (name 'afistfullofash)
-		     (url (string-append "file://" home-directory "/src/guix-config/afistfullofash"))
-		     (branch "main"))
 		   (channel
-
+		    (name 'afistfullofash)
+		    (url "https://github.com/afistfullofash/afistfullofash")
+		    (branch "main"))
+		   (channel
 		    (name 'nonguix)
 		    (url "https://gitlab.com/nonguix/nonguix")
 		    ;; Enable signature verification:
@@ -289,7 +306,7 @@
 							     "/src/shell-scripts/") ; Custom Shell Scripts
 					      "${PATH}") ; Original Value
 					    ":"))
-		    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam")
+		    ("GUIX_SANDBOX_EXTRA_SHARES" . ,(string-append "/steam:" home-directory "/.steam/root/compatibilitytools.d/") )
 		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
 		    ("BAT_THEME" . "Dracula")
 		    ("NNN_FIFO" . "/tmp/nnn.fifo")
@@ -335,7 +352,7 @@
    ("lsd" ,dracula-lsd-theme-repo)
    ("nnn/plugins" ,nnn-plugins-repo)
    ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
-   ("config/autorandr" ,(local-file "files/autorandr"
+   ("autorandr" ,(local-file "files/autorandr"
 				    #:recursive? #t))
    ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
 
@@ -357,6 +374,7 @@
 			      development-packages
 			      desktop-packages
 			      emacs-packages
+			      language-server-packages
 			      zsh-plugins
 			      misc-packages))
 		     tree-sitter-grammars))

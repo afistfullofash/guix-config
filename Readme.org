@@ -1,13 +1,25 @@
 * Guix Config
 Sets up a complete system with most packages required for personal use installed to the users home.
 
-Build system:
+This requires that the channels afistfullofash and nonguix are avaliable. To ensure they are avaliable the script below will ensure they are avliable.
+** Initalize Channels
 #+begin_src sh
-    sudo guix pull
-    sudo guix system reconfigure ./system.scm
+  rm ~/.config/guix/channels.scm
+  mkdir -p ~/.config/guix/
+  cp ./channels.scm ~/.config/guix/channels.scm
+
+  guix pull
+  hash guix
 #+end_src
 
-Build home:
+
+** Reconfigure System
 #+begin_src sh
-  guix home reconfigure -I . ./home.scm
+  sudo guix pull
+  sudo guix system reconfigure ./system.scm
+#+end_src
+
+** Reconfigure Home
+#+begin_src sh
+  guix home reconfigure ./home.scm
 #+end_src
