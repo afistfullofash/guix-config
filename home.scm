@@ -20,16 +20,18 @@
   #:use-module (guix git-download)
   #:use-module (guix packages)
   #:use-module (guix store)
-    #:use-module (guix utils)
+  #:use-module (guix utils)
   
   #:use-module (ice-9 popen)
   
   #:use-module (afistfullofash packages boundary)
   #:use-module (afistfullofash packages runst)
+  #:use-module (afistfullofash packages codex)
   #:use-module (afistfullofash packages kubectl)
   #:use-module (afistfullofash packages emacs-xyz)
   #:use-module (afistfullofash packages fonts)
-  #:use-module (afistfullofash packages terraform))
+  #:use-module (afistfullofash packages terraform)
+  #:use-module (afistfullofash packages tree-sitter))
 
 (define home-directory (getenv "HOME"))
 
@@ -133,7 +135,8 @@
    "ripgrep"
    "mpv"
    ;; prompt replacement
-   "starship"))
+   "starship"
+   "codex"))
 
 (define development-packages
   (list "git"
@@ -194,6 +197,7 @@
 	tree-sitter-html
 	tree-sitter-hcl
 	tree-sitter-gomod
+	tree-sitter-yaml
 	tree-sitter-go
 	tree-sitter-dockerfile
 	tree-sitter-css
@@ -217,6 +221,10 @@
    ;; Notetaking Tool
    "obsidian"
    "steam"
+   ;; Main browser
+   "firefox"
+   ;; Backup if firefox fails
+   "google-chrome-stable"
    "calibre"
    ;; Screenshot tool
    "maim"
@@ -236,7 +244,6 @@
 	"font-dejavu"
 	"autorandr"
 	"protonup-ng"
-	"glibc-locales"
 	"gnupg"
 	;; Required by dirvish
 	"vips"
@@ -287,6 +294,14 @@
 		    (url "https://github.com/afistfullofash/afistfullofash")
 		    (branch "main"))
 		   (channel
+		    (name 'rustup)
+		    (url "https://github.com/declantsien/guix-rustup")
+		    (introduction
+		     (make-channel-introduction
+		      "325d3e2859d482c16da21eb07f2c6ff9c6c72a80"
+		      (openpgp-fingerprint
+		       "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5"))))
+		   (channel
 		    (name 'nonguix)
 		    (url "https://gitlab.com/nonguix/nonguix")
 		    ;; Enable signature verification:
@@ -303,8 +318,8 @@
 		    ("GUIX_HOME_PATH" . ,(string-append home-directory
 							"/.guix-home/profile"))
 		    ("PATH" . ,(string-join (list (string-append home-directory
-							     "/src/shell-scripts/") ; Custom Shell Scripts
-					      "${PATH}") ; Original Value
+								 "/src/shell-scripts/") ; Custom Shell Scripts
+						  "${PATH}") ; Original Value
 					    ":"))
 		    ("GUIX_SANDBOX_EXTRA_SHARES" . ,(string-append "/steam:" home-directory "/.steam/root/compatibilitytools.d/") )
 		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
@@ -321,43 +336,43 @@
 
 (define home-file-locations
   `((".themes/Dracula" ,dracula-gtk-theme-repo)
-   (".icons/Dracula" ,dracula-gtk-icons)
-   (".Xresources" ,dracula-xresources-theme-repo)
-   (".gitconfig" ,(local-file "files/git/gitconfig"))
-   (".gitignore" ,(local-file "files/git/gitignore"))
-   ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
-   (".emacs.d/init.el" ,(local-file "files/emacs/init.el"))
-   ;; For some reason this does not work when we pass directories to it
-   (".stumpwm.d/init.lisp" ,(local-file "files/stumpwm/init.lisp"))
-   (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
-   (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
-   (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
-   (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
-   ;; Ensure screenshot directory exists
-   ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
+    (".icons/Dracula" ,dracula-gtk-icons)
+    (".Xresources" ,dracula-xresources-theme-repo)
+    (".gitconfig" ,(local-file "files/git/gitconfig"))
+    (".gitignore" ,(local-file "files/git/gitignore"))
+    ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
+    ;; For some reason this does not work when we pass directories to it
+    (".stumpwm.d/init.lisp" ,(local-file "files/stumpwm/init.lisp"))
+    (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
+    (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
+    (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
+    (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
+    (".emacs.d/init.el" ,(local-file "files/emacs/init.el"))
+    ;; Ensure screenshot directory exists
+    ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
 
 (define xdg-config-file-locations
   ;; This Stats with a heap of THEMEING
   `(("assets" ,(symlink-to "$HOME/.themes/Dracula/assets"))
-   ;; GTK
-   ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
-   ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
-   ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
-   ;; QT5
-   ("qt5ct/colors" ,dracula-qt5-theme-repo)
-   ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
-   ;; Specific Programs
-   ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
-   ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
-   ("lsd" ,dracula-lsd-theme-repo)
-   ("nnn/plugins" ,nnn-plugins-repo)
-   ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
-   ("autorandr" ,(local-file "files/autorandr"
-				    #:recursive? #t))
-   ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
+    ;; GTK
+    ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
+    ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
+    ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
+    ;; QT5
+    ("qt5ct/colors" ,dracula-qt5-theme-repo)
+    ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
+    ;; Specific Programs
+    ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
+    ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
+    ("lsd" ,dracula-lsd-theme-repo)
+    ("nnn/plugins" ,nnn-plugins-repo)
+    ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
+    ("autorandr" ,(local-file "files/autorandr"
+			      #:recursive? #t))
+    ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
 
-   ;; Autostarts
-   ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
+    ;; Autostarts
+    ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
 
 (define ssh-configuration
   (home-openssh-configuration
