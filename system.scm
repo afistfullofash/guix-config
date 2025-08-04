@@ -2,9 +2,12 @@
 
 (use-modules (gnu)
 	     (gnu services)
+	     (gnu services linux)
+	     
 	     (gnu packages shells)
 	     (gnu packages wm)
 	     (gnu packages lisp-xyz)
+	     (gnu packages hardware)
 
 	     (guix packages)
 	     (guix utils)
@@ -53,10 +56,10 @@
   (host-name "reason")
 
   (users (cons* (user-account
-                 (name "thomas")
-                 (comment "Thomas Atkinson")
+                 (name "natalie")
+                 (comment "Natalie Atkinson")
                  (group "users")
-                 (home-directory "/home/thomas")
+                 (home-directory "/home/natalie")
 		 (shell (file-append zsh "/bin/zsh"))
                  (supplementary-groups '("wheel" "netdev" "audio" "video" "docker" "lp")))
                 %base-user-accounts))
@@ -74,6 +77,13 @@
 		"font-google-noto"
 		"font-liberation"
 		"hicolor-icon-theme"
+		"i2c-tools"
+		"openrgb"
+		"flatpak"
+		"gzip"
+		"bzip2"
+		"unzip"
+		"simple-scan"
 		;; For setting the screenshot time
 		"sbcl-local-time"))
 	     (list stumpwm-with-local-time)
@@ -81,6 +91,9 @@
 
   (services
    (append (list
+	    (service kernel-module-loader-service-type
+                     '("i2c-dev" "i2c-piix4"))
+	    (udev-rules-service 'openrgb openrgb)
 	    (service bluetooth-service-type
 		     (bluetooth-configuration (auto-enable? #t)
 					      (multi-profile 'multiple)))	    
@@ -91,7 +104,9 @@
 		      (shepherd-requirement '(iwd))))
 	    (service containerd-service-type)
 	    (service docker-service-type)
-	    (service cups-service-type)
+	    (service cups-service-type
+		     (cups-configuration
+		      (web-interface? #t)))
 	    (service gnome-keyring-service-type)
 	    (service gnome-desktop-service-type)
 	    (set-xorg-configuration
@@ -114,7 +129,7 @@
                (keyboard-layout keyboard-layout)))
 
   (file-systems (cons* (file-system
-                         (mount-point "/home/thomas")
+                         (mount-point "/home/natalie")
                          (device (uuid
                                   "930472ef-8c72-4154-92fb-8d045196d45e"
                                   'btrfs))

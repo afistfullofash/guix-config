@@ -47,6 +47,10 @@ zstyle ':fzf-tab:*' switch-group '<' '>'
 export BOUNDARY_ADDR="https://boundary.liven.com.au:9200"
 alias boundary_login="boundary authenticate oidc -auth-method-id=amoidc_oQJX98VDSU -addr=https://boundary.liven.com.au:9200"
 
+get_boundary_token() {
+  secret-tool lookup profile default | jq .Data
+}
+
 # Replace old-school commands with modern equivalents
 alias ls='lsd --group-dirs=first --icon=auto'
 alias ll='ls -l'

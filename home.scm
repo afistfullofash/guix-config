@@ -136,19 +136,18 @@
    "mpv"
    ;; prompt replacement
    "starship"
-   "codex"))
+   "codex"
+   "unzip"))
 
 (define development-packages
   (list "git"
 	"git:credential-libsecret"
 	"git-lfs"
-	"gcc-toolchain"
 	"awscliv2"
 	"boundary"
 	"gawk"
 	"jq"
 	"kubectl"
-	"make"
 	"terraform"))
 
 (define emacs-packages
@@ -255,7 +254,8 @@
 	"runst"
 	"tabbed"
 	;; Runs autorun files
-	"dex"))
+	"dex"
+	"glibc-locales"))
 
 
 (define runst-service
@@ -321,7 +321,7 @@
 								 "/src/shell-scripts/") ; Custom Shell Scripts
 						  "${PATH}") ; Original Value
 					    ":"))
-		    ("GUIX_SANDBOX_EXTRA_SHARES" . ,(string-append "/steam:" home-directory "/.steam/root/compatibilitytools.d/") )
+		    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam" )
 		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
 		    ("BAT_THEME" . "Dracula")
 		    ("NNN_FIFO" . "/tmp/nnn.fifo")
@@ -332,7 +332,8 @@
 				       ":"))
 		    ;; Locale
 		    ("TZ" . "Australia/Sydney")
-		    ("LC_ALL" . "en_AU.utf8"))))
+		    ("LC_ALL" . "en_AU.utf8")
+		    ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
 
 (define home-file-locations
   `((".themes/Dracula" ,dracula-gtk-theme-repo)
