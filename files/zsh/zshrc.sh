@@ -102,16 +102,10 @@ ghrq() {
 
 
 gsr() {
-    wd=$(pwd)
-    cd ${HOME}/src/guix-config/
     sudo guix pull
-    sudo guix system reconfigure ./system.scm
-    cd ${wd}
+    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/desktop.scm
 }
 
 gsrq() {
-    wd=$(pwd)
-    cd ${HOME}/src/guix-config/
-    sudo guix system reconfigure ./system.scm
-    cd ${wd}
+    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/desktop.scm
 }

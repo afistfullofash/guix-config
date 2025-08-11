@@ -103,12 +103,12 @@
   (setq expand-region-fast-keys-enabled t))
 
 (use-package treesit
-  :mode (("\\.tsx\\'" . tsx-ts-mode))
+  :mode (("\\.tsx\\'" . tsx-ts-mode)
+	 ("\\.json\\'" . json-ts-mode))
   :init
   (let ((paths (split-string (or (getenv "TREE_SITTER_GRAMMAR_PATH") "") ":" t)))
     (setq treesit-extra-load-path
-          (append paths treesit-extra-load-path)))
-  )
+          (append paths treesit-extra-load-path))))
 
 (use-package guix
   :config
@@ -274,15 +274,16 @@
   :mode ("\\.yml\\'" "\\.yaml\\'"))
 
 (use-package json-ts-mode
-  :mode ("\\.json\\'"))
+  :mode ("\\.json$"))
 
 (use-package dockerfile-ts-mode
   :mode ("\\Dockerfile\\'"))
 
 ;;; Prettier
 (use-package prettier-js
-  :mode (("\\.tsx\\'" . prettier-js-mode)
-	 ("\\.json\\'" . prettier-js-mode)))
+  :hook ((js-mode . prettier-js-mode)
+	 (ts-mode . prettier-js-mode)
+	 (json-ts-mode . prettier-js-mode)))
 
 (use-package tsx-ts-mode
   :mode "\\.tsx\\'")
