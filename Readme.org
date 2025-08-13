@@ -16,7 +16,7 @@ This requires that the channels afistfullofash and nonguix are avaliable. To ens
 ** Reconfigure System
 #+begin_src sh
   sudo guix pull
-  sudo guix system reconfigure ./system.scm
+  sudo guix system reconfigure ./${SYSTEM_TO_DEPLOY}.scm
 #+end_src
 
 ** Reconfigure Home

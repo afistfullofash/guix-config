@@ -1,0 +1,42 @@
+(define-module (systems laptop))
+
+(use-modules (systems base)
+	     (gnu)
+	     (gnu services)
+	     (gnu services linux)
+	     
+	     (gnu packages shells)
+	     (gnu packages wm)
+	     (gnu packages lisp-xyz)
+	     (gnu packages hardware)
+
+	     (guix packages)
+	     (guix utils)
+     
+	     (nongnu packages linux)
+	     (nongnu system linux-initrd)
+
+	     (srfi srfi-1))
+
+(define system
+  (operating-system
+    (inherit base-operating-system)
+    (host-name "siren")
+
+    (swap-devices (list (swap-space
+                        (target (uuid
+                                 "23c8daff-2df4-4412-870a-3cf257d8f78d")))))
+    
+    (file-systems (cons* (file-system
+                           (mount-point "/")
+                           (device (uuid
+                                    "5307cb84-d017-4990-a877-f491bb886955"
+                                    'ext4))
+                           (type "ext4"))
+			 (file-system
+                           (mount-point "/boot/efi")
+                           (device (uuid "D160-D22E"
+					 'fat32))
+                           (type "vfat")) %base-file-systems))))
+
+system

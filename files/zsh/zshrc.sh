@@ -102,10 +102,20 @@ ghrq() {
 
 
 gsr() {
+    if [ -z "${1}" ]; then
+	echo "No System given to configure"
+	return 1
+    fi
+    SYSTEM=${1}
     sudo guix pull
-    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/desktop.scm
+    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/${SYSTEM}.scm
 }
 
 gsrq() {
-    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/desktop.scm
+    if [ -z "${1}" ]; then
+	echo "No System given to configure"
+	return 1
+    fi
+    SYSTEM=${1}
+    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/${SYSTEM}.scm
 }
