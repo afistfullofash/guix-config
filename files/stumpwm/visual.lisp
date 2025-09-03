@@ -108,37 +108,17 @@
 
 (apply-theme (gethash 'dracula *themes*))
 
-;;; Load battery module
-;; (load-module "notify")
-
-;; Set notification text color to yellow to make it obvious
-;; (in-package :notify)
-;; (defun show-notification (app icon summary body)
-;;   "Show the notification using standard STUMPWM::MESSAGE function"
-;;   (declare (ignore app icon))
-;;   (stumpwm:message "^B^[^3*~A ~A^]" summary body))
-;; ;;; Start notification server
-;; (notify-server-toggle)
-
-;; (load-module :ttf-fonts)
-
 (in-package :stumpwm)
 
 (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
-;; (load-module :battery-portable)
 
-;; (ql:quickload :clx-truetype)
-;; (load-module "ttf-fonts")
-;; (xft:cache-fonts)
-;; (set-font (make-instance 'xft:font :family "DejaVu Sans Mono" :subfamily "Bold" :slant "r" :size 10))
-
-;; (defun get-utc-time ()
-;;   (subseq (run-shell-command "date -u +%H:%M" t) 0 5))
-
-
-;; Show time, cpu usage and network traffic in the modelinecomment 
+;; Show time, cpu usage and network traffic in the modelinecomment
+(asdf:load-system "battery-portable")
 (setf *screen-mode-line-format*
-      (list "%W"))
+      (list (if (equal (getenv "GUIX_CONFIG_SYSTEM_FORMAT") "laptop")
+		"%B |")
+	    "%B |"
+	    "%W"))
 
 (setf *window-format* "%n %10c: %15t")
 
@@ -149,7 +129,10 @@
 (stumpwm:add-hook stumpwm:*destroy-window-hook*
                   #'(lambda (win) (stumpwm:repack-window-numbers)))
 
-;; Turn on the modeline
-(mapcar (lambda (head)
-	  (toggle-mode-line (current-screen) head))
-	(screen-heads (current-screen)))
+(defun toggle-modeline-all-screens ()
+  ;; Turn on the modeline
+  (mapcar (lambda (head)
+	    (toggle-mode-line (current-screen) head))
+	  (screen-heads (current-screen))))
+
+(toggle-modeline-all-screens)

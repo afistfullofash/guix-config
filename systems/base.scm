@@ -19,12 +19,15 @@
 
 (use-service-modules cups desktop networking ssh xorg docker)
 
-(define-public stumpwm-with-local-time
+(define-public stumpwm-with-extensions
   (package
     (inherit stumpwm)
-    (name "stumpwm-with-local-time")
+    (name "stumpwm-with-extensions")
     (inputs
-     (list sbcl-local-time stumpwm))
+     (list sbcl-local-time
+	   sbcl-stumpwm-pamixer
+	   sbcl-stumpwm-battery-portable
+	   stumpwm))
     (arguments
      (substitute-keyword-arguments (package-arguments stumpwm)
        ((#:phases phases)
@@ -36,10 +39,16 @@
                  (setenv "HOME" "/tmp")
                  (build-program program outputs
                                 #:entry-program '((stumpwm:stumpwm) 0)
-                                #:dependencies '("stumpwm" "local-time")
+                                #:dependencies '("stumpwm"
+						 "local-time"
+						 "battery-portable"
+						 "pamixer")
                                 #:dependency-prefixes
                                 (map (lambda (input) (assoc-ref inputs input))
-                                     '("stumpwm" "sbcl-local-time"))))))
+                                     '("stumpwm"
+				       "sbcl-local-time"
+				       "sbcl-stumpwm-battery-portable"
+				       "sbcl-stumpwm-pamixer"))))))
            (delete 'copy-source)
            (delete 'build)
            (delete 'check)
@@ -86,9 +95,10 @@
 		  "bzip2"
 		  "unzip"
 		  "simple-scan"
+		  "pamixer"
 		  ;; For setting the screenshot time
 		  "sbcl-local-time"))
-	       (list stumpwm-with-local-time)
+	       (list stumpwm-with-extensions)
 	       %base-packages))
 
     (services

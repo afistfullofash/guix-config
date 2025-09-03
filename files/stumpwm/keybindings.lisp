@@ -1,7 +1,14 @@
 (in-package :stumpwm)
 (asdf:load-system "local-time")
+(asdf:load-system "pamixer")
+
 ;; Double check prefix-key is set correctly
 (set-prefix-key (kbd "C-t"))
+
+;;; Set media keys
+(define-key *top-map* (kbd "XF86AudioRaiseVolume") "pamixer-volume-up")
+(define-key *top-map* (kbd "XF86AudioLowerVolume") "pamixer-volume-down")
+(define-key *top-map* (kbd "XF86AudioMute") "pamixer-toggle-mute")
 
 ;; Emacs Style Frame Splitting
 (define-key *root-map* (kbd "0") "remove")

@@ -25,7 +25,7 @@
   #:use-module (ice-9 popen)
   
   #:use-module (afistfullofash packages boundary)
-  #:use-module (afistfullofash packages runst)
+  ;; #:use-module (afistfullofash packages runst)
   #:use-module (afistfullofash packages codex)
   #:use-module (afistfullofash packages kubectl)
   #:use-module (afistfullofash packages emacs-xyz)
@@ -225,7 +225,8 @@
    "firefox"
    ;; Backup if firefox fails
    "google-chrome-stable"
-   "calibre"
+   ;; "calibre"
+   "pavucontrol"
    ;; Screenshot tool
    "maim"
    ;; Image Viewer
@@ -245,6 +246,7 @@
 	"autorandr"
 	"protonup-ng"
 	"gnupg"
+	"wireplumber"
 	;; Required by dirvish
 	"vips"
 	"poppler"
@@ -252,25 +254,25 @@
 	"openssh"
 	;; Background Setter
 	"feh"
-	"runst"
+	;; "runst"
 	"tabbed"
 	;; Runs autorun files
 	"dex"
 	"glibc-locales"))
 
 
-(define runst-service
-  (simple-service
-   'runst home-shepherd-service-type
-   (list
-    (shepherd-service
-     (documentation "Run the runst notification daemon")
-     (requirement '(x11-display))
-     (auto-start? #t)
-     (provision '(runst))
-     (start #~(make-forkexec-constructor
-               (list #$(file-append runst "/bin/runst"))))
-     (stop #~(make-kill-destructor))))))
+;; (define runst-service
+;;   (simple-service
+;;    'runst home-shepherd-service-type
+;;    (list
+;;     (shepherd-service
+;;      (documentation "Run the runst notification daemon")
+;;      (requirement '(x11-display))
+;;      (auto-start? #t)
+;;      (provision '(runst))
+;;      (start #~(make-forkexec-constructor
+;;                (list #$(file-append runst "/bin/runst"))))
+;;      (stop #~(make-kill-destructor))))))
 
 (define autorandr-service
   (simple-service
@@ -390,7 +392,7 @@
    (services
     (list
 
-     runst-service
+     ;; runst-service
      autorandr-service
      environment-variables-service
      variant-packages-service
