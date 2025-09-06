@@ -55,6 +55,13 @@
            (delete 'remove-temporary-cache)
            (delete 'cleanup)))))))
 
+(define etc-sudoers-config
+  (plain-file "etc-sudoers-config"
+              "Defaults  timestamp_timeout=480
+root      ALL=(ALL) ALL
+%wheel    ALL=(ALL) ALL
+natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current-system/profile/sbin/shutdown,/home/natalie/.config/guix/current/bin/guix,/run/current-system/profile/bin/brillo"))
+
 (define-public base-operating-system
   (operating-system
     (host-name "base")
@@ -75,11 +82,15 @@
 		   (supplementary-groups '("wheel" "netdev" "audio" "video" "docker" "lp")))
 		  %base-user-accounts))
 
+  (sudoers-file etc-sudoers-config)
+    
     (packages (append
 	       (specifications->packages
 		'("blueman"
 		  "bluez"
 		  "bluez-alsa"
+		  ;; Backlight and LED Control
+		  "brillo"
 		  "glibc-locales"
 		  "alsa-plugins"
 		  "xdg-utils"
@@ -120,7 +131,6 @@
 		       (cups-configuration
 			(web-interface? #t)))
 	      (service gnome-keyring-service-type)
-	      (service gnome-desktop-service-type)
 	      (set-xorg-configuration
 	       (xorg-configuration (keyboard-layout keyboard-layout))))
 	     (modify-services %desktop-services
@@ -132,7 +142,7 @@
 					      (append (list "https://substitutes.nonguix.org")
 						      %default-substitute-urls))
 					     (authorized-keys
-					      (append (list (local-file "../files/nonguix/signing-key.pub"))
+					      (append (list (local-file "files/nonguix/signing-key.pub"))
 						      %default-authorized-guix-keys)))))))
     
     (file-systems (cons*

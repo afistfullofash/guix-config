@@ -85,19 +85,26 @@ ssh_network() {
 }
 
 ghr() {
-    wd=$(pwd)
-    cd ${HOME}/src/guix-config/
+    SYSTEM=${1}
+    print
+    print
+    print -P "%B%F{magenta+}Running Home Guix Pull%f%b"
+    print
+    print
     guix pull
     hash guix
-    guix home reconfigure ./home.scm
-    cd ${wd}
+    ghrq $SYSTEM
 }
 
 ghrq() {
-    wd=$(pwd)
-    cd ${HOME}/src/guix-config/
-    guix home reconfigure ./home.scm
-    cd ${wd}
+    SYSTEM=${1}
+    print
+    print
+    print -P "%B%F{magenta+}Running Guix Reconfigure Home%f%b"
+    print -P "$SYSTEM"
+    print
+    print
+    guix home reconfigure  -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/home/${SYSTEM}.scm
 }
 
 
@@ -107,8 +114,13 @@ gsr() {
 	return 1
     fi
     SYSTEM=${1}
+    print
+    print
+    print -P "%B%F{magenta+}Running System Guix Pull%f%b"
+    print
+    print
     sudo guix pull
-    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/${SYSTEM}.scm
+    gsrq $SYSTEM
 }
 
 gsrq() {
@@ -117,5 +129,11 @@ gsrq() {
 	return 1
     fi
     SYSTEM=${1}
+    print
+    print
+    print -P "%B%F{magenta+}Running Guix Reconfigure System%f%b"
+    print -P "$SYSTEM"
+    print
+    print
     sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/${SYSTEM}.scm
 }

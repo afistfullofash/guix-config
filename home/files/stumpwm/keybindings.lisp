@@ -16,6 +16,17 @@
 (define-key *root-map* (kbd "2") "vsplit")
 (define-key *root-map* (kbd "3") "hsplit")
 
+(defcommand screen-brightness-up () ()
+  "Increase the brightness of the screen"
+  (run-shell-command "sudo brillo -A 10"))
+
+(defcommand screen-brightness-down () ()
+  "Decrease the brightness of the screen"
+  (run-shell-command "sudo brillo -U 10"))
+
+(define-key *top-map* (kbd "XF86MonBrightnessUp") "screen-brightness-up")
+(define-key *top-map* (kbd "XF86MonBrightnessDown") "screen-brightness-down")
+
 (defmacro make-program-binding (program-name window-class &optional alias)
   "Create run-or-raise and run-or-pull commands for program-name
 window-class is the windows-class
