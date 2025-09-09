@@ -33,7 +33,8 @@
   #:use-module (afistfullofash packages emacs-xyz)
   #:use-module (afistfullofash packages fonts)
   #:use-module (afistfullofash packages terraform)
-  #:use-module (afistfullofash packages tree-sitter))
+
+  #:export (base-home-environment))
 
 (define home-directory (getenv "HOME"))
 
@@ -84,6 +85,26 @@
 	"kubectl"
 	"terraform"))
 
+;;; This tangles the emacs init org file into init.el
+;;; Ensuring that the emacs config is never out of date
+(define emacs-init-el
+  (computed-file
+   "init.el"
+   (with-imported-modules '((guix build utils))
+     #~(begin
+	 (use-modules (guix build utils))
+	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs") "/bin/emacs")))
+		(init-org-file #$(local-file "files/emacs/init.org")))
+	   (format #t "Tangling ~a...\n" init-org-file)
+	   (invoke emacs-bin
+		   "--batch"
+		   "-q"	; Don't load a user init file
+		   init-org-file ; Open the org file in a buffer
+		   "--eval" "(require 'org)"
+		   "--eval" "(org-babel-tangle)"))
+	 (rename-file (string-append (dirname #$(local-file "files/emacs/init.org")) "/init.el")
+		      #$output)))))
+
 (define emacs-packages
   (list "emacs-doom-themes"
 	"emacs-nyan-mode-1.1.4"
@@ -112,88 +133,89 @@
 	"emacs-marginalia"
 	"emacs-consult"
 	"emacs-cape"
-	"emacs-corfu"))
+	"emacs-corfu"
+	"emacs-sly"))
 
 (define tree-sitter-grammars
-  (list tree-sitter-typescript
-	tree-sitter-scheme
-	tree-sitter-rust
-	tree-sitter-ruby
-	tree-sitter-python
-	tree-sitter-php
-	tree-sitter-org
-	tree-sitter-nix
-	tree-sitter-meson
-	tree-sitter-markdown
-	tree-sitter-json
-	tree-sitter-javascript
-	tree-sitter-html
-	tree-sitter-hcl
-	tree-sitter-gomod
-	tree-sitter-yaml
-	tree-sitter-go
-	tree-sitter-dockerfile
-	tree-sitter-css
-	tree-sitter-cmake
-	tree-sitter-c-sharp
-	tree-sitter-bash))
+(list tree-sitter-typescript
+      tree-sitter-scheme
+      tree-sitter-rust
+      tree-sitter-ruby
+      tree-sitter-python
+      tree-sitter-php
+      tree-sitter-org
+      tree-sitter-nix
+      tree-sitter-meson
+      tree-sitter-markdown
+      tree-sitter-json
+      tree-sitter-javascript
+      tree-sitter-html
+      tree-sitter-hcl
+      tree-sitter-gomod
+      tree-sitter-yaml
+      tree-sitter-go
+      tree-sitter-dockerfile
+      tree-sitter-css
+      tree-sitter-cmake
+      tree-sitter-c-sharp
+      tree-sitter-bash))
 
 (define language-server-packages
-  (list "rust-analyzer"
-	"python-lsp-server"
-	"guile-lsp-server"
-	"sqls"))
+(list "rust-analyzer"
+      "python-lsp-server"
+      "guile-lsp-server"
+      "sqls"))
 
 (define desktop-packages
-  (list
-   ;; Terminal
-   "alacritty"
-   "emacs"
-   ;; Password Management
-   "keepassxc"
-   ;; Notetaking Tool
-   "obsidian"
-   "steam"
-   ;; Main browser
-   "firefox"
-   ;; Backup if firefox fails
-   "google-chrome-stable"
-   ;; "calibre"
-   "pavucontrol"
-   ;; Backup file manager
-   "thunar"
-   ;; Screenshot tool
-   "maim"
-   ;; Image Viewer
-   "sxiv"
-   ;; Document Viewer
-   "zathura"))
+(list
+ ;; Terminal
+ "alacritty"
+ "emacs"
+ ;; Password Management
+ "keepassxc"
+ ;; Notetaking Tool
+ "obsidian"
+ "steam"
+ ;; Main browser
+ "firefox"
+ ;; Backup if firefox fails
+ "google-chrome-stable"
+ ;; "calibre"
+ "pavucontrol"
+ ;; Backup file manager
+ "thunar"
+ ;; Screenshot tool
+ "maim"
+ ;; Image Viewer
+ "sxiv"
+ ;; Document Viewer
+ "zathura"))
 
 (define zsh-plugins
-  (list "zsh-autosuggestions"
-	"zsh-completions"
-	"zsh-history-substring-search"
-	"zsh-syntax-highlighting"))
+(list "zsh-autosuggestions"
+      "zsh-completions"
+      "zsh-history-substring-search"
+      "zsh-syntax-highlighting"))
 
 (define misc-packages
-  (list "fonts-nerd-fonts-dejavu"
-	"font-dejavu"
-	"autorandr"
-	"protonup-ng"
-	"gnupg"
-	"wireplumber"
-	;; Required by dirvish
-	"vips"
-	"poppler"
-	"mediainfo"
-	"openssh"
-	;; Background Setter
-	"feh"
-	;; "runst"
-	"tabbed"
-	;; Runs autorun files
-	"dex"
-	"glibc-locales"))
+(list "fonts-nerd-fonts-dejavu"
+      "font-dejavu"
+      "autorandr"
+      "protonup-ng"
+      "gnupg"
+      "wireplumber"
+      ;; Required by dirvish
+      "vips"
+      "poppler"
+      "mediainfo"
+      "openssh"
+      ;; Background Setter
+      "feh"
+      ;; "runst"
+      "tabbed"
+      ;; Runs autorun files
+      "dex"
+      "glibc-locales"))
 
 
 ;; (define runst-service
@@ -210,137 +232,139 @@
 ;;      (stop #~(make-kill-destructor))))))
 
 (define autorandr-service
-  (simple-service
-   'autorandr home-shepherd-service-type
-   (list
-    (shepherd-service
-     (documentation "Run autorandr to set screens")
-     (requirement '(x11-display))
-     (auto-start? #t)
-     (one-shot? #t)
-     (provision '(autorandr))
-     (start #~(make-forkexec-constructor
-               (list #$(file-append autorandr "/bin/autorandr") "--change")))
-     (stop #~(make-kill-destructor))))))
+(simple-service
+ 'autorandr home-shepherd-service-type
+ (list
+  (shepherd-service
+   (documentation "Run autorandr to set screens")
+   (requirement '(x11-display))
+   (auto-start? #t)
+   (one-shot? #t)
+   (provision '(autorandr))
+   (start #~(make-forkexec-constructor
+             (list #$(file-append autorandr "/bin/autorandr") "--change")))
+   (stop #~(make-kill-destructor))))))
 
 (define variant-packages-service
-  (simple-service 'variant-packages-service
-		  home-channels-service-type
-		  (list
-		   (channel
-		    (name 'afistfullofash)
-		    (url "https://github.com/afistfullofash/afistfullofash")
-		    (branch "main"))
-		   (channel
-		    (name 'nonguix)
-		    (url "https://gitlab.com/nonguix/nonguix")
-		    ;; Enable signature verification:
-		    (introduction
-		     (make-channel-introduction
-		      "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-		      (openpgp-fingerprint
-		       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))))
+(simple-service 'variant-packages-service
+		home-channels-service-type
+		(list
+		 (channel
+		  (name 'afistfullofash)
+		  (url "https://github.com/afistfullofash/afistfullofash")
+		  (branch "main"))
+		 (channel
+		  (name 'nonguix)
+		  (url "https://gitlab.com/nonguix/nonguix")
+		  ;; Enable signature verification:
+		  (introduction
+		   (make-channel-introduction
+		    "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+		    (openpgp-fingerprint
+		     "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))))
 
 (define environment-variables-service
-  (simple-service 'some-useful-env-vars-service
-		  home-environment-variables-service-type
-		  `(("GTK_THEME" .  "Dracula")
-		    ("GUIX_HOME_PATH" . ,(string-append home-directory
-							"/.guix-home/profile"))
-		    ("PATH" . ,(string-join (list (string-append home-directory
-								 "/src/shell-scripts/") ; Custom Shell Scripts
-						  "${PATH}") ; Original Value
-					    ":"))
-		    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam" )
-		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
-		    ("BAT_THEME" . "Dracula")
-		    ("NNN_FIFO" . "/tmp/nnn.fifo")
-		    ("TREE_SITTER_LIBDIR"
-		     . ,#~(string-join (map (lambda (pkg)
-					      (string-append pkg "/lib"))
-					    '#$tree-sitter-grammars)
-				       ":"))
-		    ;; Locale
-		    ("TZ" . "Australia/Sydney")
-		    ("LC_ALL" . "en_AU.utf8")
-		    ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
+(simple-service 'some-useful-env-vars-service
+		home-environment-variables-service-type
+		`(("GTK_THEME" .  "Dracula")
+		  ("GUILE_LOAD_PATH" . "~/src/guix-config:~/src/afistfullofash")
+		  ("GUIX_HOME_PATH" . ,(string-append home-directory
+						      "/.guix-home/profile"))
+		  ("PATH" . ,(string-join (list (string-append home-directory
+							       "/src/shell-scripts/") ; Custom Shell Scripts
+						"${PATH}") ; Original Value
+					  ":"))
+		  ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam" )
+		  ("BOUNDARY_KEYRING_TYPE" . "secret-service")
+		  ("BAT_THEME" . "Dracula")
+		  ("NNN_FIFO" . "/tmp/nnn.fifo")
+		  ("TREE_SITTER_LIBDIR"
+		   . ,#~(string-join (map (lambda (pkg)
+					    (string-append pkg "/lib"))
+					  '#$tree-sitter-grammars)
+				     ":"))
+		  ;; Locale
+		  ("TZ" . "Australia/Sydney")
+		  ("LC_ALL" . "en_AU.utf8")
+		  ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
 
 (define home-file-locations
-  `((".themes/Dracula" ,dracula-gtk-theme-repo)
-    (".icons/Dracula" ,dracula-gtk-icons)
-    (".Xresources" ,dracula-xresources-theme-repo)
-    (".gitconfig" ,(local-file "files/git/gitconfig"))
-    (".gitignore" ,(local-file "files/git/gitignore"))
-    ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
-    ;; For some reason this does not work when we pass directories to it
-    (".stumpwm.d/init.lisp" ,(local-file "files/stumpwm/init.lisp"))
-    (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
-    (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
-    (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
-    (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
-    (".emacs.d/init.el" ,(local-file "files/emacs/init.el"))
-    ;; Ensure screenshot directory exists
-    ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
+`((".themes/Dracula" ,dracula-gtk-theme-repo)
+  (".icons/Dracula" ,dracula-gtk-icons)
+  (".Xresources" ,dracula-xresources-theme-repo)
+  (".gitconfig" ,(local-file "files/git/gitconfig"))
+  (".gitignore" ,(local-file "files/git/gitignore"))
+  ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
+  ;; For some reason this does not work when we pass directories to it
+  (".stumpwm.d/init.lisp" ,(local-file "files/stumpwm/init.lisp"))
+  (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
+  (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
+  (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
+  (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
+  (".emacs.d/init.el" ,emacs-init-el)
+  ;; (".emacs.d/init.el" ,(local-file "files/emacs/init.el"))
+  ;; Ensure screenshot directory exists
+  ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
 
 (define xdg-config-file-locations
-  ;; This Stats with a heap of THEMEING
-  `(("assets" ,(symlink-to "$HOME/.themes/Dracula/assets"))
-    ;; GTK
-    ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
-    ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
-    ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
-    ;; QT5
-    ("qt5ct/colors" ,dracula-qt5-theme-repo)
-    ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
-    ;; Specific Programs
-    ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
-    ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
-    ("lsd" ,dracula-lsd-theme-repo)
-    ("nnn/plugins" ,nnn-plugins-repo)
-    ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
-    ("autorandr" ,(local-file "files/autorandr"
-			      #:recursive? #t))
-    ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
+;; This Stats with a heap of THEMEING
+`(("assets" ,(symlink-to "$HOME/.themes/Dracula/assets"))
+  ;; GTK
+  ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
+  ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
+  ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
+  ;; QT5
+  ("qt5ct/colors" ,dracula-qt5-theme-repo)
+  ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
+  ;; Specific Programs
+  ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
+  ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
+  ("lsd" ,dracula-lsd-theme-repo)
+  ("nnn/plugins" ,nnn-plugins-repo)
+  ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
+  ("autorandr" ,(local-file "files/autorandr"
+			    #:recursive? #t))
+  ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
 
-    ;; Autostarts
-    ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
+  ;; Autostarts
+  ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
 
 (define ssh-configuration
-  (home-openssh-configuration
-   (hosts
-    (list (openssh-host (name "*")
-			(identity-file "~/.ssh/tom.pub"))
-	  (openssh-host (name "gitlab.com")
-			(identity-file "~/.ssh/work.pub"))))))
+(home-openssh-configuration
+ (hosts
+  (list (openssh-host (name "*")
+		      (identity-file "~/.ssh/tom.pub"))
+	(openssh-host (name "gitlab.com")
+		      (identity-file "~/.ssh/work.pub"))))))
 
-(define-public base-home-environment
-  (home-environment
-   (packages (append (specifications->packages
-		      (append terminal-packages
-			      development-packages
-			      desktop-packages
-			      emacs-packages
-			      language-server-packages
-			      zsh-plugins
-			      misc-packages))
-		     tree-sitter-grammars))
-   (services
-    (list
+(define base-home-environment
+(home-environment
+ (packages (append (specifications->packages
+		    (append terminal-packages
+			    development-packages
+			    desktop-packages
+			    emacs-packages
+			    language-server-packages
+			    zsh-plugins
+			    misc-packages))
+		   tree-sitter-grammars))
+ (services
+  (list
 
-     ;; runst-service
-     autorandr-service
-     environment-variables-service
-     variant-packages-service
+   ;; runst-service
+   autorandr-service
+   environment-variables-service
+   variant-packages-service
 
-     (service home-dbus-service-type)
-     (service home-pipewire-service-type)
-     (service home-syncthing-service-type)
-     (service home-redshift-service-type)
-     (service home-ssh-agent-service-type)
-     (service home-openssh-service-type ssh-configuration)
-     (service home-files-service-type home-file-locations)
-     (service home-xdg-configuration-files-service-type xdg-config-file-locations)
-     (service home-zsh-service-type
-	      (home-zsh-configuration
-	       (zshrc (list
-		       (local-file "files/zsh/zshrc.sh")))))))))
+   (service home-dbus-service-type)
+   (service home-pipewire-service-type)
+   (service home-syncthing-service-type)
+   (service home-redshift-service-type)
+   (service home-ssh-agent-service-type)
+   (service home-openssh-service-type ssh-configuration)
+   (service home-files-service-type home-file-locations)
+   (service home-xdg-configuration-files-service-type xdg-config-file-locations)
+   (service home-zsh-service-type
+	    (home-zsh-configuration
+	     (zshrc (list
+		     (local-file "files/zsh/zshrc.sh")))))))))

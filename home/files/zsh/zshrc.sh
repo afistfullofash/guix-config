@@ -101,7 +101,7 @@ ghrq() {
     print
     print
     print -P "%B%F{magenta+}Running Guix Reconfigure Home%f%b"
-    print -P "$SYSTEM"
+    print -P "%B$SYSTEM%b"
     print
     print
     guix home reconfigure  -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/home/${SYSTEM}.scm
@@ -132,7 +132,7 @@ gsrq() {
     print
     print
     print -P "%B%F{magenta+}Running Guix Reconfigure System%f%b"
-    print -P "$SYSTEM"
+    print -P "%B$SYSTEM%b"
     print
     print
     sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/${SYSTEM}.scm

@@ -27,6 +27,17 @@
 (define-key *top-map* (kbd "XF86MonBrightnessUp") "screen-brightness-up")
 (define-key *top-map* (kbd "XF86MonBrightnessDown") "screen-brightness-down")
 
+(defcommand keyboard-brightness-up () ()
+  "Increase the brightness of the keyboard"
+  (run-shell-command "sudo brillo -kA 10"))
+
+(defcommand keyboard-brightness-down () ()
+  "Decrease the brightness of the keyboard"
+  (run-shell-command "sudo brillo -kU 10"))
+
+(define-key *top-map* (kbd "XF86KbdBrightnessUp") "keyboard-brightness-up")
+(define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down")
+
 (defmacro make-program-binding (program-name window-class &optional alias)
   "Create run-or-raise and run-or-pull commands for program-name
 window-class is the windows-class

@@ -1,21 +1,23 @@
-(define-module (systems base))
+(define-module (systems base)
+  #:use-module (gnu)
+  #:use-module (gnu services)
+  #:use-module (gnu services linux)
+  
+  #:use-module (gnu packages shells)
+  #:use-module (gnu packages wm)
+  #:use-module (gnu packages lisp-xyz)
+  #:use-module (gnu packages pkg-config)
+  #:use-module (gnu packages hardware)
 
-(use-modules (gnu)
-	     (gnu services)
-	     (gnu services linux)
-	     
-	     (gnu packages shells)
-	     (gnu packages wm)
-	     (gnu packages lisp-xyz)
-	     (gnu packages hardware)
+  #:use-module (guix packages)
+  #:use-module (guix utils)
 
-	     (guix packages)
-	     (guix utils)
-     
-	     (nongnu packages linux)
-	     (nongnu system linux-initrd)
+  #:use-module (nongnu packages linux)
+  #:use-module (nongnu system linux-initrd)
 
-	     (srfi srfi-1))
+  #:use-module (srfi srfi-1)
+
+  #:export (base-operating-system))
 
 (use-service-modules cups desktop networking ssh xorg docker)
 
@@ -27,7 +29,11 @@
      (list sbcl-local-time
 	   sbcl-stumpwm-pamixer
 	   sbcl-stumpwm-battery-portable
-	   stumpwm))
+	   sbcl-stumpwm-notify
+	   sbcl-slynk
+	   stumpwm
+	   ;; sbcl-stumpwm-notify wanted his
+	   pkg-config))
     (arguments
      (substitute-keyword-arguments (package-arguments stumpwm)
        ((#:phases phases)
@@ -42,13 +48,17 @@
                                 #:dependencies '("stumpwm"
 						 "local-time"
 						 "battery-portable"
-						 "pamixer")
+						 "notify"
+						 "pamixer"
+						 "slynk")
                                 #:dependency-prefixes
                                 (map (lambda (input) (assoc-ref inputs input))
                                      '("stumpwm"
 				       "sbcl-local-time"
 				       "sbcl-stumpwm-battery-portable"
-				       "sbcl-stumpwm-pamixer"))))))
+				       "sbcl-stumpwm-notify"
+				       "sbcl-stumpwm-pamixer"
+				       "sbcl-slynk"))))))
            (delete 'copy-source)
            (delete 'build)
            (delete 'check)
@@ -62,7 +72,7 @@ root      ALL=(ALL) ALL
 %wheel    ALL=(ALL) ALL
 natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current-system/profile/sbin/shutdown,/home/natalie/.config/guix/current/bin/guix,/run/current-system/profile/bin/brillo"))
 
-(define-public base-operating-system
+(define base-operating-system
   (operating-system
     (host-name "base")
     (kernel linux)
@@ -107,6 +117,9 @@ natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current
 		  "unzip"
 		  "simple-scan"
 		  "pamixer"
+		  ;; sbcl-stumpwm-notify wanted these
+		  "pkg-config"
+		  "libfixposix"
 		  ;; For setting the screenshot time
 		  "sbcl-local-time"))
 	       (list stumpwm-with-extensions)

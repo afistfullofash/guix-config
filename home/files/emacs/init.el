@@ -58,49 +58,14 @@
                 :weight bold
                 :height 98)))))
 
-;;; Themeing
-(use-package doom-themes
-  :init
-  (load-theme 'doom-dracula t)
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
-	doom-themes-enable-italic t
-	doom-vibrant-brighter-modeline nil
-	org-hide-leading-stars nil) ; if nil, italics is universally disabled
+(use-package flycheck
+  :hook (after-init . global-flycheck-mode))
 
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
-
-(use-package dirvish
+;;; Dired
+(use-package dired-narrow
   :config
-  (dirvish-override-dired-mode 1) ; swaps Dired transparently
-  (dirvish-define-preview lsd (file)
-    "Use `lsd` to generate a colourful directory preview for Dirvish."
-    :require ("lsd")                    ; ensure the binary is present
-    (when (file-directory-p file)       ; only preview for directories
-      `(shell . ("lsd"
-                 "-al"                  ; long list + hidden files
-                 "--color=always"
-                 "--icon=always"
-                 "--group-dirs=first"
-                 ,file))))
-  (push 'lsd dirvish-preview-dispatchers)
-  :bind (("C-x d" . dirvish))
-  :custom
-  (dirvish-preview-enabled t)   ; live previews
-  (dirvish-use-header-line t))
-
-;;; Rainbow Delimeters
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-
-(use-package expand-region
-  :bind (("C-=" . er/expand-region)  ;; grow region (like many IDEs)
-         ("C--" . er/contract-region)) ;; shrink region
-  :init
-  (setq expand-region-fast-keys-enabled t))
+  (bind-keys :map dired-mode-map
+	     ("f" . dired-narrow-fuzzy)))
 
 (use-package treesit
   :mode (("\\.tsx\\'" . tsx-ts-mode)
@@ -110,88 +75,19 @@
     (setq treesit-extra-load-path
           (append paths treesit-extra-load-path))))
 
-(use-package guix
-  :config
-  ;; Assuming Guix is installed and its environment variables are set up
-  ;; (e.g., through your shell's .profile or Guix Home configuration)
-  ;; This ensures Emacs-Guix can find Guile modules and Guix commands.
 
-  ;; Optional: If you want to use Emacs-Guix for developing Guix itself
-  ;; and have a Guix source checkout, similar to the 'geiser-guile' example.
-  ;; Replace "~/src/guix" with the actual path to your Guix source.
-  (setq guix-load-path "~/src/guix")	; For Guile modules
+;;; yaml
+(use-package yaml-ts-mode
+  :mode ("\\.yml\\'" "\\.yaml\\'"))
 
-  ;; Auto-prettify store file names (e.g., /gnu/store/hash-package-version -> /gnu/store/...-package-version)
-  ;;(guix-prettify-store-paths-mode 1)
+(use-package json-ts-mode
+  :mode ("\\.json$"))
 
-  ;; Keybindings (optional, often M-x guix is enough to get to the popup)
-  (global-set-key (kbd "C-c p") 'guix)	; Example global binding
+(use-package dockerfile-ts-mode
+  :mode ("\\Dockerfile\\'"))
 
-  ;; You might want to enable `guix-devel-mode` for .scm files
-  ;; to get better Guix-specific features when editing package definitions.
-  (add-hook 'scheme-mode-hook (lambda ()
-                                (when (string-match-p "\\.scm\\'" (buffer-file-name))
-                                  (guix-devel-mode 1))))
-
-  ;; If you're using Guix Home and want to edit your home configuration,
-  ;; you might add its path here as well for Geiser/Guix development mode.
-  ;; (add-to-list 'geiser-guile-load-path "~/.config/guix/current/share")
-  ;; (add-to-list 'geiser-guile-load-path "~/my-guix-home-config-repo")
-  )
-
-(use-package geiser
-  :custom
-  (geiser-default-implementation 'guile)
-  (geiser-active-implementations '(guile))
-  (geiser-implementations-alist '(((regexp "\\.scm$") guile)))
-  :hook
-  (scheme-mode . geiser-mode))
-
-(use-package geiser-guile
-  :config
-  ;; Assuming the Guix checkout is in ~/src/guix.
-  (add-to-list 'geiser-guile-load-path "~/src/guix"))
-
-(use-package indent-bars
-  :hook ((yaml-mode . indent-bars-mode)
-	 (python-mode . indent-bars-mode)))
-
-;;; Dired
-(use-package dired-narrow
-  :config
-  (bind-keys :map dired-mode-map
-	     ("f" . dired-narrow-fuzzy)))
-
-;;; Undo-tree
-(use-package undo-tree
-  :diminish undo-tree-mode
-  :init
-  (let ((undo-dir (expand-file-name "undo-tree/" (getenv "XDG_CACHE_HOME"))))
-    (unless (file-directory-p undo-dir)
-      (make-directory undo-dir t))
-    (setq undo-tree-history-directory-alist `((".*" . ,undo-dir))
-	  undo-tree-auto-save-history t))
-  (global-undo-tree-mode))
-
-(use-package paredit
-  ;; enable in all the major Lisp modes you care about
-  :hook ((emacs-lisp-mode
-          lisp-mode
-          lisp-interaction-mode
-          scheme-mode
-          clojure-mode) . paredit-mode)
-  :bind
-  ;; let’s make “M-(” wrap the following sexp in parens
-  (:map paredit-mode-map
-        ("M-(" . paredit-wrap-round)
-        ;; some handy defaults you can tweak:
-        ("C-M-f" . paredit-forward) 
-        ("C-M-b" . paredit-backward)
-        ("C-)"   . paredit-forward-slurp-sexp)
-        ("C-("   . paredit-forward-barf-sexp))
-  :config
-  ;; optional: show mismatched parens in fringe
-  (show-paren-mode +1))
+(use-package tsx-ts-mode
+  :mode "\\.tsx\\'")
 
 (use-package vertico
   :init (vertico-mode))
@@ -253,31 +149,81 @@
 (use-package magit
   :bind (("C-c m" . magit-status)))
 
-;;; Rust
+(use-package paredit
+  ;; enable in all the major Lisp modes you care about
+  :hook ((emacs-lisp-mode
+          lisp-mode
+          lisp-interaction-mode
+          scheme-mode
+          clojure-mode) . paredit-mode)
+  :bind
+  ;; let’s make “M-(” wrap the following sexp in parens
+  (:map paredit-mode-map
+        ("M-(" . paredit-wrap-round)
+        ;; some handy defaults you can tweak:
+        ("C-M-f" . paredit-forward) 
+        ("C-M-b" . paredit-backward)
+        ("C-)"   . paredit-forward-slurp-sexp)
+        ("C-("   . paredit-forward-barf-sexp))
+  :config
+  ;; optional: show mismatched parens in fringe
+  (show-paren-mode +1))
+
+(use-package geiser
+  :custom
+  (geiser-default-implementation 'guile)
+  (geiser-active-implementations '(guile))
+  (geiser-implementations-alist '(((regexp "\\.scm$") guile)))
+  :hook
+  (scheme-mode . geiser-mode))
+
+(use-package geiser-guile
+  :config
+  ;; Assuming the Guix checkout is in ~/src/guix.
+  (add-to-list 'geiser-guile-load-path "~/src/guix"))
+
+(use-package guix
+  :config
+  ;; Assuming Guix is installed and its environment variables are set up
+  ;; (e.g., through your shell's .profile or Guix Home configuration)
+  ;; This ensures Emacs-Guix can find Guile modules and Guix commands.
+
+  ;; Optional: If you want to use Emacs-Guix for developing Guix itself
+  ;; and have a Guix source checkout, similar to the 'geiser-guile' example.
+  ;; Replace "~/src/guix" with the actual path to your Guix source.
+  (setq guix-load-path "~/src/guix")	; For Guile modules
+
+  ;; Auto-prettify store file names (e.g., /gnu/store/hash-package-version -> /gnu/store/...-package-version)
+  ;;(guix-prettify-store-paths-mode 1)
+
+  ;; Keybindings (optional, often M-x guix is enough to get to the popup)
+  (global-set-key (kbd "C-c p") 'guix)	; Example global binding
+
+  ;; You might want to enable `guix-devel-mode` for .scm files
+  ;; to get better Guix-specific features when editing package definitions.
+  (add-hook 'scheme-mode-hook (lambda ()
+                                (when (string-match-p "\\.scm\\'" (buffer-file-name))
+                                  (guix-devel-mode 1))))
+
+  ;; If you're using Guix Home and want to edit your home configuration,
+  ;; you might add its path here as well for Geiser/Guix development mode.
+  ;; (add-to-list 'geiser-guile-load-path "~/.config/guix/current/share")
+  ;; (add-to-list 'geiser-guile-load-path "~/my-guix-home-config-repo")
+  )
+
+(use-package terraform-mode
+  :hook (terraform-mode . (lambda ()
+                            (add-hook 'before-save-hook #'terraform-format-buffer nil t))))
+
 (use-package rustic
   :config
   (setq rustic-format-on-save t)
   :custom
   (rustic-analyzer-command '("rustup" "run" "stable" "rust-analyzer")))
 
-;;; Terraform
-(use-package terraform-mode
-  :hook (terraform-mode . (lambda ()
-                            (add-hook 'before-save-hook #'terraform-format-buffer nil t))))
-
 ;;; web-mode
 (use-package web-mode
   :mode (".svelte$"))
-
-;;; yaml
-(use-package yaml-ts-mode
-  :mode ("\\.yml\\'" "\\.yaml\\'"))
-
-(use-package json-ts-mode
-  :mode ("\\.json$"))
-
-(use-package dockerfile-ts-mode
-  :mode ("\\Dockerfile\\'"))
 
 ;;; Prettier
 (use-package prettier-js
@@ -285,25 +231,18 @@
 	 (ts-mode . prettier-js-mode)
 	 (json-ts-mode . prettier-js-mode)))
 
-(use-package tsx-ts-mode
-  :mode "\\.tsx\\'")
-
 ;;; Lsp-mode
 (use-package lsp-mode
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
   :hook ((terraform-mode . lsp)
-	 (tsx-ts-mode . lsp)
-	 (scheme-mode . lsp))
+	 (tsx-ts-mode . lsp))
   :magic (".svelte$" . lsp)
   :commands lsp)
 
 (use-package lsp-ui
   :commands lsp-ui-mode)
-
-(use-package flycheck
-  :hook (after-init . global-flycheck-mode))
 
 (use-package lsp-scheme
   :after lsp-mode
@@ -317,13 +256,6 @@
   ;;  '((scheme-mode . ((lsp-scheme-implementation . "chicken")))))
   ;; (dir-locals-set-directory-class "/path/to/project/" 'my-scheme)
   )
-
-(use-package nyan-mode
-  :init
-  ;; Fix up Nyan Cat cause she's pretty
-  (setq nyan-animate-nyancat t
-	nyan-wavy-trail t)
-  (nyan-mode))
 
 (use-package org
   :defer t
@@ -360,6 +292,51 @@
         '((:results . "output replace")
           (:exports . "both")
           (:cache   . "no"))))
+
+(use-package expand-region
+  :bind (("C-=" . er/expand-region)  ;; grow region (like many IDEs)
+         ("C--" . er/contract-region)) ;; shrink region
+  :init
+  (setq expand-region-fast-keys-enabled t))
+
+(use-package undo-tree
+  :diminish undo-tree-mode
+  :init
+  (let ((undo-dir (expand-file-name "undo-tree/" (getenv "XDG_CACHE_HOME"))))
+    (unless (file-directory-p undo-dir)
+      (make-directory undo-dir t))
+    (setq undo-tree-history-directory-alist `((".*" . ,undo-dir))
+	  undo-tree-auto-save-history t))
+  (global-undo-tree-mode))
+
+(use-package indent-bars
+  :hook ((yaml-mode . indent-bars-mode)
+  	 (python-mode . indent-bars-mode)))
+
+;;; Themeing
+(use-package doom-themes
+  :init
+  (load-theme 'doom-dracula t)
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
+	doom-themes-enable-italic t
+	doom-vibrant-brighter-modeline nil
+	org-hide-leading-stars nil) ; if nil, italics is universally disabled
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
+(use-package nyan-mode
+  :init
+  ;; Fix up Nyan Cat cause she's pretty
+  (setq nyan-animate-nyancat t
+    	nyan-wavy-trail t)
+  (nyan-mode))
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (provide 'init.el)
 ;;; init.el ends here

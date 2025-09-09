@@ -112,13 +112,19 @@
 
 (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
 
-;; Show time, cpu usage and network traffic in the modelinecomment
 (asdf:load-system "battery-portable")
-(setf *screen-mode-line-format*
-      (list (if (equal (getenv "GUIX_CONFIG_SYSTEM_FORMAT") "laptop")
-		"%B |")
+
+(defvar *show-mode-line-time* nil)
+(defun set-mode-line-format ()
+  (setf *screen-mode-line-format*
+      (list
+       (if *show-mode-line-time* "%d | ")
+       (if (equal (getenv "GUIX_CONFIG_SYSTEM_FORMAT") "laptop")
+	   "%B |")
 	    "%B |"
-	    "%W"))
+	    "%W")))
+
+(set-mode-line-format)
 
 (setf *window-format* "%n %10c: %15t")
 
@@ -136,3 +142,7 @@
 	  (screen-heads (current-screen))))
 
 (toggle-modeline-all-screens)
+
+(defun start-notify ()
+  (asdf:load-system "notify")
+  (notify:notify-server-toggle))
