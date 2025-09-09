@@ -1,0 +1,434 @@
+#+TITLE: StumpWM Config
+#+PROPERTY: header-args:lisp :tangle init.lisp :exports both :eval never
+
+* General
+** TODO Move to using the :stumpwm-user namespace where possible
+** TODO Get the stumpwm-notify module working
+** TODO Add the battery to the modeline only when GUIX_CONFIG_SYSTEM_FORMAT is passed in
+
+* Initial Config
+Start slynk for debugging purposes first and then load in our required stumpwm contrib modules
+#+begin_src lisp
+  (asdf:require-system :slynk)
+  (slynk:create-server :port 1337
+  		     :dont-close t)
+
+  (setq *startup-message* (format nil "Welcome Natalie!"))
+
+  (asdf:load-system "local-time")
+  (asdf:load-system "pamixer")
+  (asdf:load-system "battery-portable")
+
+  (in-package :stumpwm)
+#+end_src
+* Visual
+** Themeing
+*** General Functions
+#+begin_src lisp
+  ;;; Visual
+  (defvar *themes* (make-hash-table))
+  (defun add-theme (name theme)
+    (setf (gethash name *themes*) theme))
+
+  ;;; Colors based off spacemacs-dark-theme for emacs
+  (defclass theme ()
+    ((fg
+      :initarg :fg
+      :type string)
+     (bg
+      :initarg :bg
+      :type string)
+
+     (border
+      :initarg :border
+      :type string)
+
+     (focus
+      :initarg :focus
+      :type string)
+     (unfocus
+      :initarg :unfocus
+      :type string)
+
+     (mode-line-fg
+      :initarg :mode-line-fg
+      :type string)
+     (mode-line-bg
+      :initarg :mode-line-bg
+      :type string)
+     (mode-line-border
+      :initarg :mode-line-border
+      :type string)
+
+     (color-map-first
+      :initarg :color-map-first
+      :type string)
+     (color-map-last
+      :initarg :color-map-last
+      :type string)))
+
+  (defun apply-theme (theme)
+    (set-fg-color (slot-value theme 'fg))
+    (set-bg-color (slot-value theme 'bg))
+    (set-border-color (slot-value theme 'border))
+    (set-focus-color (slot-value theme 'focus))
+    (set-unfocus-color (slot-value theme 'unfocus))
+
+    (setf *mode-line-foreground-color* (slot-value theme 'mode-line-fg)
+  	,*mode-line-background-color* (slot-value theme 'mode-line-bg)
+  	,*mode-line-border-color* (slot-value theme 'mode-line-border))
+    
+    (setf (car *colors*) (slot-value theme 'color-map-first)
+  	(car (last *colors*)) (slot-value theme 'color-map-last))
+    (update-color-map (current-screen)))
+
+
+#+end_src
+*** Spacemacs
+#+begin_src lisp
+  (let ((grey "#292b2e")
+        (purple "#5d4d7a"))
+    (add-theme 'spacemacs
+  	     (make-instance 'theme
+  			    :fg purple
+  			    :bg grey
+  			    :border purple
+  			    :focus purple
+  			    :unfocus grey
+  			    :mode-line-fg purple
+  			    :mode-line-bg grey
+  			    :mode-line-border purple
+  			    :color-map-first grey
+  			    :color-map-last purple)))
+
+#+end_src
+*** Gruvbox
+#+begin_src lisp
+  (let ((fg "#ebdbb2")
+        (bg "#282828")
+        (border "#665c54"))
+    (add-theme 'gruvbox
+  	     (make-instance 'theme
+  			    :fg fg
+  			    :bg bg
+  			    :border border
+  			    :focus fg
+  			    :unfocus bg
+  			    :mode-line-fg fg
+  			    :mode-line-bg bg
+  			    :mode-line-border border
+  			    :color-map-first bg
+  			    :color-map-last fg)))
+
+#+end_src
+*** Dracula
+#+begin_src lisp
+  (let ((fg "#F8F8F2")
+        (bg "#282A36")
+        (border "#8BE9FD")
+        (purple "#BD93F9"))
+    (add-theme 'dracula
+  	     (make-instance 'theme
+  			    :fg fg
+  			    :bg bg
+  			    :border purple
+  			    :focus border
+  			    :unfocus purple
+  			    :mode-line-fg purple
+  			    :mode-line-bg bg
+  			    :mode-line-border purple
+  			    :color-map-first bg
+  			    :color-map-last fg)))
+#+end_src
+** Configuration
+#+begin_src lisp
+  (apply-theme (gethash 'dracula *themes*))
+  (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
+#+end_src
+*** Notify
+Currently the stumpwm package built from systems/base.scm cannot load the notify package.
+So this is chucked into a function while I debug it.
+#+begin_src lisp
+  (defun start-notify ()
+    (asdf:load-system "notify")
+    (notify:notify-server-toggle))  
+#+end_src
+*** Mode Line
+#+begin_src lisp
+  (defvar *show-mode-line-time* nil)
+  (defun set-mode-line-format ()
+    (setf *screen-mode-line-format*
+  	(list
+  	 (if *show-mode-line-time* "%d | ")
+  	 (if (equal (getenv "GUIX_CONFIG_SYSTEM_FORMAT") "laptop")
+  	     "%B |")
+  	 "%B |"
+  	 "%W")))
+
+  (set-mode-line-format)
+
+  (setf *window-format* "%n %10c: %15t")
+
+  ;;; When windows are desroyed window numbers are not synced
+  ;;; 2kays <https://github.com/2kays> posted a solution on
+  ;;; the TipsAndTricks section of the wiki
+  ;;; This will repack window numbers every time a window is killed
+  (stumpwm:add-hook stumpwm:*destroy-window-hook*
+                    #'(lambda (win) (stumpwm:repack-window-numbers)))
+
+  (defun toggle-modeline-all-screens ()
+    ;; Turn on the modeline
+    (mapcar (lambda (head)
+  	    (toggle-mode-line (current-screen) head))
+  	  (screen-heads (current-screen))))
+
+  (toggle-modeline-all-screens)
+#+end_src
+* Commands
+** Brightness
+#+begin_src lisp
+  (defcommand screen-brightness-up () ()
+    "Increase the brightness of the screen"
+    (run-shell-command "sudo brillo -A 10"))
+
+  (defcommand screen-brightness-down () ()
+    "Decrease the brightness of the screen"
+    (run-shell-command "sudo brillo -U 10"))  
+
+  (defcommand keyboard-brightness-up () ()
+    "Increase the brightness of the keyboard"
+    (run-shell-command "sudo brillo -kA 10"))
+
+  (defcommand keyboard-brightness-down () ()
+    "Decrease the brightness of the keyboard"
+    (run-shell-command "sudo brillo -kU 10"))
+
+#+end_src
+** Screenshots
+#+begin_src lisp
+  (defun timestamp-string ()
+    (local-time:format-timestring
+     nil (local-time:now)
+     :format '(:YEAR "-" (:MONTH 2) "-" :DAY "-" :SHORT-WEEKDAY "-" :HOUR12 "_" :MIN "_" :SEC "_" :AMPM)))
+
+  (defparameter *screenshot-path*
+    (format nil "~a/Pictures/Screenshots/~a.png"
+            (getenv "HOME")
+            (timestamp-string)))
+
+  ;; Setup bindings for less common aplications which would be opened then closed
+  (defcommand screenshot () ()
+    "Take a screenshot and save it to screenshot directory"
+    (run-shell-command (format nil "maim ~a"
+  			     ,*screenshot-path*)))
+
+  (defcommand screenshot-select () ()
+    "Select a area for a screenshot and save it to screenshot directory"
+    (run-shell-command (format nil "maim --select ~a"
+  			     ,*screenshot-path*)))
+#+end_src
+** Volume
+#+begin_src lisp
+  (defcommand volume-control () ()
+    "Start volume control"
+    (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
+#+end_src
+*** TODO Merge Old Volume Config
+This is extracted from my old stumpwm configuration at [[https://github.com/afistfullofash/.stumpwm.d/blob/master/volume.lisp][afistfullofash/.stumpwm.d/volume.lisp]]
+It should be backported into the above volume config
+#+begin_src emacs-lisp :tangle no
+;;; Setup pavol
+
+;;; Load package
+(in-package :stumpwm)
+
+(load-module :pavol)
+
+;;; Changes to pavol to get volume to 150%
+;;; This follows the maximum volume allowed by pavolcontrol
+;;; This is to hacky to merge
+(in-package :pavol)
+
+(defparameter *max-volume* (if t
+			       150
+			       100)
+  "The maximum allowed volume.
+pavucontrol allows a max volume percentage of 150.
+this may damage the speakers so make it be explicatly set.
+The default value is 100.")
+
+(defmethod (setf volume) (percentage (sink sink))
+  (assert (<= 0 percentage *max-volume*))
+  (pacmd "set-sink-volume ~a ~a"
+         (sink-index sink)
+         (percentage->integer percentage))
+  percentage)
+
+(defun volume-up (sink percentage)
+  (setf (volume sink) (min (+ (volume sink) percentage) *max-volume*)))
+
+(defun make-volume-bar (percent)
+  "Return a string that represents a volume bar"
+  (format nil "^B~3d%^b [^[^7*~a^]]"
+          percent (stumpwm::bar (min 100 percent) 50 #\# #\:)))
+
+;;; Setup keybindings
+(in-package :stumpwm)
+
+(define-key *top-map*
+    (kbd "XF86AudioRaiseVolume")
+  "pavol-vol+")
+
+(define-key *top-map*
+    (kbd "XF86AudioLowerVolume")
+  "pavol-vol-")
+
+(define-key *top-map*
+    (kbd "XF86AudioMute")
+  "pavol-toggle-mute")
+
+#+end_src
+** System
+#+begin_src emacs-lisp
+  ;;; Shutdown and Reboot
+  (defcommand shutdown (confirm) ((:y-or-n "Confirm Shutdown "))
+    "Ask for the user to confirm before shutting down."
+    (if confirm
+        (run-shell-command "poweroff")))
+
+  (defcommand reboot (confirm) ((:y-or-n "Confirm Reboot "))
+    "Ask for the user to confirm before rebooting."
+    (if confirm
+        (run-shell-command "reboot")))
+
+#+end_src
+** Misc
+#+begin_src lisp
+  (defun reload-init ()
+    "Restart Slynk and reload source.
+  This is needed if Sly updates while StumpWM is running"
+    (slynk:stop-server 4004)
+    (loadrc)
+    (slynk:create-server :port 4004
+  		       :dont-close t))
+
+
+  (defcommand user-switch-to-screen (screen-num) ((:number "Screen Number: "))
+  	    "Only works when there is a currently open window on the screen"
+  	    (select-window-by-number (window-number
+  				      (car (head-windows (current-group)
+  							 (nth screen-num (group-heads (current-group)))))))
+  	    (group-wake-up (current-group)))
+#+end_src
+* Keybindings
+#+begin_src lisp
+  (set-prefix-key (kbd "C-t"))
+#+end_src
+** Keybinding Macros
+#+begin_src lisp
+  (defmacro make-program-binding (program-name window-class &optional alias)
+    "Create run-or-raise and run-or-pull commands for program-name
+  window-class is the windows-class
+  Also add keybinding to the commands. 
+  C-keybinding r calls run-or-raise
+  C-keybinding p calls run-or-pull
+  C-keybinding n creates a new instance of the program"
+    (if (not alias)
+        (setf alias program-name))
+    `(progn
+       (defvar ,(intern (format nil "*~a-map*" alias)) nil)
+
+       (defcommand ,(intern (format nil "~a" alias)) () () (run-shell-command ,program-name))
+       
+       (defcommand ,(intern (format nil "run-or-raise-~a" alias)) () ()
+         (run-or-raise ,program-name '(:class ,window-class)))
+       
+       (defcommand ,(intern (format nil "run-or-pull-~a" alias)) () ()
+         (run-or-pull ,program-name '(:class ,window-class)))
+       
+       (fill-keymap ,(intern (format nil "*~a-map*" alias))
+  		  (kbd "p") ,(format nil "run-or-pull-~a" alias)
+  		  (kbd "r") ,(format nil "run-or-raise-~a" alias)
+  		  (kbd "n") ,(format nil "~a" alias))))
+#+end_src
+** Program Bindings
+#+begin_src lisp
+  (make-program-binding "firefox" "Firefox")
+
+  (make-program-binding "alacritty" "Alacritty")
+
+  (make-program-binding "emacs" "Emacs" "emacs")
+
+  (make-program-binding "keepassxc" "keepassxc")
+
+  (make-program-binding "steam" "steam")
+
+  (make-program-binding "icedove" "Icedove")
+#+end_src
+** Keymaps
+*** System Map
+#+begin_src lisp
+  ;;; System Command Keymap
+  (defparameter *screenshot-map*
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "f") "screenshot")
+      (define-key m (kbd "s") "screenshot-select")
+      m))
+
+  (defparameter *power-map*
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "p") "shutdown")
+      (define-key m (kbd "r") "reboot")
+      m)) 
+
+  (defparameter *system-map*
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "s") *screenshot-map*)
+      (define-key m (kbd "p") *power-map*)
+      (define-key m (kbd "v") "volume-control")
+      m))
+#+end_src
+*** Program Map
+#+begin_src lisp
+  (defparameter *program-map*
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "f") |*firefox-map*|)
+      (define-key m (kbd "e") |*emacs-map*|)
+      (define-key m (kbd "c") |*alacritty-map*|)
+      (define-key m (kbd "p") |*keepassxc-map*|)
+      (define-key m (kbd "s") |*steam-map*|)
+      (define-key m (kbd "i") |*icedove-map*|)
+      m))
+#+end_src
+*** Root Map
+#+begin_src lisp
+  (define-key *root-map* (kbd "0") "remove")
+  (define-key *root-map* (kbd "1") "only")
+  (define-key *root-map* (kbd "2") "vsplit")
+  (define-key *root-map* (kbd "3") "hsplit")
+
+  (define-key *root-map* (kbd "F1") "user-switch-to-screen 2")
+  (define-key *root-map* (kbd "F2") "user-switch-to-screen 1")
+  (define-key *root-map* (kbd "F3") "user-switch-to-screen 0")
+
+
+  (define-key *root-map* (kbd "p") *program-map*)
+  (define-key *root-map* (kbd "s") *system-map*)
+#+end_src
+*** Top Map
+#+begin_src lisp
+  (define-key *top-map* (kbd "XF86AudioRaiseVolume") "pamixer-volume-up")
+  (define-key *top-map* (kbd "XF86AudioLowerVolume") "pamixer-volume-down")
+  (define-key *top-map* (kbd "XF86AudioMute") "pamixer-toggle-mute")
+
+  (define-key *top-map* (kbd "XF86MonBrightnessUp") "screen-brightness-up")
+  (define-key *top-map* (kbd "XF86MonBrightnessDown") "screen-brightness-down")
+
+  (define-key *top-map* (kbd "XF86KbdBrightnessUp") "keyboard-brightness-up")
+  (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down")
+
+#+end_src
+* Final Actions
+#+begin_src lisp
+  (run-shell-command "dex -a -s $XDG_CONFIG_HOME/autostart/")
+#+end_src

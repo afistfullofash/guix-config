@@ -213,6 +213,16 @@
     ;; optional: show mismatched parens in fringe
     (show-paren-mode +1))
 #+end_src
+*** Common Lisp
+#+begin_src emacs-lisp
+  (defun connect-to-stumpwm ()
+    "Connect to stumpwm on localhost port 4004."
+    (interactive)
+    (sly-connect "127.0.0.1" 1773))
+
+  (use-package sly
+    :bind (("C-c s" . connect-to-stumpwm)))
+#+end_src
 *** Scheme
 #+begin_src emacs-lisp
   (use-package geiser
@@ -319,13 +329,16 @@
 #+begin_src emacs-lisp
   (use-package org
     :defer t
+    :custom
+    (org-babel-lisp-eval-fn "sly-eval")
     :config
     ;; Enable shell, Scheme and Emacs-Lisp in Org Babel
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((shell       . t)
        (scheme      . t)
-       (emacs-lisp  . t)))
+       (emacs-lisp  . t)
+       (lisp . t)))
 
     ;; Suppress confirmation prompts
     (setq org-confirm-babel-evaluate nil

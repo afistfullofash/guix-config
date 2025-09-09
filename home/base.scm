@@ -288,23 +288,41 @@
 		  ("LC_ALL" . "en_AU.utf8")
 		  ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
 
+(define stumpwm-init-lisp
+  (computed-file
+   "init.lisp"
+   (with-imported-modules '((guix build utils))
+     #~(begin
+	 (use-modules (guix build utils))
+	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs") "/bin/emacs")))
+		(init-org-file #$(local-file "files/stumpwm/config.org")))
+	   (format #t "Tangling ~a...\n" init-org-file)
+	   (invoke emacs-bin
+		   "--batch"
+		   "-q"	; Don't load a user init file
+		   init-org-file ; Open the org file in a buffer
+		   "--eval" "(require 'org)"
+		   "--eval" "(org-babel-tangle)"))
+	 (rename-file (string-append (dirname #$(local-file "files/stumpwm/config.org")) "/init.lisp")
+		      #$output)))))
+
+
 (define home-file-locations
-`((".themes/Dracula" ,dracula-gtk-theme-repo)
-  (".icons/Dracula" ,dracula-gtk-icons)
-  (".Xresources" ,dracula-xresources-theme-repo)
-  (".gitconfig" ,(local-file "files/git/gitconfig"))
-  (".gitignore" ,(local-file "files/git/gitignore"))
-  ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
-  ;; For some reason this does not work when we pass directories to it
-  (".stumpwm.d/init.lisp" ,(local-file "files/stumpwm/init.lisp"))
-  (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
-  (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
-  (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
-  (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
-  (".emacs.d/init.el" ,emacs-init-el)
-  ;; (".emacs.d/init.el" ,(local-file "files/emacs/init.el"))
-  ;; Ensure screenshot directory exists
-  ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
+  `((".themes/Dracula" ,dracula-gtk-theme-repo)
+    (".icons/Dracula" ,dracula-gtk-icons)
+    (".Xresources" ,dracula-xresources-theme-repo)
+    (".gitconfig" ,(local-file "files/git/gitconfig"))
+    (".gitignore" ,(local-file "files/git/gitignore"))
+    ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
+    ;; For some reason this does not work when we pass directories to it
+    (".stumpwm.d/init.lisp" ,stumpwm-init-lisp)
+    ;; (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
+    ;; (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
+    (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
+    (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
+    (".emacs.d/init.el" ,emacs-init-el)
+    ;; Ensure screenshot directory exists
+    ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
 
 (define xdg-config-file-locations
 ;; This Stats with a heap of THEMEING

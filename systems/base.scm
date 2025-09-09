@@ -2,6 +2,10 @@
   #:use-module (gnu)
   #:use-module (gnu services)
   #:use-module (gnu services linux)
+
+  #:use-module (gnu packages commencement)
+  #:use-module (gnu packages autotools)
+  #:use-module (gnu packages texinfo)
   
   #:use-module (gnu packages shells)
   #:use-module (gnu packages wm)
@@ -26,14 +30,17 @@
     (inherit stumpwm)
     (name "stumpwm-with-extensions")
     (inputs
-     (list sbcl-local-time
-	   sbcl-stumpwm-pamixer
-	   sbcl-stumpwm-battery-portable
-	   sbcl-stumpwm-notify
-	   sbcl-slynk
-	   stumpwm
-	   ;; sbcl-stumpwm-notify wanted his
-	   pkg-config))
+     (list stumpwm
+           sbcl-local-time
+           sbcl-stumpwm-battery-portable
+           sbcl-stumpwm-notify
+           sbcl-stumpwm-pamixer
+           sbcl-slynk))
+    (native-inputs
+     (list pkg-config
+           gcc-toolchain
+	   autoconf
+	   texinfo))
     (arguments
      (substitute-keyword-arguments (package-arguments stumpwm)
        ((#:phases phases)
@@ -42,23 +49,27 @@
              (lambda* (#:key inputs outputs #:allow-other-keys)
                (let* ((out (assoc-ref outputs "out"))
                       (program (string-append out "/bin/stumpwm")))
+                 ;; Avoid SBCL poking homedir during image build
                  (setenv "HOME" "/tmp")
                  (build-program program outputs
-                                #:entry-program '((stumpwm:stumpwm) 0)
-                                #:dependencies '("stumpwm"
-						 "local-time"
-						 "battery-portable"
-						 "notify"
-						 "pamixer"
-						 "slynk")
-                                #:dependency-prefixes
-                                (map (lambda (input) (assoc-ref inputs input))
-                                     '("stumpwm"
-				       "sbcl-local-time"
-				       "sbcl-stumpwm-battery-portable"
-				       "sbcl-stumpwm-notify"
-				       "sbcl-stumpwm-pamixer"
-				       "sbcl-slynk"))))))
+                   ;; Start stumpwm normally
+                   #:entry-program '((stumpwm:stumpwm) 0)
+                   ;; ASDF systems to pre-bundle
+                   #:dependencies '("stumpwm"
+                                    "local-time"
+                                    "battery-portable"
+                                    "notify"
+                                    "pamixer"
+                                    "slynk")
+                   ;; Where to find those systems
+                   #:dependency-prefixes
+                   (map (lambda (input) (assoc-ref inputs input))
+                        '("stumpwm"
+                          "sbcl-local-time"
+                          "sbcl-stumpwm-battery-portable"
+                          "sbcl-stumpwm-notify"
+                          "sbcl-stumpwm-pamixer"
+                          "sbcl-slynk"))))))
            (delete 'copy-source)
            (delete 'build)
            (delete 'check)
