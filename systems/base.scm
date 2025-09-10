@@ -180,4 +180,5 @@ natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current
     (bootloader (bootloader-configuration
 		 (bootloader grub-efi-bootloader)
 		 (targets (list "/boot/efi"))
-		 (keyboard-layout keyboard-layout)))))
+		 (keyboard-layout keyboard-layout)))
+    (name-service-switch %mdns-host-lookup-nss)))

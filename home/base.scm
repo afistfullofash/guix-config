@@ -99,7 +99,7 @@
    (with-imported-modules '((guix build utils))
      #~(begin
 	 (use-modules (guix build utils))
-	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs") "/bin/emacs")))
+	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs-lucid") "/bin/emacs")))
 		(init-org-file #$(local-file "files/emacs/init.org")))
 	   (format #t "Tangling ~a...\n" init-org-file)
 	   (invoke emacs-bin
@@ -112,7 +112,8 @@
 		      #$output)))))
 
 (define emacs-packages
-  (list "emacs-doom-themes"
+  (list "emacs-lucid"
+	"emacs-doom-themes"
 	"emacs-nyan-mode-1.1.4"
 	"emacs-expand-region"
 	"emacs-dirvish"
@@ -177,7 +178,6 @@
 (list
  ;; Terminal
  "alacritty"
- "emacs"
  ;; Password Management
  "keepassxc"
  ;; Notetaking Tool
@@ -301,7 +301,7 @@
    (with-imported-modules '((guix build utils))
      #~(begin
 	 (use-modules (guix build utils))
-	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs") "/bin/emacs")))
+	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs-lucid") "/bin/emacs")))
 		(init-org-file #$(local-file "files/stumpwm/config.org")))
 	   (format #t "Tangling ~a...\n" init-org-file)
 	   (invoke emacs-bin
@@ -323,8 +323,6 @@
     ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
     ;; For some reason this does not work when we pass directories to it
     (".stumpwm.d/init.lisp" ,stumpwm-init-lisp)
-    ;; (".stumpwm.d/keybindings.lisp" ,(local-file "files/stumpwm/keybindings.lisp"))
-    ;; (".stumpwm.d/visual.lisp" ,(local-file "files/stumpwm/visual.lisp"))
     (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
     (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
     (".emacs.d/init.el" ,emacs-init-el)

@@ -2,111 +2,110 @@
 #+PROPERTY: header-args:emacs-lisp :tangle init.el :exports both :eval never
 This is a continuation of the config at [[https://github.com/afistfullofash/.emacs.d/tree/master][afistfullofash/.emacs.d]].
 * Base Emacs Configuration
+  #+begin_src emacs-lisp
+    ;;; init.el --- Summary
+    ;;; Commentary:
+    ;;; Entry Point for Emacs customization
 
-#+begin_src emacs-lisp
-  ;;; init.el --- Summary
-  ;;; Commentary:
-  ;;; Entry Point for Emacs customization
+    ;;; Code:
 
-  ;;; Code:
+    ;;; Begin initialization
+    ;; Turn off mouse interface early in startup to avoid momentary display
+    (use-package emacs             ; the built-in pseudo-package
+      ;; --------------------------------------------------------- ;;
+      ;; Code that must run early (before other packages load)
+      ;; --------------------------------------------------------- ;;
+      :init
+      ;; Minor modes / commands ----------------------------------
+      (context-menu-mode 1)
+      (global-hl-line-mode 1)
+      (global-display-line-numbers-mode 1)
+      (menu-bar-mode   -1)
+      (tool-bar-mode   -1)
+      (scroll-bar-mode -1)
+      (tooltip-mode    -1)
 
-  ;;; Begin initialization
-  ;; Turn off mouse interface early in startup to avoid momentary display
-  (use-package emacs             ; the built-in pseudo-package
-    ;; --------------------------------------------------------- ;;
-    ;; Code that must run early (before other packages load)
-    ;; --------------------------------------------------------- ;;
-    :init
-    ;; Minor modes / commands ----------------------------------
-    (context-menu-mode 1)
-    (global-hl-line-mode 1)
-    (global-display-line-numbers-mode 1)
-    (menu-bar-mode   -1)
-    (tool-bar-mode   -1)
-    (scroll-bar-mode -1)
-    (tooltip-mode    -1)
+      ;; Backup & auto-save directories --------------------------
+      (let* ((backup-dir      (expand-file-name "~/.tmp/emacs/backups/"))
+             (auto-saves-dir  (expand-file-name "~/.tmp/emacs/auto-saves/")))
+        (dolist (dir (list backup-dir auto-saves-dir))
+          (unless (file-directory-p dir)      ; create if missing
+            (make-directory dir t)))
+        (setq backup-directory-alist        `(("." . ,backup-dir))
+              auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+              auto-save-list-file-prefix     (concat auto-saves-dir ".saves-")
+              tramp-backup-directory-alist   `((".*" . ,backup-dir))
+              tramp-auto-save-directory      auto-saves-dir))
 
-    ;; Backup & auto-save directories --------------------------
-    (let* ((backup-dir      (expand-file-name "~/.tmp/emacs/backups/"))
-           (auto-saves-dir  (expand-file-name "~/.tmp/emacs/auto-saves/")))
-      (dolist (dir (list backup-dir auto-saves-dir))
-        (unless (file-directory-p dir)      ; create if missing
-          (make-directory dir t)))
-      (setq backup-directory-alist        `(("." . ,backup-dir))
-            auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
-            auto-save-list-file-prefix     (concat auto-saves-dir ".saves-")
-            tramp-backup-directory-alist   `((".*" . ,backup-dir))
-            tramp-auto-save-directory      auto-saves-dir))
+      ;; Enable region case-changing commands without prompt -----
+      (put 'upcase-region   'disabled nil)
+      (put 'downcase-region 'disabled nil)
 
-    ;; Enable region case-changing commands without prompt -----
-    (put 'upcase-region   'disabled nil)
-    (put 'downcase-region 'disabled nil)
+      ;; --------------------------------------------------------- ;;
+      ;; Plain variable customisations
+      ;; --------------------------------------------------------- ;;
+      :custom
+      (enable-recursive-minibuffers   t)
+      (read-extended-command-predicate #'command-completion-default-include-p)
+      (minibuffer-prompt-properties
+       '(read-only t cursor-intangible t face minibuffer-prompt))
+      (inhibit-startup-message t)
+      (initial-scratch-message  "")
+      (enable-local-variables :all)
+      (enable-local-eval       t)
 
-    ;; --------------------------------------------------------- ;;
-    ;; Plain variable customisations
-    ;; --------------------------------------------------------- ;;
-    :custom
-    (enable-recursive-minibuffers   t)
-    (read-extended-command-predicate #'command-completion-default-include-p)
-    (minibuffer-prompt-properties
-     '(read-only t cursor-intangible t face minibuffer-prompt))
-    (inhibit-startup-message t)
-    (initial-scratch-message  "")
-    (enable-local-variables :all)
-    (enable-local-eval       t)
-
-    ;; --------------------------------------------------------- ;;
-    ;; Faces
-    ;; --------------------------------------------------------- ;;
-    :custom-face
-    (default
-     ((t (:family "DejaVuSansM Nerd Font Mono"
-                  :weight bold
-                  :height 98)))))
-#+end_src
+      ;; --------------------------------------------------------- ;;
+      ;; Faces
+      ;; --------------------------------------------------------- ;;
+      :custom-face
+      (default
+       ((t (:family "DejaVuSansM Nerd Font Mono"
+                    :weight bold
+                    :height 98)))))
+  #+end_src
 * Spell Check
-#+begin_src emacs-lisp
-(use-package jinx
-  :hook (emacs-startup . global-jinx-mode)
-  :bind (("M-$" . jinx-correct)
-         ("C-M-$" . jinx-languages)))
-#+end_src
+  #+begin_src emacs-lisp
+    (use-package jinx
+      :hook (emacs-startup . global-jinx-mode)
+      :bind (("M-$" . jinx-correct)
+             ("C-M-$" . jinx-languages)))
+  #+end_src
 * FlyCheck
-#+begin_src emacs-lisp
-  (use-package flycheck
-    :hook (emacs-startup . global-flycheck-mode))
-#+end_src
+  #+begin_src emacs-lisp
+    (use-package flycheck
+      :hook (emacs-startup . global-flycheck-mode))
+  #+end_src
 * Dired
 ** Dirvish
-#+begin_src emacs-lisp
-  (use-package dirvish
-    :config
-    (dirvish-override-dired-mode 1) ; swaps Dired transparently
-    (dirvish-define-preview lsd (file)
-      "Use `lsd` to generate a colourful directory preview for Dirvish."
-      :require ("lsd")                    ; ensure the binary is present
-      (when (file-directory-p file)       ; only preview for directories
-        `(shell . ("lsd"
-                   "-al"                  ; long list + hidden files
-                   "--color=always"
-                   "--icon=always"
-                   "--group-dirs=first"
-                   ,file))))
-    (push 'lsd dirvish-preview-dispatchers)
-    :bind (("C-x d" . dirvish))
-    :custom
-    (dirvish-preview-enabled t)   ; live previews
-    (dirvish-use-header-line t))
-  #+end_src
+   #+begin_src emacs-lisp
+     (use-package dirvish
+       :config
+       (dirvish-override-dired-mode 1) ; swaps Dired transparently
+       (dirvish-define-preview lsd (file)
+     			  "Use `lsd` to generate a colourful directory preview for Dirvish."
+     			  :require ("lsd")                    ; ensure the binary is present
+     			  (when (file-directory-p file)       ; only preview for directories
+     			    `(shell . ("lsd"
+     				       "-al"                  ; long list + hidden files
+     				       "--color=always"
+     				       "--icon=always"
+     				       "--group-dirs=first"
+     				       ,file))))
+       (push 'lsd dirvish-preview-dispatchers)
+       :bind (("C-x d" . dirvish))
+       :custom
+       (dirvish-preview-enabled t)   ; live previews
+       (dirvish-use-header-line t))
+   #+end_src
 ** Dired Narrow
-  #+begin_src emacs-lisp
-    ;;; Dired
-    (use-package dired-narrow
-      :config
-      (bind-keys :map dired-mode-map
-    	     ("f" . dired-narrow-fuzzy)))
+   #+begin_src emacs-lisp
+     ;;; Dired
+     (use-package dired-narrow
+       :config
+       (bind-keys :map dired-mode-map
+     	     ("f" . dired-narrow-fuzzy)))
 
-  #+end_src
+   #+end_src
 * Treesitter
   #+begin_src emacs-lisp
     (use-package treesit
@@ -132,121 +131,121 @@ This is a continuation of the config at [[https://github.com/afistfullofash/.ema
       :mode "\\.tsx\\'")
 
 
-    #+end_src
+  #+end_src
     
 * Cape + Consult + Corfu + Vertico
-#+begin_src emacs-lisp
-  (use-package vertico
-    :init (vertico-mode))
+  #+begin_src emacs-lisp
+    (use-package vertico
+      :init (vertico-mode))
 
-  ;; Persist history over Emacs restarts. Vertico sorts by history position.
-  (use-package savehist
-    :init
-    (savehist-mode))
+    ;; Persist history over Emacs restarts. Vertico sorts by history position.
+    (use-package savehist
+      :init
+      (savehist-mode))
 
-  (use-package orderless
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-defaults nil)
-    (completion-category-overrides '((file (styles partial-completion)))))
+    (use-package orderless
+      :custom
+      (completion-styles '(orderless basic))
+      (completion-category-defaults nil)
+      (completion-category-overrides '((file (styles partial-completion)))))
 
-  (use-package marginalia
-    :init (marginalia-mode))
+    (use-package marginalia
+      :init (marginalia-mode))
 
-  (use-package consult
-    :bind (("C-s" . consult-line)
-  	 ("C-y" . consult-yank-from-kill-ring)
-  	 ("C-x b" . consult-buffer)
-  	 ("C-c g" . consult-ripgep)))
+    (use-package consult
+      :bind (("C-s" . consult-line)
+    	 ("C-y" . consult-yank-from-kill-ring)
+    	 ("C-x b" . consult-buffer)
+    	 ("C-c g" . consult-ripgep)))
 
-  ;; CORFU: Popup UI for in-buffer completion
-  (use-package corfu
-    :init
-    (global-corfu-mode) ;; enables Corfu in all buffers
-    ;; :custom
-    ;; (corfu-auto t)                ;; enable auto popup
-    ;; (corfu-cycle t)               ;; allow cycling through candidates
-    ;; (corfu-preselect-first t)
-    ;; (corfu-quit-at-boundary nil)
-    ;; (corfu-quit-no-match 'separator)
-    ;; (corfu-scroll-margin 5)
-    ;; (corfu-max-width 80)
-    ;; :bind
-    ;; (:map corfu-map
-    ;;       ("TAB" . corfu-next)
-    ;;       ([tab] . corfu-next)
-    ;;       ("S-TAB" . corfu-previous)
-    ;;       ([backtab] . corfu-previous))
-    )
+    ;; CORFU: Popup UI for in-buffer completion
+    (use-package corfu
+      :init
+      (global-corfu-mode) ;; enables Corfu in all buffers
+      ;; :custom
+      ;; (corfu-auto t)                ;; enable auto popup
+      ;; (corfu-cycle t)               ;; allow cycling through candidates
+      ;; (corfu-preselect-first t)
+      ;; (corfu-quit-at-boundary nil)
+      ;; (corfu-quit-no-match 'separator)
+      ;; (corfu-scroll-margin 5)
+      ;; (corfu-max-width 80)
+      ;; :bind
+      ;; (:map corfu-map
+      ;;       ("TAB" . corfu-next)
+      ;;       ([tab] . corfu-next)
+      ;;       ("S-TAB" . corfu-previous)
+      ;;       ([backtab] . corfu-previous))
+      )
 
-  ;; CAPE: Add extra completion sources to completion-at-point-functions
-  (use-package cape
-    :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
-    :init
-    ;; Add useful defaults to `completion-at-point-functions`
-    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-    (add-to-list 'completion-at-point-functions #'cape-file)
-    (add-to-list 'completion-at-point-functions #'cape-keyword)
-    ;; Optionally:
-    ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
-    ;; (add-to-list 'completion-at-point-functions #'cape-line)
-    )
-#+end_src
+    ;; CAPE: Add extra completion sources to completion-at-point-functions
+    (use-package cape
+      :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+      :init
+      ;; Add useful defaults to `completion-at-point-functions`
+      (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+      (add-to-list 'completion-at-point-functions #'cape-file)
+      (add-to-list 'completion-at-point-functions #'cape-keyword)
+      ;; Optionally:
+      ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
+      ;; (add-to-list 'completion-at-point-functions #'cape-line)
+      )
+  #+end_src
 * Magit
-#+begin_src emacs-lisp
-  ;;; Magit
-  (use-package magit
-    :bind (("C-c m" . magit-status)))
-#+end_src
+  #+begin_src emacs-lisp
+    ;;; Magit
+    (use-package magit
+      :bind (("C-c m" . magit-status)))
+  #+end_src
 * Programming Languages
 ** Lisp
 *** General
-#+begin_src emacs-lisp
-  (use-package paredit
-    ;; enable in all the major Lisp modes you care about
-    :hook ((emacs-lisp-mode
-            lisp-mode
-            lisp-interaction-mode
-            scheme-mode
-            clojure-mode) . paredit-mode)
-    :bind
-    ;; let’s make “M-(” wrap the following sexp in parens
-    (:map paredit-mode-map
-          ("M-(" . paredit-wrap-round)
-          ;; some handy defaults you can tweak:
-          ("C-M-f" . paredit-forward) 
-          ("C-M-b" . paredit-backward)
-          ("C-)"   . paredit-forward-slurp-sexp)
-          ("C-("   . paredit-forward-barf-sexp))
-    :config
-    ;; optional: show mismatched parens in fringe
-    (show-paren-mode +1))
-#+end_src
+    #+begin_src emacs-lisp
+      (use-package paredit
+        ;; enable in all the major Lisp modes you care about
+        :hook ((emacs-lisp-mode
+                lisp-mode
+                lisp-interaction-mode
+                scheme-mode
+                clojure-mode) . paredit-mode)
+        :bind
+        ;; let’s make “M-(” wrap the following sexp in parens
+        (:map paredit-mode-map
+              ("M-(" . paredit-wrap-round)
+              ;; some handy defaults you can tweak:
+              ("C-M-f" . paredit-forward) 
+              ("C-M-b" . paredit-backward)
+              ("C-)"   . paredit-forward-slurp-sexp)
+              ("C-("   . paredit-forward-barf-sexp))
+        :config
+        ;; optional: show mismatched parens in fringe
+        (show-paren-mode +1))
+    #+end_src
 *** Common Lisp
-#+begin_src emacs-lisp
-  (defun connect-to-stumpwm ()
-    "Connect to stumpwm on localhost port 4004."
-    (interactive)
-    (sly-connect "127.0.0.1" 1773))
+    #+begin_src emacs-lisp
+      (defun connect-to-stumpwm ()
+        "Connect to stumpwm on localhost port 4004."
+        (interactive)
+        (sly-connect "127.0.0.1" 1773))
 
-  (use-package sly
-    :bind (("C-c s" . connect-to-stumpwm)))
-#+end_src
+      (use-package sly
+        :bind (("C-c s" . connect-to-stumpwm)))
+    #+end_src
 *** Scheme
-#+begin_src emacs-lisp
-  (use-package geiser
-    :custom
-    (geiser-default-implementation 'guile)
-    (geiser-active-implementations '(guile))
-    (geiser-implementations-alist '(((regexp "\\.scm$") guile)))
-    :hook
-    (scheme-mode . geiser-mode))
+    #+begin_src emacs-lisp
+      (use-package geiser
+        :custom
+        (geiser-default-implementation 'guile)
+        (geiser-active-implementations '(guile))
+        (geiser-implementations-alist '(((regexp "\\.scm$") guile)))
+        :hook
+        (scheme-mode . geiser-mode))
 
-  (use-package geiser-guile
-    :config
-    ;; Assuming the Guix checkout is in ~/src/guix.
-    (add-to-list 'geiser-guile-load-path "~/src/guix"))
-#+end_src
+      (use-package geiser-guile
+        :config
+        ;; Assuming the Guix checkout is in ~/src/guix.
+        (add-to-list 'geiser-guile-load-path "~/src/guix"))
+    #+end_src
 *** Guix
     #+begin_src emacs-lisp
       (use-package guix
@@ -278,165 +277,175 @@ This is a continuation of the config at [[https://github.com/afistfullofash/.ema
         ;; (add-to-list 'geiser-guile-load-path "~/my-guix-home-config-repo")
         )
 
-#+end_src
+    #+end_src
 ** Terraform
-#+begin_src emacs-lisp
-  (use-package terraform-mode
-    :hook (terraform-mode . (lambda ()
-                              (add-hook 'before-save-hook #'terraform-format-buffer nil t))))
-#+end_src
+   #+begin_src emacs-lisp
+     (use-package terraform-mode
+       :hook (terraform-mode . (lambda ()
+                                 (add-hook 'before-save-hook #'terraform-format-buffer nil t))))
+   #+end_src
 ** Rust
-#+begin_src emacs-lisp
-  (use-package rustic
-    :config
-    (setq rustic-format-on-save t)
-    :custom
-    (rustic-analyzer-command '("rustup" "run" "stable" "rust-analyzer")))
-#+end_src
+   #+begin_src emacs-lisp
+     (use-package rustic
+       :config
+       (setq rustic-format-on-save t)
+       :custom
+       (rustic-analyzer-command '("rustup" "run" "stable" "rust-analyzer")))
+   #+end_src
 ** Web
-#+begin_src emacs-lisp
-  ;;; web-mode
-  (use-package web-mode
-    :mode (".svelte$"))
+   #+begin_src emacs-lisp
+     ;;; web-mode
+     (use-package web-mode
+       :mode (".svelte$"))
 
-  ;;; Prettier
-  (use-package prettier-js
-    :hook ((js-mode . prettier-js-mode)
-  	 (ts-mode . prettier-js-mode)
-  	 (json-ts-mode . prettier-js-mode)))
-      #+end_src
+     ;;; Prettier
+     (use-package prettier-js
+       :hook ((js-mode . prettier-js-mode)
+     	 (ts-mode . prettier-js-mode)
+     	 (json-ts-mode . prettier-js-mode)))
+   #+end_src
 * Language Server Protocol
-      #+begin_src emacs-lisp
-	;;; Lsp-mode
-	(use-package lsp-mode
-	  :init
-	  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-	  (setq lsp-keymap-prefix "C-c l")
-	  :hook ((terraform-mode . lsp)
-		 (tsx-ts-mode . lsp))
-	  :magic (".svelte$" . lsp)
-	  :commands lsp)
+  #+begin_src emacs-lisp
+    ;;; Lsp-mode
+    (use-package lsp-mode
+      :init
+      ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+      (setq lsp-keymap-prefix "C-c l")
+      :hook ((terraform-mode . lsp)
+    	 (tsx-ts-mode . lsp))
+      :magic (".svelte$" . lsp)
+      :commands lsp)
 
-	(use-package lsp-ui
-	  :commands lsp-ui-mode)
+    (use-package lsp-ui
+      :commands lsp-ui-mode)
 
-	(use-package lsp-scheme
-	  :after lsp-mode
-	  :custom
-	  ;; One of: "guile"  "chicken"  "gambit"  "chez"  "racket" …
-	  ;; Pick the implementation you'll use most often.
-	  (lsp-scheme-implementation "guile")  ; change to "chicken" etc. if needed
-	  ;; If you keep multiple Schemes, make it project-specific:
-	  ;; (dir-locals-set-class-variables
-	  ;;  'my-scheme
-	  ;;  '((scheme-mode . ((lsp-scheme-implementation . "chicken")))))
-	  ;; (dir-locals-set-directory-class "/path/to/project/" 'my-scheme)
-	  )
+    (use-package lsp-scheme
+      :after lsp-mode
+      :custom
+      ;; One of: "guile"  "chicken"  "gambit"  "chez"  "racket" …
+      ;; Pick the implementation you'll use most often.
+      (lsp-scheme-implementation "guile")  ; change to "chicken" etc. if needed
+      ;; If you keep multiple Schemes, make it project-specific:
+      ;; (dir-locals-set-class-variables
+      ;;  'my-scheme
+      ;;  '((scheme-mode . ((lsp-scheme-implementation . "chicken")))))
+      ;; (dir-locals-set-directory-class "/path/to/project/" 'my-scheme)
+      )
 
-#+end_src
+  #+end_src
 * Org Mode
-#+begin_src emacs-lisp
-  (use-package org
-    :defer t
-    :custom
-    (org-babel-lisp-eval-fn "sly-eval")
-    :config
-    ;; Enable shell, Scheme and Emacs-Lisp in Org Babel
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((shell       . t)
-       (scheme      . t)
-       (emacs-lisp  . t)
-       (lisp . t)))
-
-    ;; Suppress confirmation prompts
-    (setq org-confirm-babel-evaluate nil
-
-          ;; Shell defaults
-          org-babel-sh-command "bash"
-          org-babel-default-header-args:sh
-          '((:results . "output replace")
-            (:exports . "both")
-            (:session . nil)
-            (:cache . "no"))
-
-          ;; Scheme defaults (override `org-babel-scheme-command` if you use another impl)
-          org-babel-scheme-command "guile"
-          org-babel-default-header-args:scheme
-          '((:results . "output replace")
-            (:exports . "both")
-            (:session . nil)
-            (:cache . "no"))
-
-          ;; Emacs-Lisp defaults
-          ;; (no external REPL, just evaluates in the current Emacs session)
-          org-babel-default-header-args:emacs-lisp
-          '((:results . "output replace")
-            (:exports . "both")
-            (:cache   . "no"))))
-
-#+end_src
+  #+begin_src emacs-lisp
+    (use-package org
+      :defer t
+      :custom
+      (org-adapt-indentation t)
+      (org-babel-lisp-eval-fn "sly-eval")
+      (org-agenda-files '("~/org"))
+      ;; Suppress confirmation prompts
+      (org-confirm-babel-evaluate nil)
+      ;; Shell defaults
+      (org-babel-sh-command "bash")
+      (org-babel-default-header-args:sh
+       '((:results . "output replace")
+         (:exports . "both")
+         (:session . nil)
+         (:cache . "no")))
+      ;; Scheme defaults (override `org-babel-scheme-command` if you use another impl)
+      (org-babel-scheme-command "guile")
+      (org-babel-default-header-args:scheme
+       '((:results . "output replace")
+         (:exports . "both")
+         (:session . nil)
+         (:cache . "no")))
+      ;; Emacs-Lisp defaults
+      ;; (no external REPL, just evaluates in the current Emacs session)
+      (org-babel-default-header-args:emacs-lisp
+       '((:results . "output replace")
+         (:exports . "both")
+         (:cache   . "no")))
+      :config
+      ;; Enable shell, Scheme and Emacs-Lisp in Org Babel
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((shell       . t)
+         (scheme      . t)
+         (emacs-lisp  . t)
+         (lisp . t))))
+  #+end_src
+** Org Indent
+   #+begin_src emacs-lisp :tangle no
+     (use-package org-indent
+       :diminish
+       :hook (org-mode . org-indent-mode)
+       :custom
+       (org-indent-indentation-per-level 1)
+       (org-indent-mode-turns-on-hiding-stars nil))
+   #+end_src
 * Visual
 ** Expand Region
-#+begin_src emacs-lisp
-  (use-package expand-region
-    :bind (("C-=" . er/expand-region)  ;; grow region (like many IDEs)
-           ("C--" . er/contract-region)) ;; shrink region
-    :init
-    (setq expand-region-fast-keys-enabled t))
-#+end_src
+   #+begin_src emacs-lisp
+     (use-package expand-region
+       :bind (("C-=" . er/expand-region)  ;; grow region (like many IDEs)
+              ("C--" . er/contract-region)) ;; shrink region
+       :init
+       (setq expand-region-fast-keys-enabled t))
+   #+end_src
 ** Undo Tree
-#+begin_src emacs-lisp
-  (use-package undo-tree
-    :diminish undo-tree-mode
-    :init
-    (let ((undo-dir (expand-file-name "undo-tree/" (getenv "XDG_CACHE_HOME"))))
-      (unless (file-directory-p undo-dir)
-        (make-directory undo-dir t))
-      (setq undo-tree-history-directory-alist `((".*" . ,undo-dir))
-  	  undo-tree-auto-save-history t))
-    (global-undo-tree-mode))
-#+end_src
+   #+begin_src emacs-lisp
+     (use-package undo-tree
+       :diminish undo-tree-mode
+       :init
+       (let ((undo-dir (expand-file-name "undo-tree/" (getenv "XDG_CACHE_HOME"))))
+         (unless (file-directory-p undo-dir)
+           (make-directory undo-dir t))
+         (setq undo-tree-history-directory-alist `((".*" . ,undo-dir))
+     	  undo-tree-auto-save-history t))
+       (global-undo-tree-mode))
+   #+end_src
 ** Indent Bars
-#+begin_src emacs-lisp
-  (use-package indent-bars
-    :hook ((yaml-mode . indent-bars-mode)
-    	 (python-mode . indent-bars-mode)))
-#+end_src
+   #+begin_src emacs-lisp
+     (use-package indent-bars
+       :hook ((yaml-mode . indent-bars-mode)
+       	 (python-mode . indent-bars-mode)))
+   #+end_src
 ** Themeing
 *** Doom Themes
-#+begin_src emacs-lisp
-  ;;; Themeing
-  (use-package doom-themes
-    :init
-    (load-theme 'doom-dracula t)
-    ;; Global settings (defaults)
-    (setq doom-themes-enable-bold t ; if nil, bold is universally disabled
-  	doom-themes-enable-italic t
-  	doom-vibrant-brighter-modeline nil
-  	org-hide-leading-stars nil) ; if nil, italics is universally disabled
+    #+begin_src emacs-lisp
+      (use-package doom-themes
+        :custom
+        ;; Global settings (defaults)
+        (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+        (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+        ;; for treemacs users
+        ;; (doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+        :config
+        (load-theme 'doom-dracula t)
 
-    ;; Enable flashing mode-line on errors
-    (doom-themes-visual-bell-config)
-    ;; Corrects (and improves) org-mode's native fontification.
-    (doom-themes-org-config))
-#+end_src
+        ;; Enable flashing mode-line on errors
+        (doom-themes-visual-bell-config)
+        ;; or for treemacs users
+        ;; (doom-themes-treemacs-config)
+        ;; Corrects (and improves) org-mode's native fontification.
+        (doom-themes-org-config))
+    #+end_src
 *** Nyan Mode
-#+begin_src emacs-lisp
-  (use-package nyan-mode
-    :init
-    ;; Fix up Nyan Cat cause she's pretty
-    (setq nyan-animate-nyancat t
-      	nyan-wavy-trail t)
-    (nyan-mode))
-  #+end_src
+    #+begin_src emacs-lisp
+      (use-package nyan-mode
+        :custom
+        ;; Fix up Nyan Cat cause she's pretty
+        (nyan-animate-nyancat t)
+        (nyan-wavy-trail t)
+        :init
+
+        (nyan-mode))
+    #+end_src
 ** Rainbow Delimeters
-  #+begin_src emacs-lisp
-    (use-package rainbow-delimiters
-      :hook (prog-mode . rainbow-delimiters-mode))
-  #+end_src
+   #+begin_src emacs-lisp
+     (use-package rainbow-delimiters
+       :hook (prog-mode . rainbow-delimiters-mode))
+   #+end_src
 * End Errata
-#+begin_src emacs-lisp
-  (provide 'init.el)
-  ;;; init.el ends here
-#+end_src
+  #+begin_src emacs-lisp
+    (provide 'init.el)
+    ;;; init.el ends here
+  #+end_src
