@@ -73,6 +73,12 @@
    "codex"
    "unzip"))
 
+(define spellcheck-packages
+  (list
+   "aspell"
+   "hunspell"
+   "hunspell-dict-en"))
+
 (define development-packages
   (list "git"
 	"git:credential-libsecret"
@@ -134,7 +140,8 @@
 	"emacs-consult"
 	"emacs-cape"
 	"emacs-corfu"
-	"emacs-sly"))
+	"emacs-sly"
+	"emacs-jinx"))
 
 (define tree-sitter-grammars
 (list tree-sitter-typescript
@@ -359,6 +366,7 @@
 (home-environment
  (packages (append (specifications->packages
 		    (append terminal-packages
+			    spellcheck-packages
 			    development-packages
 			    desktop-packages
 			    emacs-packages

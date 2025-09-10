@@ -1,8 +1,22 @@
-* Guix Config
-Sets up a complete system with most packages required for personal use installed to the users home.
+* afistfullofash's Guix Config
+This configuration contains everything needed to configure both my laptop and desktop from scratch using both [[https://guix.gnu.org/manual/en/html_node/System-Configuration.html][Guix System]] and [[https://guix.gnu.org/manual/en/html_node/Home-Configuration.html][Guix Home]].
+Generally if something is needed before the user logs in, like the Window Manager etc it is in the system configuration.
+If something is going to be used by the user as much as possible it is all handled in the home configuration.
 
-This requires that the channels afistfullofash and nonguix are avaliable. To ensure they are avaliable the script below will ensure they are avliable.
-** Initalize Channels
+** Home
+The Emacs and StumpWM configurations are both done literately using org babel.
+| Program | Config File Location               |
+|---------+------------------------------------|
+| Emacs   | [[file:home/files/emacs/init.org]]     |
+| StumpWM | [[file:home/files/stumpwm/config.org]] |
+
+These are both tangled into their respective init.el and init.lisp files by (org-tangle-file) when Guix Home Reconfigure is ran.
+
+
+* Configure a new system
+This requires that the channels [[https://github.com/afistfullofash/afistfullofash][afistfullofash]] and [[https://gitlab.com/nonguix/nonguix/][nonguix]] are available. To ensure they are available the script below will install a temporary channels.scm from this repo which will allow this to run.
+
+#+name: configure-channels
 #+begin_src sh
   rm ~/.config/guix/channels.scm
   mkdir -p ~/.config/guix/
@@ -12,14 +26,13 @@ This requires that the channels afistfullofash and nonguix are avaliable. To ens
   hash guix
 #+end_src
 
-
-** Reconfigure System
+#+name: reconfigure-system
 #+begin_src sh
   sudo guix pull
   sudo guix system reconfigure ./${SYSTEM_TO_DEPLOY}.scm
 #+end_src
 
-** Reconfigure Home
+#+name reconfigure-home
 #+begin_src sh
   guix home reconfigure ./home.scm
 #+end_src

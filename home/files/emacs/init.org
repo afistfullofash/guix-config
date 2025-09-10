@@ -1,6 +1,8 @@
 #+TITLE: Emacs init.org
 #+PROPERTY: header-args:emacs-lisp :tangle init.el :exports both :eval never
+This is a continuation of the config at [[https://github.com/afistfullofash/.emacs.d/tree/master][afistfullofash/.emacs.d]].
 * Base Emacs Configuration
+
 #+begin_src emacs-lisp
   ;;; init.el --- Summary
   ;;; Commentary:
@@ -62,13 +64,20 @@
                   :weight bold
                   :height 98)))))
 #+end_src
+* Spell Check
+#+begin_src emacs-lisp
+(use-package jinx
+  :hook (emacs-startup . global-jinx-mode)
+  :bind (("M-$" . jinx-correct)
+         ("C-M-$" . jinx-languages)))
+#+end_src
 * FlyCheck
 #+begin_src emacs-lisp
   (use-package flycheck
-    :hook (after-init . global-flycheck-mode))
+    :hook (emacs-startup . global-flycheck-mode))
 #+end_src
 * Dired
-** COMMENT Dirvish
+** Dirvish
 #+begin_src emacs-lisp
   (use-package dirvish
     :config
