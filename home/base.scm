@@ -38,7 +38,6 @@
 
 (define home-directory (getenv "HOME"))
 
-
 (define nnn-plugins-repo
   (origin
     (uri (git-reference
@@ -114,7 +113,13 @@
 (define emacs-packages
   (list "emacs-lucid"
 	"emacs-doom-themes"
+	"emacs-doom-modeline"
+	"emacs-nerd-icons"
+	"emacs-org-roam"
+	"emacs-org-journal"
 	"emacs-nyan-mode-1.1.4"
+	"emacs-diredfl"
+	"emacs-format-all-the-code"
 	"emacs-expand-region"
 	"emacs-dirvish"
 	"emacs-rainbow-delimiters"
@@ -180,8 +185,6 @@
  "alacritty"
  ;; Password Management
  "keepassxc"
- ;; Notetaking Tool
- "obsidian"
  "steam"
  ;; Main browser
  "firefox"
@@ -189,8 +192,6 @@
  "google-chrome-stable"
  ;; "calibre"
  "pavucontrol"
- ;; Backup file manager
- "thunar"
  ;; Screenshot tool
  "maim"
  ;; Image Viewer
@@ -212,7 +213,8 @@
       "gnupg"
       "wireplumber"
       ;; Required by dirvish
-      "vips"
+      ;; Currently breaking things
+      ;; "vips"
       "poppler"
       "mediainfo"
       "openssh"

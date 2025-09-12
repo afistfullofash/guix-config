@@ -84,6 +84,7 @@ ssh_network() {
   done
 }
 
+# Guix Home Reconfigure
 ghr() {
     SYSTEM=${1}
     print
@@ -96,6 +97,7 @@ ghr() {
     ghrq $SYSTEM
 }
 
+# Guix Home Reconfigure Quick
 ghrq() {
     SYSTEM=${1}
     print
@@ -107,7 +109,7 @@ ghrq() {
     guix home reconfigure  -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/home/${SYSTEM}.scm
 }
 
-
+# Guix System Reconfigure
 gsr() {
     if [ -z "${1}" ]; then
 	echo "No System given to configure"
@@ -123,6 +125,7 @@ gsr() {
     gsrq $SYSTEM
 }
 
+# Guix System Reconfigure Quick
 gsrq() {
     if [ -z "${1}" ]; then
 	echo "No System given to configure"
@@ -137,3 +140,7 @@ gsrq() {
     print
     sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/${SYSTEM}.scm
 }
+
+# Guix Full Reconfigures
+alias gfr="gsr ${1} && ghr ${1} && sudo reboot"
+alias gfrq="gsrq ${1} && ghrq ${1} && sudo reboot"

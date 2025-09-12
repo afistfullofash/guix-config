@@ -32,7 +32,7 @@ This requires that the channels [[https://github.com/afistfullofash/afistfullofa
   sudo guix system reconfigure ./${SYSTEM_TO_DEPLOY}.scm
 #+end_src
 
-#+name reconfigure-home
+#+name: reconfigure-home
 #+begin_src sh
   guix home reconfigure ./home.scm
 #+end_src

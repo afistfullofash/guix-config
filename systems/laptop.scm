@@ -1,27 +1,27 @@
-(define-module (systems laptop))
+(define-module (systems laptop)
+  #:use-module (systems base)
 
-(use-modules (systems base)
-	     (gnu)
-	     (gnu services)
-	     (gnu services linux)
-	     
-	     (gnu packages shells)
-	     (gnu packages wm)
-	     (gnu packages lisp-xyz)
-	     (gnu packages hardware)
+  #:use-module (gnu)
+  #:use-module (gnu services)
+  #:use-module (gnu services linux)
 
-	     (guix packages)
-	     (guix utils)
-     
-	     (nongnu packages linux)
-	     (nongnu system linux-initrd)
+  #:use-module (guix packages)
+  #:use-module (guix utils)
+  #:use-module (nongnu packages linux)
+  #:use-module (nongnu system linux-initrd)
 
-	     (srfi srfi-1))
+  #:use-module (srfi srfi-1)
 
-(define system
+  #:export (laptop-operating-system))
+
+
+(define laptop-operating-system
   (operating-system
     (inherit base-operating-system)
     (host-name "siren")
+    ;; We don't want to enable capslock on the laptop
+    (keyboard-layout (keyboard-layout "au"
+				      #:options '("ctrl:nocaps")))
 
     (swap-devices (list (swap-space
                         (target (uuid
@@ -39,4 +39,4 @@
 					 'fat32))
                            (type "vfat")) %base-file-systems))))
 
-system
+laptop-operating-system

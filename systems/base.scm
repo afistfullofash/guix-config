@@ -1,8 +1,19 @@
 (define-module (systems base)
+  #:use-module (guix utils)
+  #:use-module (guix packages)
+
   #:use-module (gnu)
+
   #:use-module (gnu services)
   #:use-module (gnu services linux)
+  #:use-module (gnu services cups)
+  #:use-module (gnu services desktop)
+  #:use-module (gnu services networking)
+  #:use-module (gnu services ssh)
+  #:use-module (gnu services xorg)
+  #:use-module (gnu services docker)
 
+  
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages texinfo)
@@ -13,19 +24,15 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages hardware)
 
-  #:use-module (guix packages)
-  #:use-module (guix utils)
-
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
 
   #:use-module (srfi srfi-1)
 
-  #:export (base-operating-system))
+  #:export (base-operating-system)
+  #:export (stumpwm-with-extensions))
 
-(use-service-modules cups desktop networking ssh xorg docker)
-
-(define-public stumpwm-with-extensions
+(define stumpwm-with-extensions
   (package
     (inherit stumpwm)
     (name "stumpwm-with-extensions")
