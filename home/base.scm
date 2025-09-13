@@ -357,6 +357,14 @@
     ;; Autostarts
     ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
 
+(define ssh-configuration
+  (home-openssh-configuration
+   (hosts
+    (list (openssh-host (name "*")
+			(identity-file "~/.ssh/tom.pub"))
+	  (openssh-host (name "gitlab.com")
+			(identity-file "~/.ssh/work.pub"))))))
+
 (define base-home-services
   (list
    ;; runst-service
@@ -376,14 +384,6 @@
 	    (home-zsh-configuration
 	     (zshrc (list
 		     (local-file "files/zsh/zshrc.sh")))))))
-
-(define ssh-configuration
-  (home-openssh-configuration
-   (hosts
-    (list (openssh-host (name "*")
-			(identity-file "~/.ssh/tom.pub"))
-	  (openssh-host (name "gitlab.com")
-			(identity-file "~/.ssh/work.pub"))))))
 
 (define base-home-environment
   (home-environment

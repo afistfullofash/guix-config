@@ -11,8 +11,7 @@
 (define laptop-environment-variables-service
   (simple-service 'laptop-environment-variables-service
 		  home-environment-variables-service-type
-		  `(("GUIX_HOME_SYSTEM_FORMAT" .  "laptop")
-		    )))
+		  `(("GUIX_HOME_SYSTEM_FORMAT" .  "laptop"))))
 
 
 (define laptop-home-environment
