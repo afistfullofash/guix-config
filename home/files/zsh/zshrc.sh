@@ -142,5 +142,32 @@ gsrq() {
 }
 
 # Guix Full Reconfigures
-alias gfr="gsr ${1} && ghr ${1} && sudo reboot"
-alias gfrq="gsrq ${1} && ghrq ${1} && sudo reboot"
+gfrq() {
+    if [ -z "${1}" ]; then
+	echo "No System given to configure"
+	return 1
+    fi
+    SYSTEM=${1}
+    print
+    print
+    print -P "%B%F{magenta+}Running Complete Guix Reconfigure Quick%f%b"
+    print -P "%B$SYSTEM%b"
+    print
+    print
+    gsrq ${SYSTEM} && ghrq ${SYSTEM} && sudo reboot
+}
+
+gfr() {
+    if [ -z "${1}" ]; then
+	echo "No System given to configure"
+	return 1
+    fi
+    SYSTEM=${1}
+    print
+    print
+    print -P "%B%F{magenta+}Running Complete Guix Reconfigure%f%b"
+    print -P "%B$SYSTEM%b"
+    print
+    print
+    gsr ${SYSTEM} && ghr ${SYSTEM} && sudo reboot
+}

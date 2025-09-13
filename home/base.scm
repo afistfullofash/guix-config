@@ -9,9 +9,11 @@
   #:use-module (gnu home services ssh)
   #:use-module (gnu home services syncthing)
   #:use-module (gnu home services shepherd)
+
   #:use-module (gnu packages)
   #:use-module (gnu packages tree-sitter)
   #:use-module (gnu packages xdisorg)
+
   #:use-module (gnu services)
 
   #:use-module (guix channels)
@@ -34,7 +36,8 @@
   #:use-module (afistfullofash packages fonts)
   #:use-module (afistfullofash packages terraform)
 
-  #:export (base-home-environment))
+  #:export (base-home-environment
+	    base-home-services))
 
 (define home-directory (getenv "HOME"))
 
@@ -150,81 +153,81 @@
 	"emacs-jinx"))
 
 (define tree-sitter-grammars
-(list tree-sitter-typescript
-      tree-sitter-scheme
-      tree-sitter-rust
-      tree-sitter-ruby
-      tree-sitter-python
-      tree-sitter-php
-      tree-sitter-org
-      tree-sitter-nix
-      tree-sitter-meson
-      tree-sitter-markdown
-      tree-sitter-json
-      tree-sitter-javascript
-      tree-sitter-html
-      tree-sitter-hcl
-      tree-sitter-gomod
-      tree-sitter-yaml
-      tree-sitter-go
-      tree-sitter-dockerfile
-      tree-sitter-css
-      tree-sitter-cmake
-      tree-sitter-c-sharp
-      tree-sitter-bash))
+  (list tree-sitter-typescript
+	tree-sitter-scheme
+	tree-sitter-rust
+	tree-sitter-ruby
+	tree-sitter-python
+	tree-sitter-php
+	tree-sitter-org
+	tree-sitter-nix
+	tree-sitter-meson
+	tree-sitter-markdown
+	tree-sitter-json
+	tree-sitter-javascript
+	tree-sitter-html
+	tree-sitter-hcl
+	tree-sitter-gomod
+	tree-sitter-yaml
+	tree-sitter-go
+	tree-sitter-dockerfile
+	tree-sitter-css
+	tree-sitter-cmake
+	tree-sitter-c-sharp
+	tree-sitter-bash))
 
 (define language-server-packages
-(list "rust-analyzer"
-      "python-lsp-server"
-      "guile-lsp-server"
-      "sqls"))
+  (list "rust-analyzer"
+	"python-lsp-server"
+	"guile-lsp-server"
+	"sqls"))
 
 (define desktop-packages
-(list
- ;; Terminal
- "alacritty"
- ;; Password Management
- "keepassxc"
- "steam"
- ;; Main browser
- "firefox"
- ;; Backup if firefox fails
- "google-chrome-stable"
- ;; "calibre"
- "pavucontrol"
- ;; Screenshot tool
- "maim"
- ;; Image Viewer
- "sxiv"
- ;; Document Viewer
- "zathura"))
+  (list
+   ;; Terminal
+   "alacritty"
+   ;; Password Management
+   "keepassxc"
+   "steam"
+   ;; Main browser
+   "firefox"
+   ;; Backup if firefox fails
+   "google-chrome-stable"
+   ;; "calibre"
+   "pavucontrol"
+   ;; Screenshot tool
+   "maim"
+   ;; Image Viewer
+   "sxiv"
+   ;; Document Viewer
+   "zathura"))
 
 (define zsh-plugins
-(list "zsh-autosuggestions"
-      "zsh-completions"
-      "zsh-history-substring-search"
-      "zsh-syntax-highlighting"))
+  (list "zsh-autosuggestions"
+	"zsh-completions"
+	"zsh-history-substring-search"
+	"zsh-syntax-highlighting"))
 
 (define misc-packages
-(list "fonts-nerd-fonts-dejavu"
-      "font-dejavu"
-      "autorandr"
-      "protonup-ng"
-      "gnupg"
-      "wireplumber"
-      ;; Required by dirvish
-      ;; Currently breaking things
-      ;; "vips"
-      "poppler"
-      "mediainfo"
-      "openssh"
-      ;; Background Setter
-      "feh"
-      ;; "runst"
-      "tabbed"
-      ;; Runs autorun files
-      "dex"
-      "glibc-locales"))
+  (list "fonts-nerd-fonts-dejavu"
+	"font-dejavu"
+	"autorandr"
+	"protonup-ng"
+	"gnupg"
+	"wireplumber"
+	;; Required by dirvish
+	;; Currently breaking things
+	;; "vips"
+	"poppler"
+	"mediainfo"
+	"openssh"
+	;; Background Setter
+	"feh"
+	;; "runst"
+	"tabbed"
+	;; Runs autorun files
+	"dex"
+	"glibc-locales"))
 
 
 ;; (define runst-service
@@ -241,61 +244,61 @@
 ;;      (stop #~(make-kill-destructor))))))
 
 (define autorandr-service
-(simple-service
- 'autorandr home-shepherd-service-type
- (list
-  (shepherd-service
-   (documentation "Run autorandr to set screens")
-   (requirement '(x11-display))
-   (auto-start? #t)
-   (one-shot? #t)
-   (provision '(autorandr))
-   (start #~(make-forkexec-constructor
-             (list #$(file-append autorandr "/bin/autorandr") "--change")))
-   (stop #~(make-kill-destructor))))))
+  (simple-service
+   'autorandr home-shepherd-service-type
+   (list
+    (shepherd-service
+     (documentation "Run autorandr to set screens")
+     (requirement '(x11-display))
+     (auto-start? #t)
+     (one-shot? #t)
+     (provision '(autorandr))
+     (start #~(make-forkexec-constructor
+               (list #$(file-append autorandr "/bin/autorandr") "--change")))
+     (stop #~(make-kill-destructor))))))
 
 (define variant-packages-service
-(simple-service 'variant-packages-service
-		home-channels-service-type
-		(list
-		 (channel
-		  (name 'afistfullofash)
-		  (url "https://github.com/afistfullofash/afistfullofash")
-		  (branch "main"))
-		 (channel
-		  (name 'nonguix)
-		  (url "https://gitlab.com/nonguix/nonguix")
-		  ;; Enable signature verification:
-		  (introduction
-		   (make-channel-introduction
-		    "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
-		    (openpgp-fingerprint
-		     "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))))
+  (simple-service 'variant-packages-service
+		  home-channels-service-type
+		  (list
+		   (channel
+		    (name 'afistfullofash)
+		    (url "https://github.com/afistfullofash/afistfullofash")
+		    (branch "main"))
+		   (channel
+		    (name 'nonguix)
+		    (url "https://gitlab.com/nonguix/nonguix")
+		    ;; Enable signature verification:
+		    (introduction
+		     (make-channel-introduction
+		      "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+		      (openpgp-fingerprint
+		       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))))
 
 (define environment-variables-service
-(simple-service 'some-useful-env-vars-service
-		home-environment-variables-service-type
-		`(("GTK_THEME" .  "Dracula")
-		  ("GUILE_LOAD_PATH" . "~/src/guix-config:~/src/afistfullofash")
-		  ("GUIX_HOME_PATH" . ,(string-append home-directory
-						      "/.guix-home/profile"))
-		  ("PATH" . ,(string-join (list (string-append home-directory
-							       "/src/shell-scripts/") ; Custom Shell Scripts
-						"${PATH}") ; Original Value
-					  ":"))
-		  ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam" )
-		  ("BOUNDARY_KEYRING_TYPE" . "secret-service")
-		  ("BAT_THEME" . "Dracula")
-		  ("NNN_FIFO" . "/tmp/nnn.fifo")
-		  ("TREE_SITTER_LIBDIR"
-		   . ,#~(string-join (map (lambda (pkg)
-					    (string-append pkg "/lib"))
-					  '#$tree-sitter-grammars)
-				     ":"))
-		  ;; Locale
-		  ("TZ" . "Australia/Sydney")
-		  ("LC_ALL" . "en_AU.utf8")
-		  ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
+  (simple-service 'base-environment-variables-service
+		  home-environment-variables-service-type
+		  `(("GTK_THEME" .  "Dracula")
+		    ("GUILE_LOAD_PATH" . "~/src/guix-config:~/src/afistfullofash")
+		    ("GUIX_HOME_PATH" . ,(string-append home-directory
+							"/.guix-home/profile"))
+		    ("PATH" . ,(string-join (list (string-append home-directory
+								 "/src/shell-scripts/") ; Custom Shell Scripts
+						  "${PATH}") ; Original Value
+					    ":"))
+		    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam" )
+		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
+		    ("BAT_THEME" . "Dracula")
+		    ("NNN_FIFO" . "/tmp/nnn.fifo")
+		    ("TREE_SITTER_LIBDIR"
+		     . ,#~(string-join (map (lambda (pkg)
+					      (string-append pkg "/lib"))
+					    '#$tree-sitter-grammars)
+				       ":"))
+		    ;; Locale
+		    ("TZ" . "Australia/Sydney")
+		    ("LC_ALL" . "en_AU.utf8")
+		    ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
 
 (define stumpwm-init-lisp
   (computed-file
@@ -332,51 +335,38 @@
     ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
 
 (define xdg-config-file-locations
-;; This Stats with a heap of THEMEING
-`(("assets" ,(symlink-to "$HOME/.themes/Dracula/assets"))
-  ;; GTK
-  ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
-  ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
-  ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
-  ;; QT5
-  ("qt5ct/colors" ,dracula-qt5-theme-repo)
-  ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
-  ;; Specific Programs
-  ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
-  ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
-  ("lsd" ,dracula-lsd-theme-repo)
-  ("nnn/plugins" ,nnn-plugins-repo)
-  ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
-  ("autorandr" ,(local-file "files/autorandr"
-			    #:recursive? #t))
-  ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
+  ;; This Stats with a heap of THEMEING
+  `(("assets" ,(symlink-to "$HOME/.themes/Dracula/assets"))
+    ;; GTK
+    ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
+    ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
+    ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
+    ;; QT5
+    ("qt5ct/colors" ,dracula-qt5-theme-repo)
+    ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
+    ;; Specific Programs
+    ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
+    ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
+    ("lsd" ,dracula-lsd-theme-repo)
+    ("nnn/plugins" ,nnn-plugins-repo)
+    ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
+    ("autorandr" ,(local-file "files/autorandr"
+			      #:recursive? #t))
+    ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
 
-  ;; Autostarts
-  ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
+    ;; Autostarts
+    ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
 
 (define ssh-configuration
-(home-openssh-configuration
- (hosts
-  (list (openssh-host (name "*")
-		      (identity-file "~/.ssh/tom.pub"))
-	(openssh-host (name "gitlab.com")
-		      (identity-file "~/.ssh/work.pub"))))))
+  (home-openssh-configuration
+   (hosts
+    (list (openssh-host (name "*")
+			(identity-file "~/.ssh/tom.pub"))
+	  (openssh-host (name "gitlab.com")
+			(identity-file "~/.ssh/work.pub"))))))
 
-(define base-home-environment
-(home-environment
- (packages (append (specifications->packages
-		    (append terminal-packages
-			    spellcheck-packages
-			    development-packages
-			    desktop-packages
-			    emacs-packages
-			    language-server-packages
-			    zsh-plugins
-			    misc-packages))
-		   tree-sitter-grammars))
- (services
+(define base-home-services
   (list
-
    ;; runst-service
    autorandr-service
    environment-variables-service
@@ -393,4 +383,18 @@
    (service home-zsh-service-type
 	    (home-zsh-configuration
 	     (zshrc (list
-		     (local-file "files/zsh/zshrc.sh")))))))))
+		     (local-file "files/zsh/zshrc.sh")))))))
+
+(define base-home-environment
+  (home-environment
+   (packages (append (specifications->packages
+		      (append terminal-packages
+			      spellcheck-packages
+			      development-packages
+			      desktop-packages
+			      emacs-packages
+			      language-server-packages
+			      zsh-plugins
+			      misc-packages))
+		     tree-sitter-grammars))
+   (services base-home-services)))

@@ -151,9 +151,8 @@
         (setf *screen-mode-line-format*
       	(list
       	 (if *show-mode-line-time* "%d | ")
-      	 (if (equal (getenv "GUIX_CONFIG_SYSTEM_FORMAT") "laptop")
+      	 (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
       	     "%B |")
-      	 "%B |"
       	 "%W")))
 
       (set-mode-line-format)
