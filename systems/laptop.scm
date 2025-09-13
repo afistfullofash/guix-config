@@ -17,7 +17,7 @@
 
 (define laptop-operating-system
   (operating-system
-    (inherit base-operating-system)
+    (inherit base-system-operating-system)
     (host-name "siren")
     ;; We don't want to enable capslock on the laptop
     (keyboard-layout (keyboard-layout "au"
@@ -37,6 +37,7 @@
                            (mount-point "/boot/efi")
                            (device (uuid "D160-D22E"
 					 'fat32))
-                           (type "vfat")) %base-file-systems))))
+                           (type "vfat"))
+			 %base-file-systems))))
 
 laptop-operating-system

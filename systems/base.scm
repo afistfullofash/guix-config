@@ -29,7 +29,7 @@
 
   #:use-module (srfi srfi-1)
 
-  #:export (base-operating-system)
+  #:export (base-system-operating-system)
   #:export (stumpwm-with-extensions))
 
 (define stumpwm-with-extensions
@@ -90,7 +90,7 @@ root      ALL=(ALL) ALL
 %wheel    ALL=(ALL) ALL
 natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current-system/profile/sbin/shutdown,/home/natalie/.config/guix/current/bin/guix,/run/current-system/profile/bin/brillo"))
 
-(define base-operating-system
+(define base-system-operating-system
   (operating-system
     (host-name "base")
     (kernel linux)

@@ -1,26 +1,22 @@
-(define-module (systems desktop))
+(define-module (systems desktop)
+  #:use-module (systems base)
 
-(use-modules (systems base)
-	     (gnu)
-	     (gnu services)
-	     (gnu services linux)
-	     
-	     (gnu packages shells)
-	     (gnu packages wm)
-	     (gnu packages lisp-xyz)
-	     (gnu packages hardware)
+  #:use-module (gnu)
+  #:use-module (gnu services)
+  #:use-module (gnu services linux)
 
-	     (guix packages)
-	     (guix utils)
-     
-	     (nongnu packages linux)
-	     (nongnu system linux-initrd)
+  #:use-module (guix packages)
+  #:use-module (guix utils)
+  #:use-module (nongnu packages linux)
+  #:use-module (nongnu system linux-initrd)
 
-	     (srfi srfi-1))
+  #:use-module (srfi srfi-1)
 
-(define system
+  #:export (desktop-operating-system))
+
+(define desktop-operating-system
   (operating-system
-    (inherit base-operating-system)
+    (inherit base-system-operating-system)
     (host-name "reason")
 
     (file-systems
@@ -47,6 +43,7 @@
 	(device (uuid
 		 "a49c3c67-4927-41d6-b48f-fa4f5cc2e502"
 		 'ext4))
-	(type "ext4")) %base-file-systems))))
+	(type "ext4"))
+      %base-file-systems))))
 
-system
+desktop-operating-system
