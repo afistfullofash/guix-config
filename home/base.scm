@@ -286,7 +286,6 @@
 								 "/src/shell-scripts/") ; Custom Shell Scripts
 						  "${PATH}") ; Original Value
 					    ":"))
-		    ("GUIX_SANDBOX_EXTRA_SHARES" . "/steam" )
 		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
 		    ("BAT_THEME" . "Dracula")
 		    ("NNN_FIFO" . "/tmp/nnn.fifo")
