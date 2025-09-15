@@ -2,6 +2,7 @@
   #:use-module (systems base)
 
   #:use-module (gnu)
+  #:use-module (gnu system)
   #:use-module (gnu services)
   #:use-module (gnu services linux)
 

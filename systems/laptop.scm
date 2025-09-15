@@ -2,11 +2,15 @@
   #:use-module (systems base)
 
   #:use-module (gnu)
+  #:use-module (gnu system)
   #:use-module (gnu services)
   #:use-module (gnu services linux)
-
+  #:use-module (gnu services xorg)
+  
   #:use-module (guix packages)
   #:use-module (guix utils)
+
+  
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
 
@@ -19,9 +23,6 @@
   (operating-system
     (inherit base-system-operating-system)
     (host-name "siren")
-    ;; We don't want to enable capslock on the laptop
-    (keyboard-layout (keyboard-layout "au"
-				      #:options '("ctrl:nocaps")))
 
     (swap-devices (list (swap-space
                         (target (uuid
@@ -38,6 +39,14 @@
                            (device (uuid "D160-D22E"
 					 'fat32))
                            (type "vfat"))
-			 %base-file-systems))))
+			 %base-file-systems))
+    (services (modify-services base-system-services
+		(set-xorg-configuration config =>
+					(xorg-configuration
+					 (inherit config)
+					 (keyboard-layout "au"
+							  #:options '("ctrl:nocaps"))))))))
+
+
 
 laptop-operating-system

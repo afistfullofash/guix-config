@@ -3,7 +3,8 @@
   #:use-module (guix packages)
 
   #:use-module (gnu)
-
+  #:use-module (gnu system)
+  
   #:use-module (gnu services)
   #:use-module (gnu services linux)
   #:use-module (gnu services cups)
@@ -30,7 +31,8 @@
   #:use-module (srfi srfi-1)
 
   #:export (base-system-operating-system)
-  #:export (stumpwm-with-extensions))
+  #:export (stumpwm-with-extensions)
+  #:export (base-system-services))
 
 (define stumpwm-with-extensions
   (package
@@ -82,6 +84,39 @@
            (delete 'check)
            (delete 'remove-temporary-cache)
            (delete 'cleanup)))))))
+
+(define base-system-services
+  (append (list
+	      (service kernel-module-loader-service-type
+		       '("i2c-dev" "i2c-piix4"))
+	      (udev-rules-service 'openrgb openrgb)
+	      (service bluetooth-service-type
+		       (bluetooth-configuration (auto-enable? #t)
+						(multi-profile 'multiple)))	    
+	      (service iwd-service-type)
+	      (service connman-service-type
+		       (connman-configuration
+			(disable-vpn? #t)
+			(shepherd-requirement '(iwd))))
+	      (service containerd-service-type)
+	      (service docker-service-type)
+	      (service cups-service-type
+		       (cups-configuration
+			(web-interface? #t)))
+	      (service gnome-keyring-service-type)
+	      (set-xorg-configuration
+	       (xorg-configuration (keyboard-layout keyboard-layout))))
+	     (modify-services %desktop-services
+	       (delete wpa-supplicant-service-type)
+	       (delete network-manager-service-type)
+	       (guix-service-type config => (guix-configuration
+					     (inherit config)
+					     (substitute-urls
+					      (append (list "https://substitutes.nonguix.org")
+						      %default-substitute-urls))
+					     (authorized-keys
+					      (append (list (local-file "files/nonguix/signing-key.pub"))
+						      %default-authorized-guix-keys)))))))
 
 (define etc-sudoers-config
   (plain-file "etc-sudoers-config"
@@ -135,6 +170,9 @@ natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current
 		  "unzip"
 		  "simple-scan"
 		  "pamixer"
+		  ;; lm-sensors and extras
+		  "lm-sensors"
+		  "dmidecode"
 		  ;; sbcl-stumpwm-notify wanted these
 		  "pkg-config"
 		  "libfixposix"
@@ -143,38 +181,7 @@ natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current
 	       (list stumpwm-with-extensions)
 	       %base-packages))
 
-    (services
-     (append (list
-	      (service kernel-module-loader-service-type
-		       '("i2c-dev" "i2c-piix4"))
-	      (udev-rules-service 'openrgb openrgb)
-	      (service bluetooth-service-type
-		       (bluetooth-configuration (auto-enable? #t)
-						(multi-profile 'multiple)))	    
-	      (service iwd-service-type)
-	      (service connman-service-type
-		       (connman-configuration
-			(disable-vpn? #t)
-			(shepherd-requirement '(iwd))))
-	      (service containerd-service-type)
-	      (service docker-service-type)
-	      (service cups-service-type
-		       (cups-configuration
-			(web-interface? #t)))
-	      (service gnome-keyring-service-type)
-	      (set-xorg-configuration
-	       (xorg-configuration (keyboard-layout keyboard-layout))))
-	     (modify-services %desktop-services
-	       (delete wpa-supplicant-service-type)
-	       (delete network-manager-service-type)
-	       (guix-service-type config => (guix-configuration
-					     (inherit config)
-					     (substitute-urls
-					      (append (list "https://substitutes.nonguix.org")
-						      %default-substitute-urls))
-					     (authorized-keys
-					      (append (list (local-file "files/nonguix/signing-key.pub"))
-						      %default-authorized-guix-keys)))))))
+    (services base-system-services)
     
     (file-systems (cons*
                    (file-system
