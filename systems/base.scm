@@ -30,9 +30,9 @@
 
   #:use-module (srfi srfi-1)
 
-  #:export (base-system-operating-system)
-  #:export (stumpwm-with-extensions)
-  #:export (base-system-services))
+  #:export (base-system-operating-system
+	    stumpwm-with-extensions
+	    base-system-services))
 
 (define stumpwm-with-extensions
   (package

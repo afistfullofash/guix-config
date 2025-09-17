@@ -44,8 +44,9 @@
 		(set-xorg-configuration config =>
 					(xorg-configuration
 					 (inherit config)
-					 (keyboard-layout "au"
-							  #:options '("ctrl:nocaps"))))))))
+					 (keyboard-layout
+					  (keyboard-layout "au"
+							   #:options '("ctrl:nocaps")))))))))
 
 
 
