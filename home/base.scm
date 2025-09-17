@@ -9,6 +9,7 @@
   #:use-module (gnu home services ssh)
   #:use-module (gnu home services syncthing)
   #:use-module (gnu home services shepherd)
+  #:use-module (gnu home services backup)
 
   #:use-module (gnu packages)
   #:use-module (gnu packages tree-sitter)
@@ -37,7 +38,9 @@
   #:use-module (afistfullofash packages terraform)
 
   #:export (base-home-environment
-	    base-home-services))
+	    base-home-services
+
+	    base-home-backup-service))
 
 (define home-directory (getenv "HOME"))
 
@@ -118,8 +121,13 @@
 	"emacs-doom-themes"
 	"emacs-doom-modeline"
 	"emacs-nerd-icons"
+
+	;; Org Mode
+	"emacs-org-modern"
+	"emacs-org-modern-indent"
 	"emacs-org-roam"
 	"emacs-org-journal"
+	
 	"emacs-nyan-mode-1.1.4"
 	"emacs-diredfl"
 	"emacs-format-all-the-code"
@@ -127,7 +135,6 @@
 	"emacs-dirvish"
 	"emacs-rainbow-delimiters"
 	"emacs-guix"
-	"emacs-geiser"
 	"emacs-geiser-guile"
 	"emacs-indent-bars"
 	"emacs-dired-hacks"
@@ -227,7 +234,8 @@
 	"tabbed"
 	;; Runs autorun files
 	"dex"
-	"glibc-locales"))
+	"glibc-locales"
+	"rclone"))
 
 
 ;; (define runst-service
@@ -299,6 +307,23 @@
 		    ("LC_ALL" . "en_AU.utf8")
 		    ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
 
+(define (base-home-backup-service name repository)
+  (simple-service 'home-backup-service
+                  home-restic-backup-service-type
+                  (list (restic-backup-job
+                         (name name)
+                         (repository repository)
+                         (password-file "~/.restic")
+                         ;; Every day at 23.
+                         (schedule "0 23 * * *")
+                         (files '("~/.restic"
+                                  "~/.config/rclone"
+                                  "~/Pictures"
+				  "~/Passwords"
+				  "~/src/guix-config"
+				  "~/src/afistfullofash"
+				  "~/org"))))))
+
 (define stumpwm-init-lisp
   (computed-file
    "init.lisp"
@@ -310,8 +335,8 @@
 	   (format #t "Tangling ~a...\n" init-org-file)
 	   (invoke emacs-bin
 		   "--batch"
-		   "-q"	; Don't load a user init file
-		   init-org-file ; Open the org file in a buffer
+		   "-q"		       ; Don't load a user init file
+		   init-org-file       ; Open the org file in a buffer
 		   "--eval" "(require 'org)"
 		   "--eval" "(org-babel-tangle)"))
 	 (rename-file (string-append (dirname #$(local-file "files/stumpwm/config.org")) "/init.lisp")

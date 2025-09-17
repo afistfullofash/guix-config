@@ -88,7 +88,7 @@
         ;; Startup
         (inhibit-startup-message t)
         (initial-scratch-message  "")
-
+        (initial-buffer-choice "~/org/Main.org")
         ;; Enable file local variables
         (enable-local-variables :all)
         ;; Allow eval
@@ -293,12 +293,6 @@
      #+end_src
 **** Scheme
      #+begin_src emacs-lisp
-       (use-package geiser
-         :custom
-         (geiser-default-implementation 'guile)
-         (geiser-active-implementations '(guile))
-         (geiser-implementations-alist '(((regexp "\\.scm$") guile))))
-
        (use-package geiser-guile
          :config
          ;; Assuming the Guix checkout is in ~/src/guix.
@@ -392,6 +386,9 @@
 
    #+end_src
 ** Org Mode
+   This org configuration is going to split the main org use-package up a bit so I can notate it a little better. While I like that I can just drop in and out of src blocks when I wish in Literate Programming I have yet to have worked out how to get fontification working correctly with [[*Rainbow Delimeters][rainbow-delimiters]] and miss-matched pairs.
+
+   I have the [[*Org Modern][org-modern]] configuration under themes.
    #+begin_src emacs-lisp
      (use-package org
        :defer t
@@ -459,7 +456,7 @@
            (lisp . t))))
     #+end_src
 *** Org Indent
-    #+begin_src emacs-lisp :tangle no
+    #+begin_src emacs-lisp
       (use-package org-indent
         :diminish
         :hook (org-mode . org-indent-mode)
@@ -479,11 +476,12 @@
           (org-narrow-to-subtree))
         (goto-char (point-max)))
 
+
       (use-package org-journal
         :init
         ;; Change default prefix key; needs to be set before loading org-journal
         (setq org-journal-prefix-key "C-c j ")
-        (setq org-journal-dir "~/org/journal/"        ;; change to where you want your journals
+        (setq org-journal-dir "~/org/journal/" ;; change to where you want your journals
           	org-journal-date-prefix "#+TITLE: "
           	org-journal-file-format "%Y-%m-%d.org"
           	org-journal-date-format "%A, %d %B %Y")
@@ -548,6 +546,11 @@
         :hook ((yaml-mode . indent-bars-mode)
        	 (python-mode . indent-bars-mode)))
     #+end_src
+*** Rainbow Delimeters
+    #+begin_src emacs-lisp
+      (use-package rainbow-delimiters
+        :hook (prog-mode . rainbow-delimiters-mode))
+    #+end_src
 *** Themeing
 **** Icons
 ***** Nerd Fonts
@@ -573,18 +576,31 @@
          :init
          (mode-icons-mode))
      #+end_src
+**** Nyan Mode
+     #+begin_src emacs-lisp
+       (use-package nyan-mode
+         :custom
+         ;; Fix up Nyan Cat cause she's pretty
+         (nyan-animate-nyancat t)
+         (nyan-wavy-trail t)
+         :init
+         (nyan-mode))
+     #+end_src
 **** Diredfl
      #+begin_src emacs-lisp :tangle no
        (use-package diredfl
          :custom
          (diredfl-global-mode t))
      #+end_src
+**** Org Modern
+     #+begin_src emacs-lisp
+       (use-package org-modern
+         :config (global-org-modern-mode))
+
+       (use-package org-modern-indent
+         :hook (org-mode . org-modern-indent-mode))
+     #+end_src     
 **** Doom
-***** Doom Modeline
-      #+begin_src emacs-lisp
-	(use-package doom-modeline
-	  :hook (after-init . doom-modeline-mode))
-      #+end_src
 ***** Doom Themes
       #+begin_src emacs-lisp
 	(use-package doom-themes
@@ -604,21 +620,11 @@
 	  ;; Corrects (and improves) org-mode's native fontification.
 	  (doom-themes-org-config))
       #+end_src
-**** Nyan Mode
-     #+begin_src emacs-lisp
-       (use-package nyan-mode
-         :custom
-         ;; Fix up Nyan Cat cause she's pretty
-         (nyan-animate-nyancat t)
-         (nyan-wavy-trail t)
-         :init
-         (nyan-mode))
-     #+end_src
-*** Rainbow Delimeters
-    #+begin_src emacs-lisp
-      (use-package rainbow-delimiters
-        :hook (prog-mode . rainbow-delimiters-mode))
-    #+end_src
+***** Doom Modeline
+      #+begin_src emacs-lisp
+	(use-package doom-modeline
+	  :hook (after-init . doom-modeline-mode))
+      #+end_src
 ** End Errata
    #+begin_src emacs-lisp
      (provide 'init.el)
