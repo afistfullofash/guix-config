@@ -106,6 +106,7 @@ ghrq() {
     print -P "%B$SYSTEM%b"
     print
     print
+    source ~/.pass/restic.env
     guix home reconfigure  -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/home/${SYSTEM}.scm
 }
 

@@ -23,5 +23,3 @@
    (inherit base-home-environment)
    (services (append desktop-home-services
 		     base-home-services))))
-
-desktop-home-environment

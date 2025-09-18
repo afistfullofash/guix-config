@@ -307,23 +307,6 @@
 		    ("LC_ALL" . "en_AU.utf8")
 		    ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
 
-(define (base-home-backup-service name repository)
-  (simple-service 'home-backup-service
-                  home-restic-backup-service-type
-                  (list (restic-backup-job
-                         (name name)
-                         (repository repository)
-                         (password-file "~/.restic")
-                         ;; Every day at 23.
-                         (schedule "0 23 * * *")
-                         (files '("~/.restic"
-                                  "~/.config/rclone"
-                                  "~/Pictures"
-				  "~/Passwords"
-				  "~/src/guix-config"
-				  "~/src/afistfullofash"
-				  "~/org"))))))
-
 (define stumpwm-init-lisp
   (computed-file
    "init.lisp"
