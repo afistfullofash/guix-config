@@ -86,7 +86,7 @@ ssh_network() {
 
 is_config_worktree_dirty() {
     STARTING_DIR=$(pwd)
-    cd "~/src/guix-config/"
+    cd "${HOME}/src/guix-config/"
     DIRTYNESS=$(git status --porcelain | wc -l)
     cd ${STARTING_DIR}
     return ${DIRTYNESS}
@@ -94,7 +94,7 @@ is_config_worktree_dirty() {
 
 # Guix Home Reconfigure
 ghr() {
-    if [[ is_config_worktree_dirty > 0 ]]; then
+    if [[ is_config_worktree_dirty -gt 0 ]]; then
 	print -P "%B%F{red+}Ensure there is a clean git worktree before pull%f%b"
 	return 1
     fi
@@ -132,7 +132,7 @@ ghrq() {
 
 # Guix System Reconfigure
 gsr() {
-    if [[ is_config_worktree_dirty > 0 ]]; then
+    if [[ is_config_worktree_dirty -gt 0 ]]; then
 	print -P "%B%F{red+}Ensure there is a clean git worktree before pull%f%b"
 	return 1
     fi
