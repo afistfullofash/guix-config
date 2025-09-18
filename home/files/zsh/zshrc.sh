@@ -84,8 +84,24 @@ ssh_network() {
   done
 }
 
+is_config_worktree_dirty() {
+    STARTING_DIR=$(pwd)
+    cd "~/src/guix-config/"
+    DIRTYNESS=$(git status --porcelain | wc -l)
+    cd ${STARTING_DIR}
+    return ${DIRTYNESS}
+}
+
 # Guix Home Reconfigure
 ghr() {
+    if [[ is_config_worktree_dirty > 0 ]]; then
+	print -P "%B%F{red+}Ensure there is a clean git worktree before pull%f%b"
+	return 1
+    fi
+    if [ -z "${1}" ]; then
+	print -P "%B%F{red+}No Home given to configure%f%b"
+	return 1
+    fi
     SYSTEM=${1}
     print
     print
@@ -99,6 +115,10 @@ ghr() {
 
 # Guix Home Reconfigure Quick
 ghrq() {
+    if [ -z "${1}" ]; then
+	print -P "%B%F{red}No Home given to configure%f%b"
+	return 1
+    fi    
     SYSTEM=${1}
     print
     print
@@ -112,10 +132,14 @@ ghrq() {
 
 # Guix System Reconfigure
 gsr() {
-    if [ -z "${1}" ]; then
-	echo "No System given to configure"
+    if [[ is_config_worktree_dirty > 0 ]]; then
+	print -P "%B%F{red+}Ensure there is a clean git worktree before pull%f%b"
 	return 1
     fi
+    if [ -z "${1}" ]; then
+	print -P "%B%F{red+}No System given to configure%f%b"
+	return 1
+    fi    
     SYSTEM=${1}
     print
     print
@@ -129,9 +153,9 @@ gsr() {
 # Guix System Reconfigure Quick
 gsrq() {
     if [ -z "${1}" ]; then
-	echo "No System given to configure"
+	print -P "%B%F{red+}No System given to configure%f%b"
 	return 1
-    fi
+    fi    
     SYSTEM=${1}
     print
     print
@@ -145,9 +169,9 @@ gsrq() {
 # Guix Full Reconfigures
 gfrq() {
     if [ -z "${1}" ]; then
-	echo "No System given to configure"
+	print -P "%B%F{red+}No System given to configure%f%b"
 	return 1
-    fi
+    fi    
     SYSTEM=${1}
     print
     print
@@ -160,9 +184,9 @@ gfrq() {
 
 gfr() {
     if [ -z "${1}" ]; then
-	echo "No System given to configure"
+	print -P "%B%F{red+}No System given to configure%f%b"
 	return 1
-    fi
+    fi    
     SYSTEM=${1}
     print
     print
