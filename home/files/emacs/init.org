@@ -594,11 +594,36 @@
      #+end_src
 **** Org Modern
      #+begin_src emacs-lisp
+       ;;; Org Visual Settings from the org modern readme
+       (use-package org
+         :custom
+         (org-auto-align-tags nil)
+         (org-tags-column 0)
+         (org-catch-invisible-edits 'show-and-error)
+         (org-special-ctrl-a/e t)
+         (org-insert-heading-respect-content t)
+
+         ;; Org styling, hide markup etc.
+         (org-hide-emphasis-markers t)
+         (org-pretty-entities t)
+         (org-agenda-tags-column 0)
+         (org-ellipsis "…"))
+
        (use-package org-modern
-         :config (global-org-modern-mode))
+         :custom
+         (org-modern-hide-stars nil)		; adds extra indentation
+         (org-modern-table nil)
+         (org-modern-list 
+          '(;; (?- . "-")
+            (?* . "•")
+            (?+ . "‣")))
+         :hook
+         (org-mode . org-modern-mode)
+         (org-agenda-finalize . org-modern-agenda))
 
        (use-package org-modern-indent
-         :hook (org-mode . org-modern-indent-mode))
+         :config ; Use config as we add late to the hook
+         (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
      #+end_src     
 **** Doom
 ***** Doom Themes
