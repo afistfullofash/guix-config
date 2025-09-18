@@ -39,15 +39,6 @@
                            (device (uuid "D160-D22E"
 					 'fat32))
                            (type "vfat"))
-			 %base-file-systems))
-    (services (modify-services base-system-services
-		(set-xorg-configuration config =>
-					(xorg-configuration
-					 (inherit config)
-					 (keyboard-layout
-					  (keyboard-layout "au"
-							   #:options '("ctrl:nocaps")))))))))
-
-
+			 %base-file-systems))))
 
 laptop-operating-system
