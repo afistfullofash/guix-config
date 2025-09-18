@@ -1,14 +1,18 @@
 (define-module (home laptop)
   #:use-module (gnu home)
   #:use-module (gnu home services)
-
-  #:use-module (gnu services)
+  #:use-module (gnu home services shepherd)
   
+  #:use-module (gnu services)
+
+    
   #:use-module (home base)
   #:use-module (services backup)
+
+    
   
   
-  #:export (laptop-home-environment))
+    #:export (laptop-home-environment))
 
 (define laptop-environment-variables-service
   (simple-service 'laptop-environment-variables-service
@@ -18,8 +22,8 @@
 (define (daily-at h m)
   (format #f "~a ~a * * *" m h))
 
-(define laptop-backup-service
-  (home-restic-backup-service
+(define laptop-restic-backup-timer
+  (home-restic-backup-timer
    "natalie"
    (list "~/.restic"
 	 "~/.pass"
@@ -37,9 +41,14 @@
    #:schedule (daily-at 8 30)
    #:extra-args '("--one-file-system" "--verbose")))
 
+(define laptop-home-timers
+  (simple-service 'laptop-home-timers
+                  home-shepherd-service-type
+                  (list laptop-restic-backup-timer)))
+
 (define laptop-home-services
   (list laptop-environment-variables-service
-	laptop-backup-service))
+	laptop-home-timers))
 
 (define-public laptop-home-environment
   (home-environment
