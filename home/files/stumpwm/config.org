@@ -16,6 +16,7 @@
   #+end_src
 * Visual
 ** Themeing
+   This is a quick themeing system for stumpwm with a couple of theme options.
 *** General Functions
     This gives us some very general functions to generate and apply /themes/ with.
     #+begin_src lisp
@@ -135,7 +136,13 @@
    #+begin_src lisp
      (apply-theme (gethash 'dracula *themes*))
      (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
+
+     (setq stumpwm:*message-window-gravity* :center
+           stumpwm:*input-window-gravity* :center
+           stumpwm:*message-window-padding* 10
+           stumpwm:'*message-window-y-padding* 10)
    #+end_src
+
 *** Notify
     Currently the stumpwm package built from systems/base.scm cannot load the notify package.
     So this is chucked into a function while I debug it.
