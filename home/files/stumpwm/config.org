@@ -137,10 +137,11 @@
      (apply-theme (gethash 'dracula *themes*))
      (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
 
-     (setq stumpwm:*message-window-gravity* :center
-           stumpwm:*input-window-gravity* :center
+     (setq stumpwm:*input-window-gravity* :center
+      stumpwm:*message-window-gravity* :center
+           
            stumpwm:*message-window-padding* 10
-           stumpwm:'*message-window-y-padding* 10)
+           stumpwm:*message-window-y-padding* 10)
    #+end_src
 
 *** Notify
