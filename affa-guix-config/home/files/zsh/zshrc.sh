@@ -127,7 +127,7 @@ ghrq() {
     print
     print
     source ~/.pass/restic.env
-    guix home reconfigure  -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/home/${SYSTEM}.scm
+    guix home reconfigure  -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/affa-guix-config/home/${SYSTEM}.scm
 }
 
 # Guix System Reconfigure
@@ -163,7 +163,7 @@ gsrq() {
     print -P "%B$SYSTEM%b"
     print
     print
-    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/systems/${SYSTEM}.scm
+    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/affa-guix-config/systems/${SYSTEM}.scm
 }
 
 # Guix Full Reconfigures

@@ -1,4 +1,4 @@
-(define-module (systems base)
+(define-module (affa-guix-config systems base)
   #:use-module (guix utils)
   #:use-module (guix packages)
 
@@ -30,8 +30,8 @@
 
   #:use-module (srfi srfi-1)
 
-  #:export (base-system-operating-system)
-  #:export (stumpwm-with-extensions))
+  #:export (base-system-operating-system
+	    stumpwm-with-extensions))
 
 (define stumpwm-with-extensions
   (package

@@ -1,8 +1,16 @@
-(define-module (themes dracula)
+(define-module (affa-guix-config themes dracula)
   #:use-module (guix packages)
-  #:use-module (guix git-download))
+  #:use-module (guix git-download)
 
-(define-public dracula-gtk-theme-repo
+  #:export (dracula-gtk-theme-repo
+	    dracula-qt5-theme-repo
+	    dracula-gtk-icons
+	    dracula-alacritty-theme-repo
+	    dracula-starship-theme-repo
+	    dracula-lsd-theme-repo
+	    dracula-xresources-theme-repo))
+
+(define dracula-gtk-theme-repo
   (origin
     (uri (git-reference
 	  (url "https://github.com/dracula/gtk.git")
@@ -12,7 +20,7 @@
      (base32
       "0411xwm0zaaajlviil2za14113jlgksxayxvaxp73rrq8mi8x63i"))))
 
-(define-public dracula-qt5-theme-repo
+(define dracula-qt5-theme-repo
   (origin
     (uri (git-reference
 	  (url "https://github.com/dracula/qt5.git")
@@ -22,7 +30,7 @@
      (base32
       "00qlajbxj25w1bdhj8wc5r57g25gas6f1ax6wrzb4xcypw0j7xdm"))))
 
-(define-public dracula-gtk-icons
+(define dracula-gtk-icons
   (origin
     (uri (git-reference
 	  (url "https://github.com/m4thewz/dracula-icons.git")
@@ -32,7 +40,7 @@
      (base32
       "0n6mh6zypi5nhwl2wr20w77fcjfg682n8fm848awyqnn698hhrxv"))))
 
-(define-public dracula-alacritty-theme-repo
+(define dracula-alacritty-theme-repo
   (origin
     (uri (git-reference
 	  (url "https://github.com/dracula/alacritty.git")
@@ -42,7 +50,7 @@
      (base32
       "1pmk7m2bcwmnmhrbvnnm2znmyyh3vp42vvl1phvfbkz5yqz5jf2b"))))
 
-(define-public dracula-starship-theme-repo
+(define dracula-starship-theme-repo
   (origin
     (uri (git-reference
 	  (url "https://github.com/tpine/starship.git")
@@ -52,7 +60,7 @@
      (base32
       "13i6alr7djb9h3vzav199i2kkxmzn004815z5cbc41lf7xvx2nc0"))))
 
-(define-public dracula-lsd-theme-repo
+(define dracula-lsd-theme-repo
   (origin
     (uri (git-reference
 	  (url "https://github.com/dracula/lsd.git")
@@ -62,7 +70,7 @@
      (base32
       "10id0n5c9jyrah295dv2zahl97851kp24d513k3pyxbsy9nv0qml"))))
 
-(define-public dracula-xresources-theme-repo
+(define dracula-xresources-theme-repo
   (origin
     (uri (git-reference
 	  (url "https://github.com/dracula/xresources.git")

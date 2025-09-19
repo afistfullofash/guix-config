@@ -1,5 +1,5 @@
-(define-module (home desktop)
-  #:use-module (home base)
+(define-module (affa-guix-config home desktop)
+  #:use-module (affa-guix-config home base)
   
   #:use-module (gnu home)
   #:use-module (gnu home services)

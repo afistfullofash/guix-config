@@ -1,4 +1,4 @@
-(define-module (home base)
+(define-module (affa-guix-config home base)
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home services desktop)
@@ -27,7 +27,7 @@
   
   #:use-module (ice-9 popen)
 
-  #:use-module (themes dracula)
+  #:use-module (affa-guix-config themes dracula)
   
   #:use-module (afistfullofash packages boundary)
   ;; #:use-module (afistfullofash packages runst)
@@ -39,7 +39,6 @@
 
   #:export (base-home-environment
 	    base-home-services
-
 	    base-home-backup-service))
 
 (define home-directory (getenv "HOME"))

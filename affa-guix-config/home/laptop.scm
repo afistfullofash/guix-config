@@ -1,18 +1,14 @@
-(define-module (home laptop)
+(define-module (affa-guix-config home laptop)
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
   
   #:use-module (gnu services)
-
-    
-  #:use-module (home base)
-  #:use-module (services backup)
-
-    
   
-  
-    #:export (laptop-home-environment))
+  #:use-module (affa-guix-config home base)
+  #:use-module (affa-guix-config services backup)
+
+  #:export (laptop-home-environment))
 
 (define laptop-environment-variables-service
   (simple-service 'laptop-environment-variables-service
@@ -50,7 +46,7 @@
   (list laptop-environment-variables-service
 	laptop-home-timers))
 
-(define-public laptop-home-environment
+(define laptop-home-environment
   (home-environment
    (inherit base-home-environment)
    (services (append laptop-home-services

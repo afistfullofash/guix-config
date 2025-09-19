@@ -1,5 +1,5 @@
-(define-module (systems laptop)
-  #:use-module (systems base)
+(define-module (affa-guix-config systems laptop)
+  #:use-module (affa-guix-config systems base)
 
   #:use-module (gnu)
   #:use-module (gnu system)

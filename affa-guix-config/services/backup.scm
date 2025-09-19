@@ -1,5 +1,4 @@
-;;; Redefine restic backup so we can use aws env vars
-(define-module (services backup)
+(define-module (affa-guix-config services backup)
   #:use-module (gnu)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
