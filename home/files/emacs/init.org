@@ -338,31 +338,17 @@
        :bind (("C-c m" . magit-status)))
    #+end_src
 
+** Smartparens
+   #+begin_src emacs-lisp
+     (use-package smartparens
+       :hook (prog-mode text-mode markdown-mode)
+       :config
+       ;; load default config
+       (require 'smartparens-config))
+#+end_src
+
 ** Programming Languages
 *** Lisp
-**** General
-     #+begin_src emacs-lisp
-       (use-package paredit
-         ;; enable in all the major Lisp modes you care about
-         :hook ((emacs-lisp-mode
-                 lisp-mode
-                 lisp-interaction-mode
-       	  sly-mode
-                 scheme-mode
-                 clojure-mode) . paredit-mode)
-         :bind
-         ;; let’s make “M-(” wrap the following sexp in parens
-         (:map paredit-mode-map
-               ("M-(" . paredit-wrap-round)
-               ;; some handy defaults you can tweak:
-               ("C-M-f" . paredit-forward) 
-               ("C-M-b" . paredit-backward)
-               ("C-)"   . paredit-forward-slurp-sexp)
-               ("C-("   . paredit-forward-barf-sexp))
-         :config
-         ;; optional: show mismatched parens in fringe
-         (show-paren-mode +1))
-     #+end_src
 **** Common Lisp
      We have a slynk connection running on StumpWM at port 1337 so that we can test changes to the WM without needing to restart all the time.
      #+begin_src emacs-lisp

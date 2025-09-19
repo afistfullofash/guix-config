@@ -139,7 +139,6 @@
 	"emacs-indent-bars"
 	"emacs-dired-hacks"
 	"emacs-undo-tree"
-	"emacs-paredit"
 	"emacs-smartparens"
 	"emacs-magit"
 	"emacs-rustic"
