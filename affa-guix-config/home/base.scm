@@ -264,8 +264,8 @@
                (list #$(file-append autorandr "/bin/autorandr") "--change")))
      (stop #~(make-kill-destructor))))))
 
-(define variant-packages-service
-  (simple-service 'variant-packages-service
+(define base-home-channels-service
+  (simple-service 'base-home-channels-service
 		  home-channels-service-type
 		  (list
 		   (channel
@@ -382,7 +382,7 @@
    ;; runst-service
    autorandr-service
    environment-variables-service
-   variant-packages-service
+   base-home-channels-service
 
    (service home-dbus-service-type)
    (service home-pipewire-service-type)
