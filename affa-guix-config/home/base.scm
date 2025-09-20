@@ -161,6 +161,7 @@
   (list tree-sitter-typescript
 	tree-sitter-scheme
 	tree-sitter-rust
+	tree-sitter-lua
 	tree-sitter-ruby
 	tree-sitter-python
 	tree-sitter-php
@@ -281,15 +282,21 @@
 		      (openpgp-fingerprint
 		       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))))
 
+(define (home-file-path file)
+  (string-append home-directory file))
+
+(define (environment-variable-seperated-path items)
+  (string-join (map home-file-path items) ":"))
+
 (define environment-variables-service
   (simple-service 'base-environment-variables-service
 		  home-environment-variables-service-type
 		  `(("GTK_THEME" .  "Dracula")
-		    ("GUILE_LOAD_PATH" . "~/src/guix-config:~/src/afistfullofash")
-		    ("GUIX_HOME_PATH" . ,(string-append home-directory
-							"/.guix-home/profile"))
-		    ("PATH" . ,(string-join (list (string-append home-directory
-								 "/src/shell-scripts/") ; Custom Shell Scripts
+		    ("GUILE_LOAD_PATH" . ,(environment-variable-seperated-path
+					   '("/src/guix-config"
+					     "/src/afistfullofash")))
+		    ("GUIX_HOME_PATH" . ,(home-file-path "/.guix-home/profile"))
+		    ("PATH" . ,(string-join (list (home-file-path "/src/shell-scripts/") ; Custom Shell Scripts
 						  "${PATH}") ; Original Value
 					    ":"))
 		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
@@ -298,7 +305,7 @@
 		    ("TREE_SITTER_LIBDIR"
 		     . ,#~(string-join (map (lambda (pkg)
 					      (string-append pkg "/lib"))
-					    '#$tree-sitter-grammars)
+					    '#$tree-sitter-grammars) ;
 				       ":"))
 		    ;; Locale
 		    ("TZ" . "Australia/Sydney")
@@ -333,8 +340,8 @@
     ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
     ;; For some reason this does not work when we pass directories to it
     (".stumpwm.d/init.lisp" ,stumpwm-init-lisp)
-    (".ssh/tom.pub" ,(local-file "files/ssh/tom.pub"))
     (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
+    (".ssh/nat.pub" ,(local-file "files/ssh/nat.pub"))
     (".emacs.d/init.el" ,emacs-init-el)
     ;; Ensure screenshot directory exists
     ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
@@ -366,7 +373,7 @@
   (home-openssh-configuration
    (hosts
     (list (openssh-host (name "*")
-			(identity-file "~/.ssh/tom.pub"))
+			(identity-file "~/.ssh/nat.pub"))
 	  (openssh-host (name "gitlab.com")
 			(identity-file "~/.ssh/work.pub"))))))
 

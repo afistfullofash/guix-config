@@ -341,10 +341,13 @@
 ** Smartparens
    #+begin_src emacs-lisp
      (use-package smartparens
+       :custom
+       (sp-base-key-bindings :sp)
        :hook (prog-mode text-mode markdown-mode)
        :config
        ;; load default config
-       (require 'smartparens-config))
+       (require 'smartparens-config)
+       (smartparens-global-strict-mode))
 #+end_src
 
 ** Programming Languages
@@ -362,10 +365,7 @@
      #+end_src
 **** Scheme
      #+begin_src emacs-lisp
-       (use-package geiser-guile
-         :config
-         ;; Assuming the Guix checkout is in ~/src/guix.
-         (add-to-list 'geiser-guile-load-path "~/src/guix"))
+       (use-package geiser-guile)
      #+end_src
 **** Guix
      #+begin_src emacs-lisp
@@ -378,7 +378,7 @@
          ;; Optional: If you want to use Emacs-Guix for developing Guix itself
          ;; and have a Guix source checkout, similar to the 'geiser-guile' example.
          ;; Replace "~/src/guix" with the actual path to your Guix source.
-         (setq guix-load-path "~/src/guix")	; For Guile modules
+         ;; (setq guix-load-path "~/src/guix")	; For Guile modules
 
          ;; Auto-prettify store file names (e.g., /gnu/store/hash-package-version -> /gnu/store/...-package-version)
          ;;(guix-prettify-store-paths-mode 1)

@@ -5,10 +5,11 @@ If something is going to be used by the user as much as possible it is all handl
 
 ** Home
 The Emacs and StumpWM configurations are both done literately using org babel.
-| Program | Config File Location               |
-|---------+------------------------------------|
-| Emacs   | [[file:home/files/emacs/init.org]]     |
-| StumpWM | [[file:home/files/stumpwm/config.org]] |
+| Program | Config File Location                                |
+|---------+-----------------------------------------------------|
+| Emacs   | [[file:affa-guix-config/home/files/emacs/init.org]]     |
+| StumpWM | [[file:affa-guix-config/home/files/stumpwm/config.org]] |
+
 
 These are both tangled into their respective init.el and init.lisp files by (org-tangle-file) when Guix Home Reconfigure is ran.
 

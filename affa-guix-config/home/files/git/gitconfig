@@ -1,6 +1,6 @@
 [user]
-	name = Thomas Atkinson
-	email = tnatkinson95@gmail.com
+	name = Natalie Atkinson
+	email = natalie.atkinson95@pm.me
 
 [includeIf "gitdir:~/work/**"]
 	path = ~/work/.gitconfig
