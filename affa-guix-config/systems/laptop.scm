@@ -6,6 +6,8 @@
   #:use-module (gnu services)
   #:use-module (gnu services linux)
   #:use-module (gnu services xorg)
+
+  #:use-module (gnu services containers)
   
   #:use-module (guix packages)
   #:use-module (guix utils)
@@ -19,11 +21,28 @@
   #:export (laptop-operating-system))
 
 
+(define home-assistant-system-service
+  (simple-service 'home-assistant-system-service
+                oci-service-type
+                (oci-extension
+                  (containers
+                   (list
+                    (oci-container-configuration
+                     (image "homeassistant/home-assistant:latest")
+		     (network "host")
+		     (volumes (list "/home/natalie/src/home-assistant/config:/config"))))))))
+
+(define laptop-system-services
+  (list home-assistant-system-service))
+
 (define laptop-operating-system
   (operating-system
     (inherit base-system-operating-system)
     (host-name "siren")
 
+    (services (append laptop-system-services
+		    base-system-services))
+    
     (swap-devices (list (swap-space
                         (target (uuid
                                  "23c8daff-2df4-4412-870a-3cf257d8f78d")))))
