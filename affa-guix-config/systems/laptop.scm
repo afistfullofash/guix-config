@@ -30,7 +30,9 @@
                     (oci-container-configuration
                      (image "homeassistant/home-assistant:latest")
 		     (network "host")
-		     (volumes (list "/home/natalie/src/home-assistant/config:/config"))))))))
+		     (volumes (list "/home/natalie/src/home-assistant/config:/config"))
+		     (environment (list '("TZ" . "Australia/Sydney")))
+		     (extra-arguments '("--privileged"))))))))
 
 (define laptop-system-services
   (list home-assistant-system-service))
