@@ -134,7 +134,6 @@ natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current
     (timezone "Australia/Sydney")
     (keyboard-layout (keyboard-layout "au"))
 
-
     (users (cons* (user-account
 		   (name "natalie")
 		   (comment "Natalie Atkinson")

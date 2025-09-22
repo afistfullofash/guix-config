@@ -307,6 +307,7 @@
 					      (string-append pkg "/lib"))
 					    '#$tree-sitter-grammars) ;
 				       ":"))
+		    ("AFFOA_SYSTEM_THEME_TYPE" . "dark")
 		    ;; Locale
 		    ("TZ" . "Australia/Sydney")
 		    ("LC_ALL" . "en_AU.utf8")

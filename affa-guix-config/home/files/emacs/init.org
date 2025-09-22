@@ -3,59 +3,59 @@
   This is [[https://github.com/afistfullofash][afistfullofash's]] emacs configuration.
 
   To generate a init.el from this file run:
-  #+begin_src emacs-lisp :tangle no :eval yes:results silent
-    (org-babel-tangle)
-  #+end_src
+    #+begin_src emacs-lisp :tangle no :eval yes:results silent
+      (org-babel-tangle)
+    #+end_src
 
-  To run this file within emacs without restarting:
+To run this file within emacs without restarting:
   #+begin_src emacs-lisp :tangle no :eval yes :results silent
     (org-babel-load-file (buffer-file-name))
   #+end_src
 
-  This is a continuation of the configuration previously maintained at [[https://github.com/afistfullofash/.emacs.d/tree/master][afistfullofash/.emacs.d]].
+This is a continuation of the configuration previously maintained at [[https://github.com/afistfullofash/.emacs.d/tree/master][afistfullofash/.emacs.d]].
   
 ** Prelude
    This is to keep eldoc from complaining to much about the generated file. There is a accompanying statement at [[*End Errata][End Erratta]].
   
-   #+begin_src emacs-lisp
-     ;;; init.el --- Summary
-     ;;; Commentary:
-     ;;; Entry Point for Emacs customization
+      #+begin_src emacs-lisp
+        ;;; init.el --- Summary
+        ;;; Commentary:
+        ;;; Entry Point for Emacs customization
 
-     ;;; Code:
-   #+end_src
+        ;;; Code:
+      #+end_src
    
 ** Base Emacs Configuration
    emacs is the built in pseudo-package that use-package provides us. We use it for any code we need to run before other packages load.  
 *** Disable User Interface
     Turn off mouse interface early in startup to avoid momentary display
-    #+begin_src emacs-lisp
-      (use-package emacs
-        :init
-        (context-menu-mode 1)
-        (global-hl-line-mode 1)
-        (global-display-line-numbers-mode 1)
-        (menu-bar-mode   -1)
-        (tool-bar-mode   -1)
-        (scroll-bar-mode -1)
-        (tooltip-mode    -1))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package emacs
+            :init
+            (context-menu-mode 1)
+            (global-hl-line-mode 1)
+            (global-display-line-numbers-mode 1)
+            (menu-bar-mode   -1)
+            (tool-bar-mode   -1)
+            (scroll-bar-mode -1)
+            (tooltip-mode    -1))
+        #+end_src
 *** Backup Directorys
     We set the backup and autosave file directorys to .tmp folders. Otherwise they juse pollute the filesystem like nothing else. We check that they exist and create them if they dont as well.
-    #+begin_src emacs-lisp
-      (use-package emacs
-        :init
-        (let* ((backup-dir      (expand-file-name "~/.tmp/emacs/backups/"))
-      	 (auto-saves-dir  (expand-file-name "~/.tmp/emacs/auto-saves/")))
-          (dolist (dir (list backup-dir auto-saves-dir))
-            (unless (file-directory-p dir)      ; create if missing
-              (make-directory dir t)))
-          (setq backup-directory-alist        `(("." . ,backup-dir))
-                auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
-                auto-save-list-file-prefix     (concat auto-saves-dir ".saves-")
-                tramp-backup-directory-alist   `((".*" . ,backup-dir))
-                tramp-auto-save-directory      auto-saves-dir)))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package emacs
+            :init
+            (let* ((backup-dir      (expand-file-name "~/.tmp/emacs/backups/"))
+          	 (auto-saves-dir  (expand-file-name "~/.tmp/emacs/auto-saves/")))
+              (dolist (dir (list backup-dir auto-saves-dir))
+                (unless (file-directory-p dir)      ; create if missing
+                  (make-directory dir t)))
+              (setq backup-directory-alist        `(("." . ,backup-dir))
+                    auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+                    auto-save-list-file-prefix     (concat auto-saves-dir ".saves-")
+                    tramp-backup-directory-alist   `((".*" . ,backup-dir))
+                    tramp-auto-save-directory      auto-saves-dir)))
+        #+end_src
 
 *** Enable Commands
     Ensure these commands are enabled
@@ -63,664 +63,681 @@
     |-----------------+--------|
     | upcase-region   |        |
     | downcase-region |        |
-    #+begin_src emacs-lisp
-      (use-package emacs
-        ;; Enable region case-changing commands without prompt -----
-        :init
-        (put 'upcase-region   'disabled nil)
-        (put 'downcase-region 'disabled nil))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package emacs
+            ;; Enable region case-changing commands without prompt -----
+            :init
+            (put 'upcase-region   'disabled nil)
+            (put 'downcase-region 'disabled nil))
+        #+end_src
     
 *** Variable Customisation
     Plain Variable Customisation
-    #+begin_src emacs-lisp
-      (use-package emacs
-        :custom
-        ;; TODO: FInd out why this is t
-        (enable-recursive-minibuffers   t)
-        ;; TODO: Find out why this was set
-        (read-extended-command-predicate #'command-completion-default-include-p)
+        #+begin_src emacs-lisp
+          (use-package emacs
+            :custom
+            ;; TODO: FInd out why this is t
+            (enable-recursive-minibuffers   t)
+            ;; TODO: Find out why this was set
+            (read-extended-command-predicate #'command-completion-default-include-p)
 
-        ;; TODO: find out why this is set
-        (minibuffer-prompt-properties
-         '(read-only t cursor-intangible t face minibuffer-prompt))
+            ;; TODO: find out why this is set
+            (minibuffer-prompt-properties
+             '(read-only t cursor-intangible t face minibuffer-prompt))
 
-        ;; Startup
-        (inhibit-startup-message t)
-        (initial-scratch-message  "")
-        (initial-buffer-choice "~/org/Main.org")
-        ;; Enable file local variables
-        (enable-local-variables :all)
-        ;; Allow eval
-        (enable-local-eval       t))
-    #+end_src
+            ;; Startup
+            (inhibit-startup-message t)
+            (initial-scratch-message  "")
+            (initial-buffer-choice "~/org/Main.org")
+            ;; Enable file local variables
+            (enable-local-variables :all)
+            ;; Allow eval
+            (enable-local-eval       t))
+        #+end_src
      
 *** Fonts
     Set Font to Deja Vu Sans Mono Bold
-    #+begin_src emacs-lisp
-      (use-package emacs
-        :custom-face
-        (default
-         ((t (:family "DejaVuSansM Nerd Font Mono"
-                      :weight bold
-                      :height 98)))))
+        #+begin_src emacs-lisp
+          (use-package emacs
+            :custom-face
+            (default
+             ((t (:family "DejaVuSansM Nerd Font Mono"
+                          :weight bold
+                          :height 98)))))
 
-    #+end_src
+        #+end_src
 ** User functions
    Convert scheme modules from using
-   #+begin_src scheme :tangle no
-     (define-module (package name))
+      #+begin_src scheme :tangle no
+        (define-module (package name))
 
-     (use-modules (package name)
-     	     (package name-two))
-   #+end_src
+        (use-modules (package name)
+        	     (package name-two))
+      #+end_src
    to using
-   #+begin_src scheme :tangle no
-     (define-module (module name)
-       #:use-module (package name)
-       #:use-module (package name-two))
-   #+end_src
+      #+begin_src scheme :tangle no
+        (define-module (module name)
+          #:use-module (package name)
+          #:use-module (package name-two))
+      #+end_src
     
-   #+begin_src emacs-lisp
-     (setq afistfullofash/convert-scheme-modules-to-package
-           (kmacro "C-M-s ) <return> <return> # : u s e - m o d u l e C-M-s u s e - m o d u l e s <return> C-M-s ( <return> <left> C-SPC C-M-s ) <return> C-w C-r # : u s e - m o d u l e <return> M-f M-f SPC C-y <return>"))
-   #+end_src
+      #+begin_src emacs-lisp
+        (setq afistfullofash/convert-scheme-modules-to-package
+              (kmacro "C-M-s ) <return> <return> # : u s e - m o d u l e C-M-s u s e - m o d u l e s <return> C-M-s ( <return> <left> C-SPC C-M-s ) <return> C-w C-r # : u s e - m o d u l e <return> M-f M-f SPC C-y <return>"))
+      #+end_src
 ** Spell Check
-   #+begin_src emacs-lisp
-     (use-package jinx
-       :hook (emacs-startup . global-jinx-mode)
-       :bind (("M-$" . jinx-correct)
-              ("C-M-$" . jinx-languages)))
-   #+end_src
+      #+begin_src emacs-lisp
+        (use-package jinx
+          :hook (emacs-startup . global-jinx-mode)
+          :bind (("M-$" . jinx-correct)
+                 ("C-M-$" . jinx-languages)))
+      #+end_src
 ** FlyCheck
-   #+begin_src emacs-lisp
-     (use-package flycheck
-       :hook (emacs-startup . global-flycheck-mode))
-   #+end_src
+      #+begin_src emacs-lisp
+        (use-package flycheck
+          :hook (emacs-startup . global-flycheck-mode))
+      #+end_src
 ** Dired
 *** Dirvish
-    #+begin_src emacs-lisp
-      (use-package dirvish
-        :config
-        (dirvish-override-dired-mode 1) ; swaps Dired transparently
-        :bind (("C-x d" . dirvish))
-        :custom
-        (dirvish-preview-enabled t)   ; live previews
-        (dirvish-use-header-line t))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package dirvish
+            :config
+            (dirvish-override-dired-mode 1) ; swaps Dired transparently
+            :bind (("C-x d" . dirvish))
+            :custom
+            (dirvish-preview-enabled t)   ; live previews
+            (dirvish-use-header-line t))
+        #+end_src
 *** Dired Narrow
-    #+begin_src emacs-lisp
-      ;;; Dired
-      (use-package dired-narrow
-        :config
-        (bind-keys :map dired-mode-map
-      	     ("f" . dired-narrow-fuzzy)))
+        #+begin_src emacs-lisp
+          ;;; Dired
+          (use-package dired-narrow
+            :config
+            (bind-keys :map dired-mode-map
+          	     ("f" . dired-narrow-fuzzy)))
 
-    #+end_src
+        #+end_src
 ** Format All the Code
-   #+begin_src emacs-lisp :tangle no
-     (use-package format-all
-       :commands format-all-mode
-       :hook (prog-mode . format-all-mode))
-   #+end_src
+      #+begin_src emacs-lisp :tangle no
+        (use-package format-all
+          :commands format-all-mode
+          :hook (prog-mode . format-all-mode))
+      #+end_src
   
 ** Treesitter
-   #+begin_src emacs-lisp
-     (use-package treesit
-       :mode (("\\.tsx\\'" . tsx-ts-mode)
-     	 ("\\.json\\'" . json-ts-mode))
-       :init
-       (let ((paths (split-string (or (getenv "TREE_SITTER_GRAMMAR_PATH") "") ":" t)))
-         (setq treesit-extra-load-path
-               (append paths treesit-extra-load-path))))
+      #+begin_src emacs-lisp
+        (use-package treesit
+          :mode (("\\.tsx\\'" . tsx-ts-mode)
+        	 ("\\.json\\'" . json-ts-mode))
+          :init
+          (let ((paths (split-string (or (getenv "TREE_SITTER_GRAMMAR_PATH") "") ":" t)))
+            (setq treesit-extra-load-path
+                  (append paths treesit-extra-load-path))))
 
 
-     ;;; yaml
-     (use-package yaml-ts-mode
-       :mode ("\\.yml\\'" "\\.yaml\\'"))
+        ;;; yaml
+        (use-package yaml-ts-mode
+          :mode ("\\.yml\\'" "\\.yaml\\'"))
 
-     (use-package json-ts-mode
-       :mode ("\\.json$"))
+        (use-package json-ts-mode
+          :mode ("\\.json$"))
 
-     (use-package dockerfile-ts-mode
-       :mode ("\\Dockerfile\\'"))
+        (use-package dockerfile-ts-mode
+          :mode ("\\Dockerfile\\'"))
 
-     (use-package tsx-ts-mode
-       :mode "\\.tsx\\'")
-   #+end_src
-    
-** Cape + Consult + Corfu + Vertico
-   #+begin_src emacs-lisp
-     (use-package vertico
-       :init (vertico-mode))
+        (use-package tsx-ts-mode
+          :mode "\\.tsx\\'")
+      #+end_src
+** Completion    
+*** Vertico
+       #+begin_src emacs-lisp
+         (use-package vertico
+           :init (vertico-mode))
 
-     ;; Persist history over Emacs restarts. Vertico sorts by history position.
-     (use-package savehist
-       :init
-       (savehist-mode))
+         ;; Persist history over Emacs restarts. Vertico sorts by history position.
+         (use-package savehist
+           :init
+           (savehist-mode))
+#+end_src
+*** Marginalia
+ #+begin_src emacs-lisp
 
-     (use-package orderless
-       :custom
-       (completion-styles '(orderless basic))
-       (completion-category-defaults nil)
-       (completion-category-overrides '((file (styles partial-completion)))))
+          (use-package marginalia
+            :init (marginalia-mode))
 
-     (use-package marginalia
-       :init (marginalia-mode))
+          #+end_src
+*** Orderless
+ #+begin_src emacs-lisp
+         (use-package orderless
+           :custom
+           (completion-styles '(orderless basic))
+           (completion-category-defaults nil)
+           (completion-category-overrides '((file (styles partial-completion)))))
 
-     (use-package consult
-       :bind  (;; C-c bindings in `mode-specific-map'
-              ("C-c M-x" . consult-mode-command)
-              ("C-c h" . consult-history)
-              ("C-c k" . consult-kmacro)
-              ("C-c m" . consult-man)
-              ("C-c i" . consult-info)
-              ([remap Info-search] . consult-info)
-              ;; C-x bindings in `ctl-x-map'
-              ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-              ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-              ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-              ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-              ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-              ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-              ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-              ;; Custom M-# bindings for fast register access
-              ("M-#" . consult-register-load)
-              ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-              ("C-M-#" . consult-register)
-              ;; Other custom bindings
-              ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-              ;; M-g bindings in `goto-map'
-              ("M-g e" . consult-compile-error)
-              ("M-g r" . consult-grep-match)
-              ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-              ("M-g g" . consult-goto-line)             ;; orig. goto-line
-              ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-              ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-              ("M-g m" . consult-mark)
-              ("M-g k" . consult-global-mark)
-              ("M-g i" . consult-imenu)
-              ("M-g I" . consult-imenu-multi)
-              ;; M-s bindings in `search-map'
-              ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-              ("M-s c" . consult-locate)
-              ("M-s g" . consult-grep)
-              ("M-s G" . consult-git-grep)
-              ("M-s r" . consult-ripgrep)
-              ("M-s l" . consult-line)
-              ("M-s L" . consult-line-multi)
-              ("M-s k" . consult-keep-lines)
-              ("M-s u" . consult-focus-lines)
-              ;; Isearch integration
-              ("M-s e" . consult-isearch-history)
-              :map isearch-mode-map
-              ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-              ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-              ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-              ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-              ;; Minibuffer history
-              :map minibuffer-local-map
-              ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-              ("M-r" . consult-history))                ;; orig. previous-matching-history-element
+ #+end_src
+*** Consult
+     #+begin_src emacs-lisp
+       (use-package consult
+         :bind  (;; C-c bindings in `mode-specific-map'
+           ("C-c M-x" . consult-mode-command)
+           ("C-c h" . consult-history)
+           ("C-c k" . consult-kmacro)
+           ("C-c m" . consult-man)
+           ("C-c i" . consult-info)
+           ([remap Info-search] . consult-info)
+           ;; C-x bindings in `ctl-x-map'
+           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+           ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+           ;; Custom M-# bindings for fast register access
+           ("M-#" . consult-register-load)
+           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+           ("C-M-#" . consult-register)
+           ;; Other custom bindings
+           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+           ;; M-g bindings in `goto-map'
+           ("M-g e" . consult-compile-error)
+           ("M-g r" . consult-grep-match)
+           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+           ("M-g g" . consult-goto-line)             ;; orig. goto-line
+           ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+           ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+           ("M-g m" . consult-mark)
+           ("M-g k" . consult-global-mark)
+           ("M-g i" . consult-imenu)
+           ("M-g I" . consult-imenu-multi)
+           ;; M-s bindings in `search-map'
+           ("M-s d" . consult-find)                  ;; Alternative: consult-fd
+           ("M-s c" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s k" . consult-keep-lines)
+           ("M-s u" . consult-focus-lines)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history)
+           :map isearch-mode-map
+           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+           ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+           ;; Minibuffer history
+           :map minibuffer-local-map
+           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+           ("M-r" . consult-history))                ;; orig. previous-matching-history-element
 
-       :hook (completion-list-mode . consult-preview-at-point-mode)
-       :init
-       ;; Tweak the register preview for `consult-register-load',
-       ;; `consult-register-store' and the built-in commands.  This improves the
-       ;; register formatting, adds thin separator lines, register sorting and hides
-       ;; the window mode line.
-       (advice-add #'register-preview :override #'consult-register-window)
-       (setq register-preview-delay 0.5)
+         :hook (completion-list-mode . consult-preview-at-point-mode)
+         :init
+         ;; Tweak the register preview for `consult-register-load',
+         ;; `consult-register-store' and the built-in commands.  This improves the
+         ;; register formatting, adds thin separator lines, register sorting and hides
+         ;; the window mode line.
+         (advice-add #'register-preview :override #'consult-register-window)
+         (setq register-preview-delay 0.5)
 
-       ;; Use Consult to select xref locations with preview
-       (setq xref-show-xrefs-function #'consult-xref
-     	xref-show-definitions-function #'consult-xref)
-       :config
+         ;; Use Consult to select xref locations with preview
+         (setq xref-show-xrefs-function #'consult-xref
+         xref-show-definitions-function #'consult-xref)
+         :config
 
-       ;; Optionally configure preview. The default value
-       ;; is 'any, such that any key triggers the preview.
-       ;; (setq consult-preview-key 'any)
-       ;; (setq consult-preview-key "M-.")
-       ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
-       ;; For some commands and buffer sources it is useful to configure the
-       ;; :preview-key on a per-command basis using the `consult-customize' macro.
-       (consult-customize
-        consult-theme :preview-key '(:debounce 0.2 any)
-        consult-ripgrep consult-git-grep consult-grep consult-man
-        consult-bookmark consult-recent-file consult-xref
-        consult--source-bookmark consult--source-file-register
-        consult--source-recent-file consult--source-project-recent-file
-        ;; :preview-key "M-."
-        :preview-key '(:debounce 0.4 any))
+         ;; Optionally configure preview. The default value
+         ;; is 'any, such that any key triggers the preview.
+         ;; (setq consult-preview-key 'any)
+         ;; (setq consult-preview-key "M-.")
+         ;; (setq consult-preview-key '("S-<down>" "S-<up>"))
+         ;; For some commands and buffer sources it is useful to configure the
+         ;; :preview-key on a per-command basis using the `consult-customize' macro.
+         (consult-customize
+          consult-theme :preview-key '(:debounce 0.2 any)
+          consult-ripgrep consult-git-grep consult-grep consult-man
+          consult-bookmark consult-recent-file consult-xref
+          consult--source-bookmark consult--source-file-register
+          consult--source-recent-file consult--source-project-recent-file
+          ;; :preview-key "M-."
+          :preview-key '(:debounce 0.4 any))
 
-       ;; Optionally configure the narrowing key.
-       ;; Both < and C-+ work reasonably well.
-       (setq consult-narrow-key "<") ;; "C-+")
-       )
-     ;; CORFU: Popup UI for in-buffer completion
-     (use-package corfu
-       :init
-       (global-corfu-mode) ;; enables Corfu in all buffers
-       :custom
-       (corfu-auto t)                ;; enable auto popup
-       ;; (corfu-cycle t)               ;; allow cycling through candidates
-       ;; (corfu-preselect-first t)
-       ;; (corfu-quit-at-boundary nil)
-       ;; (corfu-quit-no-match 'separator)
-       ;; (corfu-scroll-margin 5)
-       ;; (corfu-max-width 80)
-       :bind
-       (:map corfu-map
-             ("TAB" . corfu-next)
-             ([tab] . corfu-next)
-             ("S-TAB" . corfu-previous)
-             ([backtab] . corfu-previous)))
+         ;; Optionally configure the narrowing key.
+         ;; Both < and C-+ work reasonably well.
+         (setq consult-narrow-key "<") ;; "C-+")
+         )
 
-     ;; CAPE: Add extra completion sources to completion-at-point-functions
-     (use-package cape
-       :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
-       :init
-       ;; Add useful defaults to `completion-at-point-functions`
-       (add-hook 'completion-at-point-functions #'cape-dabbrev)
-       (add-hook 'completion-at-point-functions #'cape-file)
-       (add-hook 'completion-at-point-functions #'cape-keyword)
-       (add-hook 'completion-at-point-functions #'cape-elisp-block)
-       ;; Optionally:
-       ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
-       ;; (add-to-list 'completion-at-point-functions #'cape-line)
-       )
-   #+end_src
+       #+end_src
+*** Corfu
+     #+begin_src emacs-lisp
+       ;; CORFU: Popup UI for in-buffer completion
+       (use-package corfu
+         :init
+         (global-corfu-mode) ;; enables Corfu in all buffers
+         :custom
+         (corfu-auto t)                ;; enable auto popup
+         ;; (corfu-cycle t)               ;; allow cycling through candidates
+         ;; (corfu-preselect-first t)
+         ;; (corfu-quit-at-boundary nil)
+         ;; (corfu-quit-no-match 'separator)
+         ;; (corfu-scroll-margin 5)
+         ;; (corfu-max-width 80)
+         :bind
+         (:map corfu-map
+               ("TAB" . corfu-next)
+               ([tab] . corfu-next)
+               ("S-TAB" . corfu-previous)
+               ([backtab] . corfu-previous)))
+#+end_src
+
+*** Cape
+ #+begin_src emacs-lisp
+   ;; CAPE: Add extra completion sources to completion-at-point-functions
+   (use-package cape
+     :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+     :init
+     ;; Add useful defaults to `completion-at-point-functions`
+     (add-hook 'completion-at-point-functions #'cape-file)
+     (add-hook 'completion-at-point-functions #'cape-keyword)
+     (add-hook 'completion-at-point-functions #'cape-elisp-block)
+     ;; Optionally:
+     ;; (add-to-list 'completion-at-point-functions #'cape-symbol)
+     ;; (add-to-list 'completion-at-point-functions #'cape-line)
+     )
+          #+end_src
 
 ** Magit
-   #+begin_src emacs-lisp
-     ;;; Magit
-     (use-package magit
-       :bind (("C-c m" . magit-status)))
-   #+end_src
+      #+begin_src emacs-lisp
+        ;;; Magit
+        (use-package magit
+          :bind (("C-c m" . magit-status)))
+      #+end_src
 
 ** Smartparens
-   #+begin_src emacs-lisp
-     (use-package smartparens
-       :custom
-       (sp-base-key-bindings :sp)
-       :hook (prog-mode text-mode markdown-mode)
-       :config
-       ;; load default config
-       (require 'smartparens-config)
-       (smartparens-global-strict-mode))
-#+end_src
+      #+begin_src emacs-lisp
+        (use-package smartparens
+          :custom
+          (sp-base-key-bindings 'smartparens)
+          :hook (prog-mode text-mode markdown-mode)
+          :config
+          ;; load default config
+          (require 'smartparens-config)
+          (smartparens-global-strict-mode))
+   #+end_src
 
 ** Programming Languages
 *** Lisp
 **** Common Lisp
      We have a slynk connection running on StumpWM at port 1337 so that we can test changes to the WM without needing to restart all the time.
-     #+begin_src emacs-lisp
-       (defun connect-to-stumpwm ()
-         "Connect to stumpwm on localhost port 4004."
-         (interactive)
-         (sly-connect "127.0.0.1" 1337))
+          #+begin_src emacs-lisp
+            (defun connect-to-stumpwm ()
+              "Connect to stumpwm on localhost port 4004."
+              (interactive)
+              (sly-connect "127.0.0.1" 1337))
 
-       (use-package sly
-         :bind (("C-c s" . connect-to-stumpwm)))
-     #+end_src
+            (use-package sly
+              :bind (("C-c s" . connect-to-stumpwm)))
+          #+end_src
 **** Scheme
-     #+begin_src emacs-lisp
-       (use-package geiser-guile)
-     #+end_src
+          #+begin_src emacs-lisp
+            (use-package geiser-guile)
+          #+end_src
 **** Guix
-     #+begin_src emacs-lisp
-       (use-package guix
-         :config
-         ;; Assuming Guix is installed and its environment variables are set up
-         ;; (e.g., through your shell's .profile or Guix Home configuration)
-         ;; This ensures Emacs-Guix can find Guile modules and Guix commands.
+          #+begin_src emacs-lisp
+            (use-package guix
+              :config
+              ;; Assuming Guix is installed and its environment variables are set up
+              ;; (e.g., through your shell's .profile or Guix Home configuration)
+              ;; This ensures Emacs-Guix can find Guile modules and Guix commands.
 
-         ;; Optional: If you want to use Emacs-Guix for developing Guix itself
-         ;; and have a Guix source checkout, similar to the 'geiser-guile' example.
-         ;; Replace "~/src/guix" with the actual path to your Guix source.
-         ;; (setq guix-load-path "~/src/guix")	; For Guile modules
+              ;; Optional: If you want to use Emacs-Guix for developing Guix itself
+              ;; and have a Guix source checkout, similar to the 'geiser-guile' example.
+              ;; Replace "~/src/guix" with the actual path to your Guix source.
+              ;; (setq guix-load-path "~/src/guix")	; For Guile modules
 
-         ;; Auto-prettify store file names (e.g., /gnu/store/hash-package-version -> /gnu/store/...-package-version)
-         ;;(guix-prettify-store-paths-mode 1)
+              ;; Auto-prettify store file names (e.g., /gnu/store/hash-package-version -> /gnu/store/...-package-version)
+              ;;(guix-prettify-store-paths-mode 1)
 
-         ;; Keybindings (optional, often M-x guix is enough to get to the popup)
-         (global-set-key (kbd "C-c p") 'guix)	; Example global binding
+              ;; Keybindings (optional, often M-x guix is enough to get to the popup)
+              (global-set-key (kbd "C-c p") 'guix)	; Example global binding
 
-         ;; You might want to enable `guix-devel-mode` for .scm files
-         ;; to get better Guix-specific features when editing package definitions.
-         (add-hook 'scheme-mode-hook (lambda ()
-                                       (when (string-match-p "\\.scm\\'" (buffer-file-name))
-                                         (guix-devel-mode 1))))
+              ;; You might want to enable `guix-devel-mode` for .scm files
+              ;; to get better Guix-specific features when editing package definitions.
+              (add-hook 'scheme-mode-hook (lambda ()
+                                            (when (string-match-p "\\.scm\\'" (buffer-file-name))
+                                              (guix-devel-mode 1))))
 
-         ;; If you're using Guix Home and want to edit your home configuration,
-         ;; you might add its path here as well for Geiser/Guix development mode.
-         ;; (add-to-list 'geiser-guile-load-path "~/.config/guix/current/share")
-         ;; (add-to-list 'geiser-guile-load-path "~/my-guix-home-config-repo")
-         )
+              ;; If you're using Guix Home and want to edit your home configuration,
+              ;; you might add its path here as well for Geiser/Guix development mode.
+              ;; (add-to-list 'geiser-guile-load-path "~/.config/guix/current/share")
+              ;; (add-to-list 'geiser-guile-load-path "~/my-guix-home-config-repo")
+              )
 
-     #+end_src
+          #+end_src
 *** Terraform
-    #+begin_src emacs-lisp
-      (use-package terraform-mode
-        :hook (terraform-mode . (lambda ()
-                                  (add-hook 'before-save-hook #'terraform-format-buffer nil t))))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package terraform-mode
+            :hook (terraform-mode . (lambda ()
+                                      (add-hook 'before-save-hook #'terraform-format-buffer nil t))))
+        #+end_src
 *** Rust
-    #+begin_src emacs-lisp
-      (use-package rustic
-        :config
-        (setq rustic-format-on-save t)
-        :custom
-        (rustic-analyzer-command '("rustup" "run" "stable" "rust-analyzer")))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package rustic
+            :config
+            (setq rustic-format-on-save t)
+            :custom
+            (rustic-analyzer-command '("rustup" "run" "stable" "rust-analyzer")))
+        #+end_src
 *** Web
-    #+begin_src emacs-lisp
-      ;;; web-mode
-      (use-package web-mode
-        :mode (".svelte$"))
+        #+begin_src emacs-lisp
+          ;;; web-mode
+          (use-package web-mode
+            :mode (".svelte$"))
 
-      ;;; Prettier
-      (use-package prettier-js
-        :hook ((js-mode . prettier-js-mode)
-      	 (ts-mode . prettier-js-mode)
-      	 (json-ts-mode . prettier-js-mode)))
-    #+end_src
+          ;;; Prettier
+          (use-package prettier-js
+            :hook ((js-mode . prettier-js-mode)
+          	 (ts-mode . prettier-js-mode)
+          	 (json-ts-mode . prettier-js-mode)))
+        #+end_src
 ** Language Server Protocol
-   #+begin_src emacs-lisp
-     ;;; Lsp-mode
-     (use-package lsp-mode
-       :init
-       ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-       (setq lsp-keymap-prefix "C-c l")
-       :hook ((terraform-mode . lsp)
-     	 (tsx-ts-mode . lsp))
-       :magic (".svelte$" . lsp)
-       :commands lsp)
+      #+begin_src emacs-lisp
+        ;;; Lsp-mode
+        (use-package lsp-mode
+          :init
+          ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+          (setq lsp-keymap-prefix "C-c l")
+          :hook ((terraform-mode . lsp)
+        	 (tsx-ts-mode . lsp))
+          :magic (".svelte$" . lsp)
+          :commands lsp)
 
-     (use-package lsp-ui
-       :commands lsp-ui-mode)
+        (use-package lsp-ui
+          :commands lsp-ui-mode)
 
-     (use-package lsp-scheme
-       :after lsp-mode
-       :custom
-       ;; One of: "guile"  "chicken"  "gambit"  "chez"  "racket" …
-       ;; Pick the implementation you'll use most often.
-       (lsp-scheme-implementation "guile")  ; change to "chicken" etc. if needed
-       ;; If you keep multiple Schemes, make it project-specific:
-       ;; (dir-locals-set-class-variables
-       ;;  'my-scheme
-       ;;  '((scheme-mode . ((lsp-scheme-implementation . "chicken")))))
-       ;; (dir-locals-set-directory-class "/path/to/project/" 'my-scheme)
-       )
+        (use-package lsp-scheme
+          :after lsp-mode
+          :custom
+          ;; One of: "guile"  "chicken"  "gambit"  "chez"  "racket" …
+          ;; Pick the implementation you'll use most often.
+          (lsp-scheme-implementation "guile")  ; change to "chicken" etc. if needed
+          ;; If you keep multiple Schemes, make it project-specific:
+          ;; (dir-locals-set-class-variables
+          ;;  'my-scheme
+          ;;  '((scheme-mode . ((lsp-scheme-implementation . "chicken")))))
+          ;; (dir-locals-set-directory-class "/path/to/project/" 'my-scheme)
+          )
 
-   #+end_src
+      #+end_src
 ** Org Mode
    This org configuration is going to split the main org use-package up a bit so I can notate it a little better. While I like that I can just drop in and out of src blocks when I wish in Literate Programming I have yet to have worked out how to get fontification working correctly with [[*Rainbow Delimeters][rainbow-delimiters]] and miss-matched pairs.
 
    I have the [[*Org Modern][org-modern]] configuration under themes.
-   #+begin_src emacs-lisp
-     (use-package org
-       :defer t
-       :custom
-       (org-directory "~/org/")
-       (org-adapt-indentation t)
-       (org-todo-keywords '((sequence
-     			"TODO(t)" "DOING(d!)" "ISSUES(i@!)" "WAITING(w@!)"
-     			"|"
-     			"DONE(D!)" "CANCELLED(c@/!)")))
-       :bind
-       (("C-c l" . org-store-link)))
-   #+end_src
+      #+begin_src emacs-lisp
+        (use-package org
+          :defer t
+          :custom
+          (org-directory "~/org/")
+          (org-adapt-indentation t)
+          (org-todo-keywords '((sequence
+        			"TODO(t)" "DOING(d!)" "ISSUES(i@!)" "WAITING(w@!)"
+        			"|"
+        			"DONE(D!)" "CANCELLED(c@/!)")))
+          :bind
+          (("C-c l" . org-store-link)))
+      #+end_src
 *** Org Agenda
-    #+begin_src emacs-lisp
-      (use-package org
-        :defer t
-        :config
-        ;; We need to filter out the org files from the org directory and then remove files marked for the trash
-        (setq org-agenda-files (-filter (lambda (el)
-                  			    (if (or (not (string-match-p ".#" el))
-              				    (not (string-match-p ".trash/" el))) el))
-                  			  (directory-files-recursively org-directory "org")))
-        :bind (("C-c a" . org-agenda)))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package org
+            :defer t
+            :config
+            ;; We need to filter out the org files from the org directory and then remove files marked for the trash
+            (setq org-agenda-files (-filter (lambda (el)
+                      			    (if (or (not (string-match-p ".#" el))
+                  				    (not (string-match-p ".trash/" el))) el))
+                      			  (directory-files-recursively org-directory "org")))
+            :bind (("C-c a" . org-agenda)))
+        #+end_src
 *** Org Babel
-    #+begin_src emacs-lisp
-      (use-package org
-        :defer t
-        :custom
-        (org-babel-lisp-eval-fn "sly-eval")
-        ;; Suppress confirmation prompts
-        (org-confirm-babel-evaluate nil)
-        ;; Shell defaults
-        (org-babel-sh-command "bash")
-        (org-babel-default-header-args:sh
-         '((:results . "output replace")
-           (:exports . "both")
-           (:session . nil)
-           (:cache . "no")))
-        ;; Scheme defaults (override `org-babel-scheme-command` if you use another impl)
-        (org-babel-scheme-command "guile")
-        (org-babel-default-header-args:scheme
-         '((:results . "output replace")
-           (:exports . "both")
-           (:session . nil)
-           (:cache . "no")))
-        ;; Emacs-Lisp defaults
-        ;; (no external REPL, just evaluates in the current Emacs session)
-        (org-babel-default-header-args:emacs-lisp
-         '((:results . "output replace")
-           (:exports . "both")
-           (:cache   . "no")))
-        :config
-        (add-hook 'org-src-mode-hook
-                  (lambda ()
-                    (when (derived-mode-p 'emacs-lisp-mode)
-                      (flycheck-mode -1))))
-        ;; Enable shell, Scheme and Emacs-Lisp in Org Babel
-        (org-babel-do-load-languages
-         'org-babel-load-languages
-         '((shell       . t)
-           (scheme      . t)
-           (emacs-lisp  . t)
-           (lisp . t))))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package org
+            :defer t
+            :custom
+            (org-babel-lisp-eval-fn "sly-eval")
+            ;; Suppress confirmation prompts
+            (org-confirm-babel-evaluate nil)
+            ;; Shell defaults
+            (org-babel-sh-command "bash")
+            (org-babel-default-header-args:sh
+             '((:results . "output replace")
+               (:exports . "both")
+               (:session . nil)
+               (:cache . "no")))
+            ;; Scheme defaults (override `org-babel-scheme-command` if you use another impl)
+            (org-babel-scheme-command "guile")
+            (org-babel-default-header-args:scheme
+             '((:results . "output replace")
+               (:exports . "both")
+               (:session . nil)
+               (:cache . "no")))
+            ;; Emacs-Lisp defaults
+            ;; (no external REPL, just evaluates in the current Emacs session)
+            (org-babel-default-header-args:emacs-lisp
+             '((:results . "output replace")
+               (:exports . "both")
+               (:cache   . "no")))
+            :config
+            (add-hook 'org-src-mode-hook
+                      (lambda ()
+                        (when (derived-mode-p 'emacs-lisp-mode)
+                          (flycheck-mode -1))))
+            ;; Enable shell, Scheme and Emacs-Lisp in Org Babel
+            (org-babel-do-load-languages
+             'org-babel-load-languages
+             '((shell       . t)
+               (scheme      . t)
+               (emacs-lisp  . t)
+               (lisp . t))))
+        #+end_src
 *** Org Indent
-    #+begin_src emacs-lisp
-      (use-package org-indent
-        :diminish
-        :hook (org-mode . org-indent-mode)
-        :custom
-        (org-indent-indentation-per-level 1)
-        (org-indent-mode-turns-off-org-adapt-indentation nil)
-        (org-indent-mode-turns-on-hiding-stars nil))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package org-indent
+            :diminish
+            :hook (org-mode . org-indent-mode)
+            :custom
+            (org-indent-indentation-per-level 1)
+            (org-indent-mode-turns-off-org-adapt-indentation nil)
+            (org-indent-mode-turns-on-hiding-stars nil))
+        #+end_src
 *** Org Journal
     Switching between this is Org Roam
-    #+begin_src emacs-lisp
-      (defun afistfullofash/org-journal-find-location ()
-        ;; Open today's journal, but specify a non-nil prefix argument in order to
-        ;; inhibit inserting the heading; org-capture will insert the heading.
-        (org-journal-new-entry t)
-        (unless (eq org-journal-file-type 'daily)
-          (org-narrow-to-subtree))
-        (goto-char (point-max)))
+        #+begin_src emacs-lisp
+          (defun afistfullofash/org-journal-find-location ()
+            ;; Open today's journal, but specify a non-nil prefix argument in order to
+            ;; inhibit inserting the heading; org-capture will insert the heading.
+            (org-journal-new-entry t)
+            (unless (eq org-journal-file-type 'daily)
+              (org-narrow-to-subtree))
+            (goto-char (point-max)))
 
 
-      (use-package org-journal
-        :init
-        ;; Change default prefix key; needs to be set before loading org-journal
-        (setq org-journal-prefix-key "C-c j ")
-        (setq org-journal-dir "~/org/journal/" ;; change to where you want your journals
-          	org-journal-date-prefix "#+TITLE: "
-          	org-journal-file-format "%Y-%m-%d.org"
-          	org-journal-date-format "%A, %d %B %Y")
-        :bind
-        (("C-c j n" . org-journal-new-entry)
-         ("C-c j s" . org-journal-new-scheduled-entry))
-        :custom
-        (org-journal-dir "~/org/journal/")
-        (org-journal-date-format "%A, %d %B %Y"))
-    #+end_src
+          (use-package org-journal
+            :init
+            ;; Change default prefix key; needs to be set before loading org-journal
+            (setq org-journal-prefix-key "C-c j ")
+            (setq org-journal-dir "~/org/journal/" ;; change to where you want your journals
+              	org-journal-date-prefix "#+TITLE: "
+              	org-journal-file-format "%Y-%m-%d.org"
+              	org-journal-date-format "%A, %d %B %Y")
+            :bind
+            (("C-c j n" . org-journal-new-entry)
+             ("C-c j s" . org-journal-new-scheduled-entry))
+            :custom
+            (org-journal-dir "~/org/journal/")
+            (org-journal-date-format "%A, %d %B %Y"))
+        #+end_src
 *** Org Roam
-    #+begin_src emacs-lisp
-      (use-package org-roam
-        :hook
-        (after-init . (org-roam-db-autosync-mode))
-        :bind (("C-c n n" . org-roam-capture)
-      	 ("C-c n l" . org-roam-buffer-toggle)
-      	 ("C-c n f" . org-roam-node-find)
-      	 ("C-c n i" . org-roam-node-insert))
-        :custom
-        (org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-        (org-roam-directory (file-truename "~/org")))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package org-roam
+            :hook
+            (after-init . (org-roam-db-autosync-mode))
+            :bind (("C-c n n" . org-roam-capture)
+          	 ("C-c n l" . org-roam-buffer-toggle)
+          	 ("C-c n f" . org-roam-node-find)
+          	 ("C-c n i" . org-roam-node-insert))
+            :custom
+            (org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+            (org-roam-directory (file-truename "~/org")))
+        #+end_src
 *** Org Capture
 **** Templates
      Capture a Journal Entry
-     #+begin_src emacs-lisp
-       (use-package org
-         :bind ("C-c c" . org-capture)
-         :custom
-         (org-default-notes-file (concat org-directory "/notes.org"))
-         (org-capture-templates '(("t" "Todo" plain (file "~/org/Inbox.org")
-       			    "* TODO %^{Title}\n  Added: %U\n%i%?")
-       			   ("j" "Journal entry" plain (function afistfullofash/org-journal-find-location)
-       			    "* %(format-time-string org-journal-time-format)%^{Title}\n  %U\n%i%?"
-       			    :jump-to-captured t :immediate-finish t))))
-     #+end_src
+          #+begin_src emacs-lisp
+            (use-package org
+              :bind ("C-c c" . org-capture)
+              :custom
+              (org-default-notes-file (concat org-directory "/notes.org"))
+              (org-capture-templates '(("t" "Todo" plain (file "~/org/Inbox.org")
+            			    "* TODO %^{Title}\n  Added: %U\n%i%?")
+            			   ("j" "Journal entry" plain (function afistfullofash/org-journal-find-location)
+            			    "* %(format-time-string org-journal-time-format)%^{Title}\n  %U\n%i%?"
+            			    :jump-to-captured t :immediate-finish t))))
+          #+end_src
 ** Visual
 *** Expand Region
-    #+begin_src emacs-lisp
-      (use-package expand-region
-        :bind (("C-=" . er/expand-region)  ;; grow region (like many IDEs)
-               ("C--" . er/contract-region)) ;; shrink region
-        :init
-        (setq expand-region-fast-keys-enabled t))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package expand-region
+            :bind (("C-=" . er/expand-region)  ;; grow region (like many IDEs)
+                   ("C--" . er/contract-region)) ;; shrink region
+            :init
+            (setq expand-region-fast-keys-enabled t))
+        #+end_src
 *** Undo Tree
-    #+begin_src emacs-lisp
-      (use-package undo-tree
-        :diminish undo-tree-mode
-        :init
-        (let ((undo-dir (expand-file-name "undo-tree/" (getenv "XDG_CACHE_HOME"))))
-          (unless (file-directory-p undo-dir)
-            (make-directory undo-dir t))
-          (setq undo-tree-history-directory-alist `((".*" . ,undo-dir))
-      	  undo-tree-auto-save-history t))
-        (global-undo-tree-mode))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package undo-tree
+            :diminish undo-tree-mode
+            :init
+            (let ((undo-dir (expand-file-name "undo-tree/" (getenv "XDG_CACHE_HOME"))))
+              (unless (file-directory-p undo-dir)
+                (make-directory undo-dir t))
+              (setq undo-tree-history-directory-alist `((".*" . ,undo-dir))
+          	  undo-tree-auto-save-history t))
+            (global-undo-tree-mode))
+        #+end_src
 *** Indent Bars
-    #+begin_src emacs-lisp
-      (use-package indent-bars
-        :hook ((yaml-mode . indent-bars-mode)
-       	 (python-mode . indent-bars-mode)))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package indent-bars
+            :hook ((yaml-mode . indent-bars-mode)
+           	 (python-mode . indent-bars-mode)))
+        #+end_src
 *** Rainbow Delimeters
-    #+begin_src emacs-lisp
-      (use-package rainbow-delimiters
-        :hook (prog-mode . rainbow-delimiters-mode))
-    #+end_src
+        #+begin_src emacs-lisp
+          (use-package rainbow-delimiters
+            :hook (prog-mode . rainbow-delimiters-mode))
+        #+end_src
 *** Themeing
 **** Icons
 ***** Nerd Fonts
-      #+begin_src emacs-lisp
-	(use-package nerd-icons
-	  ;; :custom
-	  ;; The Nerd Font you want to use in GUI
-	  ;; "Symbols Nerd Font Mono" is the default and is recommended
-	  ;; but you can use any other Nerd Font if you want
-	  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
-	  )
-      #+end_src
+            #+begin_src emacs-lisp
+              (use-package nerd-icons
+                ;; :custom
+                ;; The Nerd Font you want to use in GUI
+                ;; "Symbols Nerd Font Mono" is the default and is recommended
+                ;; but you can use any other Nerd Font if you want
+                ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+                )
+            #+end_src
 ***** All the Icons
       This appears to be less supported by the packages we are now using. We got the suggestion from https://github.com/james-stoup/org-mode-better-defaults/tree/main.
       It is disabled for now
-      #+begin_src emacs-lisp :tangle no
-	(use-package all-the-icons
-	  :if (display-graphic-p))
-      #+end_src
+            #+begin_src emacs-lisp :tangle no
+              (use-package all-the-icons
+                :if (display-graphic-p))
+            #+end_src
 **** Iconify Mode Line
-     #+begin_src emacs-lisp :tangle no
-       (use-package mode-icons
-         :init
-         (mode-icons-mode))
-     #+end_src
+          #+begin_src emacs-lisp :tangle no
+            (use-package mode-icons
+              :init
+              (mode-icons-mode))
+          #+end_src
 **** Nyan Mode
-     #+begin_src emacs-lisp
-       (use-package nyan-mode
-         :custom
-         ;; Fix up Nyan Cat cause she's pretty
-         (nyan-animate-nyancat t)
-         (nyan-wavy-trail t)
-         :init
-         (nyan-mode))
-     #+end_src
+          #+begin_src emacs-lisp
+            (use-package nyan-mode
+              :custom
+              ;; Fix up Nyan Cat cause she's pretty
+              (nyan-animate-nyancat t)
+              (nyan-wavy-trail t)
+              :init
+              (nyan-mode))
+          #+end_src
 **** Diredfl
-     #+begin_src emacs-lisp :tangle no
-       (use-package diredfl
-         :custom
-         (diredfl-global-mode t))
-     #+end_src
+          #+begin_src emacs-lisp :tangle no
+            (use-package diredfl
+              :custom
+              (diredfl-global-mode t))
+          #+end_src
 **** Org Modern
-     #+begin_src emacs-lisp
-       ;;; Org Visual Settings from the org modern readme
-       (use-package org
-         :custom
-         (org-auto-align-tags nil)
-         (org-tags-column 0)
-         (org-catch-invisible-edits 'show-and-error)
-         (org-special-ctrl-a/e t)
-         (org-insert-heading-respect-content t)
+          #+begin_src emacs-lisp
+            ;;; Org Visual Settings from the org modern readme
+            (use-package org
+              :custom
+              (org-auto-align-tags nil)
+              (org-tags-column 0)
+              (org-catch-invisible-edits 'show-and-error)
+              (org-special-ctrl-a/e t)
+              (org-insert-heading-respect-content t)
 
-         ;; Org styling, hide markup etc.
-         (org-hide-emphasis-markers t)
-         (org-pretty-entities t)
-         (org-agenda-tags-column 0)
-         (org-ellipsis "…"))
+              ;; Org styling, hide markup etc.
+              (org-hide-emphasis-markers t)
+              (org-pretty-entities t)
+              (org-agenda-tags-column 0)
+              (org-ellipsis "…"))
 
-       (use-package org-modern
-         :custom
-         (org-modern-hide-stars nil)		; adds extra indentation
-         (org-modern-table nil)
-         (org-modern-list 
-          '(;; (?- . "-")
-            (?* . "•")
-            (?+ . "‣")))
-         :hook
-         (org-mode . org-modern-mode)
-         (org-agenda-finalize . org-modern-agenda))
+            (use-package org-modern
+              :custom
+              (org-modern-hide-stars nil)		; adds extra indentation
+              (org-modern-table nil)
+              (org-modern-list 
+               '(;; (?- . "-")
+                 (?* . "•")
+                 (?+ . "‣")))
+              :hook
+              (org-mode . org-modern-mode)
+              (org-agenda-finalize . org-modern-agenda))
 
-       (use-package org-modern-indent
-         :config ; Use config as we add late to the hook
-         (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
-     #+end_src     
+            (use-package org-modern-indent
+              :config ; Use config as we add late to the hook
+              (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+          #+end_src     
 **** Doom
 ***** Doom Themes
-      #+begin_src emacs-lisp
-	(use-package doom-themes
-	  :custom
-	  ;; Global settings (defaults)
-	  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
-	  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
-	  ;; for treemacs users
-	  ;; (doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-	  :config
-	  (load-theme 'doom-dracula t)
+            #+begin_src emacs-lisp
+              (use-package doom-themes
+                :custom
+                ;; Global settings (defaults)
+                (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+                (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+                ;; for treemacs users
+                ;; (doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+                :config
+                (if (equal (getenv "AFFOA_SYSTEM_THEME_TYPE") "dark")
+                    (load-theme 'doom-dracula t)
+                    (load-theme 'doom-gruvbox-light t))
 
-	  ;; Enable flashing mode-line on errors
-	  (doom-themes-visual-bell-config)
-	  ;; or for treemacs users
-	  ;; (doom-themes-treemacs-config)
-	  ;; Corrects (and improves) org-mode's native fontification.
-	  (doom-themes-org-config))
-      #+end_src
+                ;; Enable flashing mode-line on errors
+                (doom-themes-visual-bell-config)
+                ;; or for treemacs users
+                ;; (doom-themes-treemacs-config)
+                ;; Corrects (and improves) org-mode's native fontification.
+                (doom-themes-org-config))
+            #+end_src
 ***** Doom Modeline
-      #+begin_src emacs-lisp
-	(use-package doom-modeline
-	  :hook (after-init . doom-modeline-mode))
-      #+end_src
+            #+begin_src emacs-lisp
+              (use-package doom-modeline
+                :hook (after-init . doom-modeline-mode))
+            #+end_src
 ** End Errata
-   #+begin_src emacs-lisp
-     (provide 'init.el)
-     ;;; init.el ends here
-   #+end_src
+      #+begin_src emacs-lisp
+        (provide 'init.el)
+        ;;; init.el ends here
+      #+end_src

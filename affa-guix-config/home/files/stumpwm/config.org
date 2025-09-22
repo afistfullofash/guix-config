@@ -17,8 +17,28 @@
 * Visual
 ** Themeing
    This is a quick themeing system for stumpwm with a couple of theme options.
+
 *** General Functions
+#+begin_src lisp
+      (defvar *theme-type-env-name* "AFFOA_SYSTEM_THEME_TYPE")
+
+      (defun set-system-themeing ()
+        (let ((system-theme (getenv *theme-type-env-name*)))
+          (if (equal "dark" system-theme)
+      	(apply-theme (gethash 'dracula *themes*))
+      	(apply-theme (gethash 'gruvbox-light *themes*)))))
+
+      (defun toggle-system-themeing ()
+        (if (equal (getenv *theme-type-env-name*) "dark")
+            (setf (getenv *theme-type-env-name*) "light")
+            (setf (getenv *theme-type-env-name*) "dark"))
+        (set-system-themeing)
+        (toggle-modeline-all-screens)
+        (toggle-modeline-all-screens))
+#+end_src
+*** Basic StumpWM Themeing Sytem 
     This gives us some very general functions to generate and apply /themes/ with.
+    
     #+begin_src lisp
       ;;; Visual
       (defvar *themes* (make-hash-table))
@@ -112,6 +132,22 @@
           			    :mode-line-border border
           			    :color-map-first bg
       			    :color-map-last fg)))
+
+      (add-theme 'gruvbox-light
+      	   (let ((fg "#3c3836")
+      		 (bg "#fbf1c7")
+      		 (border "#d65d0e"))
+          	     (make-instance 'theme
+          			    :fg fg
+          			    :bg bg
+          			    :border border
+          			    :focus fg
+          			    :unfocus bg
+          			    :mode-line-fg fg
+          			    :mode-line-bg bg
+          			    :mode-line-border border
+          			    :color-map-first bg
+      			    :color-map-last fg)))
     #+end_src
 *** Dracula
     #+begin_src lisp
@@ -134,11 +170,12 @@
     #+end_src
 ** Configuration
    #+begin_src lisp
-     (apply-theme (gethash 'dracula *themes*))
+     (set-system-themeing)
+
      (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
 
      (setq stumpwm:*input-window-gravity* :center
-      stumpwm:*message-window-gravity* :center
+           stumpwm:*message-window-gravity* :center
            
            stumpwm:*message-window-padding* 10
            stumpwm:*message-window-y-padding* 10)
