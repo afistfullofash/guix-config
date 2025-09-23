@@ -40,46 +40,80 @@
     This gives us some very general functions to generate and apply /themes/ with.
     
     #+begin_src lisp
-      ;;; Visual
+            ;;; Visual
       (defvar *themes* (make-hash-table))
       (defun add-theme (name theme)
         (setf (gethash name *themes*) theme))
 
-      ;;; Colors based off spacemacs-dark-theme for emacs
+            ;;; Colors based off spacemacs-dark-theme for emacs
       (defclass theme ()
         ((fg
           :initarg :fg
+          :initform "White"
           :type string)
          (bg
           :initarg :bg
+          :initform "Black"
           :type string)
 
          (border
           :initarg :border
+          :initform "White"
           :type string)
 
          (focus
           :initarg :focus
+          :initform "White"
           :type string)
          (unfocus
           :initarg :unfocus
+          :initform "Black"
           :type string)
 
          (mode-line-fg
           :initarg :mode-line-fg
+          :initform *mode-line-foreground-color*
           :type string)
          (mode-line-bg
           :initarg :mode-line-bg
+          :initform *mode-line-background-color*
           :type string)
          (mode-line-border
           :initarg :mode-line-border
           :type string)
-
-         (color-map-first
-          :initarg :color-map-first
+         
+         ;; These are the default colors of *colors* in order
+         (black
+          :initarg :black
+          :initform "black"
           :type string)
-         (color-map-last
-          :initarg :color-map-last
+         (red
+          :initarg :red
+          :initform "red"
+          :type string)
+         (green
+          :initarg :green
+          :initform "green"
+          :type string)
+         (yellow
+          :initarg :yellow
+          :initform "yellow"
+          :type string)
+         (blue
+          :initarg :blue
+          :initform "blue"
+          :type string)
+         (magenta
+          :initarg :magenta
+          :initform "magenta"
+          :type string)
+         (cyan
+          :initarg :cyan
+          :initform "cyan"
+          :type string)
+         (white
+          :initarg :white
+          :initform "white"
           :type string)))
 
       (defun apply-theme (theme)
@@ -90,11 +124,17 @@
         (set-unfocus-color (slot-value theme 'unfocus))
 
         (setf *mode-line-foreground-color* (slot-value theme 'mode-line-fg)
-      	,*mode-line-background-color* (slot-value theme 'mode-line-bg)
-      	,*mode-line-border-color* (slot-value theme 'mode-line-border))
+            	,*mode-line-background-color* (slot-value theme 'mode-line-bg)
+            	,*mode-line-border-color* (slot-value theme 'mode-line-border))
         
-        (setf (car *colors*) (slot-value theme 'color-map-first)
-      	(car (last *colors*)) (slot-value theme 'color-map-last))
+        (setf (nth 0 *colors*) (slot-value theme 'black)
+      	(nth 1 *colors*) (slot-value theme 'red)
+      	(nth 2 *colors*) (slot-value theme 'green)
+      	(nth 3 *colors*) (slot-value theme 'yellow)
+      	(nth 4 *colors*) (slot-value theme 'blue)
+      	(nth 5 *colors*) (slot-value theme 'magenta)
+      	(nth 6 *colors*) (slot-value theme 'cyan)
+      	(nth 7 *colors*) (slot-value theme 'white))
         (update-color-map (current-screen)))
     #+end_src
 *** Spacemacs
@@ -111,8 +151,8 @@
       			    :mode-line-fg purple
       			    :mode-line-bg grey
       			    :mode-line-border purple
-      			    :color-map-first grey
-      			    :color-map-last purple)))
+      			    :black grey
+      			    :white purple)))
 
     #+end_src
 *** Gruvbox
@@ -130,8 +170,8 @@
           			    :mode-line-fg fg
           			    :mode-line-bg bg
           			    :mode-line-border border
-          			    :color-map-first bg
-      			    :color-map-last fg)))
+          			    :black bg
+      			    :white fg)))
 
       (add-theme 'gruvbox-light
       	   (let ((fg "#3c3836")
@@ -146,8 +186,15 @@
           			    :mode-line-fg fg
           			    :mode-line-bg bg
           			    :mode-line-border border
-          			    :color-map-first bg
-      			    :color-map-last fg)))
+          			    :black bg
+      			    :red "#cc241d"
+      			    :green "#98971a"
+      			    
+      			    :yellow "#d79921"
+      			    :blue "#458588"
+      			    :magenta "#b16286"
+      			    :cyan "#689d6a"
+      			    :white fg)))
     #+end_src
 *** Dracula
     #+begin_src lisp
@@ -165,8 +212,8 @@
       			    :mode-line-fg purple
       			    :mode-line-bg bg
       			    :mode-line-border purple
-      			    :color-map-first bg
-      			    :color-map-last fg)))
+      			    :black bg
+      			    :white fg)))
     #+end_src
 ** Configuration
    #+begin_src lisp
@@ -180,7 +227,7 @@
            stumpwm:*message-window-padding* 10
            stumpwm:*message-window-y-padding* 10)
    #+end_src
-
+   
 *** Notify
     Currently the stumpwm package built from systems/base.scm cannot load the notify package.
     So this is chucked into a function while I debug it.
@@ -192,17 +239,24 @@
 *** Mode Line
     #+begin_src lisp
       (defvar *show-mode-line-time* t)
-      (defun set-mode-line-format ()
-        (setf *screen-mode-line-format*
-      	(list
-      	 (if *show-mode-line-time* "%d | ")
-      	 (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
-      	     "%B |")
-      	 "%W")))
 
-      (set-mode-line-format)
+      (setf *window-format* "%n %10c |")
+      (defun trimmed-shell-command (command)
+        (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
+      		       (run-shell-command command t)))
 
-      (setf *window-format* "%n %10c: %15t")
+      (setf *screen-mode-line-format*      
+            (list
+             '(:eval (if *show-mode-line-time* "^R %d ^r " ""))
+             '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
+      		   "%B | "))
+             '(:eval (let ((email-count (trimmed-shell-command "notmuch count +tag:unread -tag:promotion")))
+      		 (if (> 0 email-count)
+      		     (format nil "~a Emails | " email-count)
+      		     "")))
+             "%W"))
+
+
 
       ;;; When windows are desroyed window numbers are not synced
       ;;; 2kays <https://github.com/2kays> posted a solution on
@@ -221,13 +275,23 @@
     #+end_src
 * User functions
   #+begin_src lisp
-    (defun make-percent-bar (percent &optional title)
-      "Return a string that represents a percent bar"
-      (format nil "~a~%^B~3d%^b [^[^7*~a^]]"
-              title
-    	  percent
-    	  (stumpwm::bar (min 100 percent) 50 #\# #\:)))
+      (defun make-percent-bar (percent &optional title)
+        "Return a string that represents a percent bar"
+        (format nil "~a~%^B~3d%^b [^[^7*~a^]]"
+                title
+      	  percent
+      	  (stumpwm::bar (min 100 percent) 50 #\# #\:)))
 
+    (defun reload-init ()
+         "Restart Slynk and reload source.
+       This is needed if Sly updates while StumpWM is running"
+         (slynk:stop-server 1337)
+         (loadrc)
+         (slynk:create-server :port 1337
+       		       :dont-close t))
+
+
+     
   #+end_src
 * Commands
 ** Brightness
@@ -306,30 +370,32 @@
      	    "Start volume control"
      	    (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
    #+end_src
+** Theme
+   #+begin_src lisp
+     (defcommand toggle-theme () ()
+          	    "Toggle the system theme"
+          	    (toggle-system-themeing))
+#+end_src
 ** System
-   #+begin_src emacs-lisp
-     ;;; Shutdown and Reboot
-     (defcommand shutdown (confirm) ((:y-or-n "Confirm Shutdown "))
-     	    "Ask for the user to confirm before shutting down."
-     	    (if confirm
-     		(run-shell-command "sudo shutdown")))
+      #+begin_src lisp
+        ;;; Shutdown and Reboot
+        (defcommand shutdown (confirm) ((:y-or-n "Confirm Shutdown "))
+        	    "Ask for the user to confirm before shutting down."
+        	    (if confirm
+        		(run-shell-command "sudo shutdown")))
 
-     (defcommand reboot (confirm) ((:y-or-n "Confirm Reboot "))
-     	    "Ask for the user to confirm before rebooting."
-     	    (if confirm
-     		(run-shell-command "sudo reboot")))
+        (defcommand reboot (confirm) ((:y-or-n "Confirm Reboot "))
+        	    "Ask for the user to confirm before rebooting."
+        	    (if confirm
+        		(run-shell-command "sudo reboot")))
+
+        (defcommand reload-init (confirm) ((:y-or-n "Confirm Reloading init file "))
+          "Ask for the user to confirm before reloading init file."
+        	    (if confirm
+        		(reload-init)))
    #+end_src
 ** Misc
    #+begin_src lisp
-     (defun reload-init ()
-       "Restart Slynk and reload source.
-     This is needed if Sly updates while StumpWM is running"
-       (slynk:stop-server 1337)
-       (loadrc)
-       (slynk:create-server :port 1337
-     		       :dont-close t))
-
-
      (defcommand user-switch-to-screen (screen-num) ((:number "Screen Number: "))
      	    "Only works when there is a currently open window on the screen"
      	    (select-window-by-number (window-number
@@ -385,25 +451,33 @@
 ** Keymaps
 *** System Map
     #+begin_src lisp
-      ;;; System Command Keymap
+       ;;; System Command Keymap
       (defparameter *screenshot-map*
-      	      (let ((m (make-sparse-keymap)))
-      		(define-key m (kbd "f") "screenshot")
-      		(define-key m (kbd "s") "screenshot-select")
-      		m))
+          	      (let ((m (make-sparse-keymap)))
+          		(define-key m (kbd "f") "screenshot")
+          		(define-key m (kbd "s") "screenshot-select")
+          		m))
+
+      (defparameter *theme-map*
+          	      (let ((m (make-sparse-keymap)))
+          		(define-key m (kbd "t") "toggle-theme")
+                      m))
+
 
       (defparameter *power-map*
-      	      (let ((m (make-sparse-keymap)))
-      		(define-key m (kbd "p") "shutdown")
-      		(define-key m (kbd "r") "reboot")
-      		m)) 
+          	      (let ((m (make-sparse-keymap)))
+          		(define-key m (kbd "p") "shutdown")
+          		(define-key m (kbd "r") "reboot")
+          		m)) 
 
       (defparameter *system-map*
                     (let ((m (make-sparse-keymap)))
-      		(define-key m (kbd "s") *screenshot-map*)
-      		(define-key m (kbd "p") *power-map*)
-      		(define-key m (kbd "v") "volume-control")
-      		m))
+          		(define-key m (kbd "s") *screenshot-map*)
+      		(define-key m (kbd "t") *theme-map*)
+          		(define-key m (kbd "p") *power-map*)
+      		(define-key m (kbd "r") "reload-init")
+          		(define-key m (kbd "v") "volume-control")
+          		m))
     #+end_src
 *** Program Map
     #+begin_src lisp

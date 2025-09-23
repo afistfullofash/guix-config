@@ -362,7 +362,31 @@ This is a continuation of the configuration previously maintained at [[https://g
           :config
           ;; load default config
           (require 'smartparens-config)
-          (smartparens-global-strict-mode))
+          (smartparens-global-strict-mode)
+
+           (let ((m smartparens-mode-map))
+            ;; slurp / barf
+            (define-key m (kbd "<C-right>") #'sp-forward-slurp-sexp)
+            (define-key m (kbd "<C-left>")  #'sp-backward-slurp-sexp)
+            (define-key m (kbd "<M-right>") #'sp-forward-barf-sexp)
+            (define-key m (kbd "<M-left>")  #'sp-backward-barf-sexp)
+            ;; splice
+            (define-key m (kbd "<C-up>")    #'sp-splice-sexp)
+            ;; useful “down” actions:
+            ;; C-Down unwraps current pair; M-Down raises child sexp (promote)
+            (define-key m (kbd "<C-down>")  #'sp-unwrap-sexp)
+            (define-key m (kbd "<M-down>")  #'sp-raise-sexp)
+            ;; Also suggested
+            ;;     sp-raise-sexp (Ctrl + Down): This is the opposite of slurping. It "raises" the current expression, replacing its parent. It's great for refactoring.
+            ;;     Before: (one (two | three) four)
+            ;;     After C-<down>: (two | three)
+            ;; sp-split-sexp (Meta + Down): This splits the current list or string at the cursor's position.
+            ;;     Before: (one two | three four)
+            ;;     After M-<down>: (one two) (three four)
+            ;; (define-key smartparens-mode-map (kbd "C-<down>")  'sp-raise-sexp)
+            ;; (define-key smartparens-mode-map (kbd "M-<down>")  'sp-split-sexp)
+            ))
+
    #+end_src
 
 ** Programming Languages

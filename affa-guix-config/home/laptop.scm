@@ -11,6 +11,7 @@
   
   #:use-module (affa-guix-config home base)
   #:use-module (affa-guix-config services backup)
+  #:use-module (affa-guix-config services mail)
 
   #:export (laptop-home-environment))
 
@@ -44,7 +45,9 @@
 (define laptop-home-timers
   (simple-service 'laptop-home-timers
                   home-shepherd-service-type
-                  (list laptop-restic-backup-timer)))
+                  (list laptop-restic-backup-timer
+			home-notmuch-new-timer
+			home-tnatkinson95-gmail-sync-timer)))
 
 (define laptop-home-channels-service
   (simple-service 'laptop-home-channels-service

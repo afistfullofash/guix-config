@@ -27,12 +27,13 @@
   
   #:use-module (ice-9 popen)
 
+  #:use-module (affa-guix-config home utils)
+
   #:use-module (affa-guix-config themes dracula)
   
   #:use-module (afistfullofash packages boundary)
   ;; #:use-module (afistfullofash packages runst)
   #:use-module (afistfullofash packages codex)
-  #:use-module (afistfullofash packages kubectl)
   #:use-module (afistfullofash packages emacs-xyz)
   #:use-module (afistfullofash packages fonts)
   #:use-module (afistfullofash packages terraform)
@@ -40,8 +41,6 @@
   #:export (base-home-environment
 	    base-home-services
 	    base-home-backup-service))
-
-(define home-directory (getenv "HOME"))
 
 (define nnn-plugins-repo
   (origin
@@ -126,7 +125,7 @@
 	"emacs-org-modern-indent"
 	"emacs-org-roam"
 	"emacs-org-journal"
-	
+	"emacs-notmuch"
 	"emacs-nyan-mode-1.1.4"
 	"emacs-diredfl"
 	"emacs-format-all-the-code"
@@ -194,6 +193,9 @@
    "alacritty"
    ;; Password Management
    "keepassxc"
+   ;; Email
+   "notmuch"
+   "lieer"
    "steam"
    ;; Main browser
    "firefox"
@@ -282,12 +284,6 @@
 		      (openpgp-fingerprint
 		       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5")))))))
 
-(define (home-file-path file)
-  (string-append home-directory file))
-
-(define (environment-variable-seperated-path items)
-  (string-join (map home-file-path items) ":"))
-
 (define environment-variables-service
   (simple-service 'base-environment-variables-service
 		  home-environment-variables-service-type
@@ -300,6 +296,7 @@
 						  "${PATH}") ; Original Value
 					    ":"))
 		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
+		    ("BROWSER" . ,(specification->package "firefox"))
 		    ("BAT_THEME" . "Dracula")
 		    ("NNN_FIFO" . "/tmp/nnn.fifo")
 		    ("TREE_SITTER_LIBDIR"
