@@ -314,10 +314,15 @@
       		   "%B"))
              " "
              '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
-             '(:eval (let ((tnatkinson-email-count (parse-integer (trimmed-shell-command "notmuch count tag:tnatkinson95 and tag:unread and not tag:promotions"))))
-      		 (if (> tnatkinson-email-count 0)
-      		     (medium-priority-message (format nil " ~a Emails " (get-bar-zone-color-string tnatkinson-email-count 5 10 15)))
-      		     "")))
+             '(:eval (let ((tnatkinson-email-count (parse-integer (trimmed-shell-command "notmuch count tag:tnatkinson95 and tag:unread and not tag:promotions")))
+      		     (natalieatkinson-email-count (parse-integer (trimmed-shell-command "notmuch count tag:natalienatkinson95 and tag:unread and not tag:promotions"))))
+      		 (if (> (+ tnatkinson-email-count natalieatkinson-email-count) 0)
+      		     (medium-priority-message
+      		      (format nil " ~a ~a Emails "
+      			      (get-bar-zone-color-string tnatkinson-email-count 5 10 15)
+      			      (get-bar-zone-color-string natalieatkinson-email-count 5 10 15)))
+      		   "")))
+             '(:eval )
              " %W"))
 
 
