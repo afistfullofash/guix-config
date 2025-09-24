@@ -97,14 +97,17 @@ natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current
 	      (service kernel-module-loader-service-type
 		       '("i2c-dev" "i2c-piix4"))
 	      (udev-rules-service 'openrgb openrgb)
+	      (service iwd-service-type
+		       (iwd-configuration
+			 (shepherd-provision '(iwd networking wireless-daemon))
+			 (config
+			  (iwd-settings
+			    (general
+			     (iwd-general-settings
+			       (enable-network-configuration? #t)))))))
 	      (service bluetooth-service-type
 		       (bluetooth-configuration (auto-enable? #t)
-						(multi-profile 'multiple)))	    
-	      (service iwd-service-type)
-	      (service connman-service-type
-		       (connman-configuration
-			(disable-vpn? #t)
-			(shepherd-requirement '(iwd))))
+						(multi-profile 'multiple)))
 	      (service containerd-service-type)
 	      (service docker-service-type)
 	      (service cups-service-type
