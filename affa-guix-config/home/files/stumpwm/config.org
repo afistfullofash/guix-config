@@ -287,7 +287,7 @@
     #+begin_src lisp
       (defvar *show-mode-line-time* t)
 
-      (setf *window-format* "%n %10c |")
+      (setf *window-format* " %n %10c ")
       (defun trimmed-shell-command (command)
         (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
       	       (run-shell-command command t)))
@@ -317,6 +317,22 @@
       	  msg
       	  mode-line-close-changes))
 
+      (add-screen-mode-line-formatter #\M 'fmt-head-window-list)
+      (defun fmt-head-window-list (ml)
+        "Using *window-format*, return a 1 line list of the windows, space seperated."
+        (format nil "~{~a~^~}"
+                (mapcar (lambda (w)
+                          (format-with-on-click-id 
+                           (let ((str (format-expand *window-formatters*
+                                                     ,*window-format*
+                                                     w)))
+                             (if (eq w (current-window))
+                                 (stumpwm::fmt-highlight (format nil "~a " str))
+                                 (format nil "~a|" str)))
+                           :ml-on-click-focus-window
+                           (stumpwm::window-id w)))
+                        (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml) (stumpwm::mode-line-head ml))
+                               #'< :key #'window-number))))
 
       (setf *screen-mode-line-format*      
             (list
@@ -333,9 +349,7 @@
       			      (get-bar-zone-color-string natalieatkinson-email-count 5 10 15)))
       		   "")))
              '(:eval )
-             " %W"))
-
-
+             " %M"))
 
       ;;; When windows are desroyed window numbers are not synced
       ;;; 2kays <https://github.com/2kays> posted a solution on
