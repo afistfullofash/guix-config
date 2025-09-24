@@ -285,6 +285,8 @@
     #+end_src
 *** Mode Line
     #+begin_src lisp
+      (set-font "-adobe-courier-bold-r-normal-*-14-*-*-*-*-*-*-*")
+
       (defvar *show-mode-line-time* t)
 
       (setf *window-format* " %n %10c ")
