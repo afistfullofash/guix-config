@@ -65,6 +65,7 @@
 (define laptop-home-services
   (list laptop-environment-variables-service
 	laptop-home-channels-service
+	home-hydroxide-service
         laptop-home-timers))
 
 (define laptop-home-environment

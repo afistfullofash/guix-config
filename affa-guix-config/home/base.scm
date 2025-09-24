@@ -196,6 +196,7 @@
    ;; Email
    "notmuch"
    "lieer"
+   
    "steam"
    ;; Main browser
    "firefox"

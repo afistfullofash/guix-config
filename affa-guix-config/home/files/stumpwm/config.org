@@ -4,7 +4,7 @@
   Start slynk for debugging purposes first and then load in our required stumpwm contrib modules
   #+begin_src lisp
     (in-package :stumpwm-user)
-    (asdf:require-system :slynk)
+    (asdf:load-system :slynk)
     (slynk:create-server :port 1337
     		     :dont-close t)
 
@@ -15,37 +15,60 @@
     (asdf:load-system "battery-portable")
   #+end_src
 * Visual
+  StumpWM kinda gives us incomplete color formatters for magnitude so make some extra ones which close off that changes
+  #+begin_src lisp
+    (defvar *bar-med-color-closer* "^b")
+    (defvar *bar-hi-color-closer* "^b^9")
+    (defvar *bar-crit-color-closer* "^b^9")
+
+    (defun bar-zone-color-closer (amount &optional (med 20) (hi 50) (crit 90) reverse)
+      "Return a color command based on the magnitude of the argument. If
+    the limits for the levels aren't specified, they default to sensible
+    values for a percentage. With reverse, lower numbers are more
+    critical."
+      (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
+        (cond ((past crit) *bar-crit-color-closer*)
+              ((past hi) *bar-hi-color-closer*)
+              ((past med) *bar-med-color-closer*)
+              (t ""))))
+
+    (defun get-bar-zone-color-string (amount &optional (med 20) (hi 50) (crit 90) reverse)
+      (format nil "~a~a~a"
+    	  (bar-zone-color amount med hi crit reverse)
+    	  amount
+    	  (bar-zone-color-closer amount med hi crit reverse)))
+#+end_src
 ** Themeing
    This is a quick themeing system for stumpwm with a couple of theme options.
 
 *** General Functions
 #+begin_src lisp
-      (defvar *theme-type-env-name* "AFFOA_SYSTEM_THEME_TYPE")
+  (defvar *theme-type-env-name* "AFFOA_SYSTEM_THEME_TYPE")
+  (defun set-system-themeing ()
+    (let ((system-theme (getenv *theme-type-env-name*)))
+      (if (equal "dark" system-theme)
+  	(apply-theme (gethash 'dracula *themes*))
+  	(apply-theme (gethash 'gruvbox-light *themes*)))))
 
-      (defun set-system-themeing ()
-        (let ((system-theme (getenv *theme-type-env-name*)))
-          (if (equal "dark" system-theme)
-      	(apply-theme (gethash 'dracula *themes*))
-      	(apply-theme (gethash 'gruvbox-light *themes*)))))
-
-      (defun toggle-system-themeing ()
-        (if (equal (getenv *theme-type-env-name*) "dark")
-            (setf (getenv *theme-type-env-name*) "light")
-            (setf (getenv *theme-type-env-name*) "dark"))
-        (set-system-themeing)
-        (toggle-modeline-all-screens)
-        (toggle-modeline-all-screens))
+  (defun toggle-system-themeing ()
+    (if (equal (getenv *theme-type-env-name*) "dark")
+        (setf (getenv *theme-type-env-name*) "light")
+        (setf (getenv *theme-type-env-name*) "dark"))
+    (set-system-themeing)
+    (toggle-modeline-all-screens)
+    (toggle-modeline-all-screens)
+  (stumpwm:message "Remember to restart emacs"))
 #+end_src
 *** Basic StumpWM Themeing Sytem 
     This gives us some very general functions to generate and apply /themes/ with.
     
     #+begin_src lisp
-            ;;; Visual
+      ;;; Visual
       (defvar *themes* (make-hash-table))
       (defun add-theme (name theme)
         (setf (gethash name *themes*) theme))
 
-            ;;; Colors based off spacemacs-dark-theme for emacs
+      ;;; Colors based off spacemacs-dark-theme for emacs
       (defclass theme ()
         ((fg
           :initarg :fg
@@ -114,6 +137,14 @@
          (white
           :initarg :white
           :initform "white"
+          :type string)
+         (custom-one
+          :initarg :custom-one
+          :initform "black"
+          :type string)
+         (custom-two
+          :initarg :custom-two
+          :initform "white"
           :type string)))
 
       (defun apply-theme (theme)
@@ -124,17 +155,20 @@
         (set-unfocus-color (slot-value theme 'unfocus))
 
         (setf *mode-line-foreground-color* (slot-value theme 'mode-line-fg)
-            	,*mode-line-background-color* (slot-value theme 'mode-line-bg)
-            	,*mode-line-border-color* (slot-value theme 'mode-line-border))
+      	*mode-line-background-color* (slot-value theme 'mode-line-bg)
+      	*mode-line-border-color* (slot-value theme 'mode-line-border))
         
-        (setf (nth 0 *colors*) (slot-value theme 'black)
-      	(nth 1 *colors*) (slot-value theme 'red)
-      	(nth 2 *colors*) (slot-value theme 'green)
-      	(nth 3 *colors*) (slot-value theme 'yellow)
-      	(nth 4 *colors*) (slot-value theme 'blue)
-      	(nth 5 *colors*) (slot-value theme 'magenta)
-      	(nth 6 *colors*) (slot-value theme 'cyan)
-      	(nth 7 *colors*) (slot-value theme 'white))
+        (setf *colors* (list 
+      		  (slot-value theme 'black)
+      		  (slot-value theme 'red)
+      		  (slot-value theme 'green)
+      		  (slot-value theme 'yellow)
+      		  (slot-value theme 'blue)
+      		  (slot-value theme 'magenta)
+      		  (slot-value theme 'cyan)
+      		  (slot-value theme 'white)
+      		  (slot-value theme 'custom-one)
+      		  (slot-value theme 'custom-two)))
         (update-color-map (current-screen)))
     #+end_src
 *** Spacemacs
@@ -183,18 +217,21 @@
           			    :border border
           			    :focus fg
           			    :unfocus bg
+
           			    :mode-line-fg fg
           			    :mode-line-bg bg
           			    :mode-line-border border
-          			    :black bg
+      			    :black bg
       			    :red "#cc241d"
       			    :green "#98971a"
-      			    
       			    :yellow "#d79921"
       			    :blue "#458588"
       			    :magenta "#b16286"
       			    :cyan "#689d6a"
-      			    :white fg)))
+      			    :white fg
+      			    
+      			    :custom-one "#ebdbb2"
+      			    :custom-two "#a89984")))
     #+end_src
 *** Dracula
     #+begin_src lisp
@@ -243,18 +280,45 @@
       (setf *window-format* "%n %10c |")
       (defun trimmed-shell-command (command)
         (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
-      		       (run-shell-command command t)))
+      	       (run-shell-command command t)))
+
+      (defvar mode-line-close-changes
+        (format nil "^(:fg \"~A\")^(:bg \"~A\")" *mode-line-foreground-color* *mode-line-background-color*))
+
+      (defvar light-bg "^(:bg 1)")
+      (defvar medium-bg "^(:bg 8)")
+      (defvar dark-bg "^(:bg 9)")
+
+      (defun low-priority-message (msg)
+        (format nil "~a~a~a"
+      	  light-bg
+      	  msg
+      	  mode-line-close-changes))
+
+      (defun medium-priority-message (msg)
+        (format nil "~a~a~a"
+      	  medium-bg
+      	  msg
+      	  mode-line-close-changes))
+
+      (defun high-priority-message (msg)
+        (format nil "~a~a~a"
+      	  dark-bg
+      	  msg
+      	  mode-line-close-changes))
+
 
       (setf *screen-mode-line-format*      
             (list
-             '(:eval (if *show-mode-line-time* "^R %d ^r " ""))
              '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
-      		   "%B | "))
-             '(:eval (let ((email-count (trimmed-shell-command "notmuch count +tag:unread -tag:promotion")))
-      		 (if (> 0 email-count)
-      		     (format nil "~a Emails | " email-count)
+      		   "%B"))
+             " "
+             '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
+             '(:eval (let ((tnatkinson-email-count (parse-integer (trimmed-shell-command "notmuch count tag:tnatkinson95 and tag:unread and not tag:promotions"))))
+      		 (if (> tnatkinson-email-count 0)
+      		     (medium-priority-message (format nil " ~a Emails " (get-bar-zone-color-string tnatkinson-email-count 5 10 15)))
       		     "")))
-             "%W"))
+             " %W"))
 
 
 
@@ -275,23 +339,21 @@
     #+end_src
 * User functions
   #+begin_src lisp
-      (defun make-percent-bar (percent &optional title)
-        "Return a string that represents a percent bar"
-        (format nil "~a~%^B~3d%^b [^[^7*~a^]]"
-                title
-      	  percent
-      	  (stumpwm::bar (min 100 percent) 50 #\# #\:)))
+          (defun make-percent-bar (percent &optional title)
+            "Return a string that represents a percent bar"
+            (format nil "~a~%^B~3d%^b [^[^7*~a^]]"
+                    title
+          	  percent
+          	  (stumpwm::bar (min 100 percent) 50 #\# #\:)))
 
-    (defun reload-init ()
-         "Restart Slynk and reload source.
-       This is needed if Sly updates while StumpWM is running"
-         (slynk:stop-server 1337)
-         (loadrc)
-         (slynk:create-server :port 1337
-       		       :dont-close t))
+        (defun reload-rc-clean ()
+             "Restart Slynk and reload source.
+           This is needed if Sly updates while StumpWM is running"
+             (slynk:stop-server 1337)
+             (loadrc)
+          (toggle-modeline-all-screens)
+          (toggle-modeline-all-screens))
 
-
-     
   #+end_src
 * Commands
 ** Brightness
@@ -475,7 +537,7 @@
           		(define-key m (kbd "s") *screenshot-map*)
       		(define-key m (kbd "t") *theme-map*)
           		(define-key m (kbd "p") *power-map*)
-      		(define-key m (kbd "r") "reload-init")
+      		(define-key m (kbd "r") "reload-rc-clean")
           		(define-key m (kbd "v") "volume-control")
           		m))
     #+end_src

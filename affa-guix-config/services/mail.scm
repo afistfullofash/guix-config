@@ -1,5 +1,6 @@
 (define-module (affa-guix-config services mail)
   #:use-module (gnu)
+  #:use-module (gnu services)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
   #:use-module (guix gexp)
@@ -10,9 +11,24 @@
   #:use-module (affa-guix-config home utils)
   #:use-module (afistfullofash packages mail)
   
-  #:export (home-tnatkinson95-gmail-sync-timer
+  #:export (home-hydroxide-service
+	    home-tnatkinson95-gmail-sync-timer
 	    home-notmuch-new-timer))
 
+
+(define home-hydroxide-service
+  (simple-service
+   'hydroxide home-shepherd-service-type
+   (list
+    (shepherd-service
+     (documentation "Run hydroxide proton bridge")
+     (requirement '())
+     (auto-start? #t)
+     (one-shot? #f)
+     (provision '(hydroxide))
+     (start #~(make-forkexec-constructor
+               (list #$(file-append hydroxide "/bin/hydroxide") "imap")))
+     (stop #~(make-kill-destructor))))))
 
 (define home-tnatkinson95-gmail-sync-timer
   (let ((gmi-script
