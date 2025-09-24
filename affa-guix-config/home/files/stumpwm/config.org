@@ -236,21 +236,31 @@
 *** Dracula
     #+begin_src lisp
       (add-theme 'dracula
-      	   (let ((fg "#F8F8F2")
-      		 (bg "#282A36")
-      		 (border "#8BE9FD")
-      		 (purple "#BD93F9"))
-      	     (make-instance 'theme
-      			    :fg fg
-      			    :bg bg
-      			    :border purple
-      			    :focus border
-      			    :unfocus purple
-      			    :mode-line-fg purple
-      			    :mode-line-bg bg
-      			    :mode-line-border purple
-      			    :black bg
-      			    :white fg)))
+           	   (let ((fg "#F8F8F2")
+           		 (bg "#282A36")
+           		 (border "#8BE9FD")
+           		 (purple "#BD93F9"))
+           	     (make-instance 'theme
+           			    :fg fg
+           			    :bg bg
+           			    :border purple
+           			    :focus border
+           			    :unfocus purple
+
+      			      :mode-line-fg purple
+           			    :mode-line-bg bg
+           			    :mode-line-border purple
+
+           			    :black bg
+           			    :white fg
+      			      :red "#FF5555"
+           			    :green "#50FA7B"
+           			    :yellow "#F1FA8C"
+           			    :blue "#8BE9FD"
+           			    :magenta "#BD93F9"
+           			    :cyan "#FF79C6"
+           			    :custom-one "#44475A"
+           			    :custom-two "#6272A4")))
     #+end_src
 ** Configuration
    #+begin_src lisp
