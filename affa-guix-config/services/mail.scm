@@ -13,6 +13,7 @@
   
   #:export (home-hydroxide-service
 	    home-tnatkinson95-gmail-sync-timer
+	    home-natalieatkinson95-proton-sync-timer
 	    home-notmuch-new-timer))
 
 
@@ -39,10 +40,16 @@
 	    #~(begin
 		 (chdir #$mail-dir)
 		 (system* #$gmi "sync"))))))
-    (shepherd-timer '(tnatkinson-gmail-sync)
+    (shepherd-timer '(mail-tnatkinson-gmail-sync)
 		    "*/10 * * * *"
 		    #~(#$gmi-script)
 		    #:requirement '())))
+
+(define home-natalieatkinson95-proton-sync-timer
+  (shepherd-timer '(mail-natalieatkinson95-proton-sync)
+		  "*/10 * * * *"
+		  #~(#$(file-append isync "/bin/mbsync") "natalie-atkinson-proton")
+		  #:requirement '()))
 
 (define home-notmuch-new-timer
   (let ((notmuch-script
@@ -53,7 +60,7 @@
 	    #~(begin
 		 (chdir #$mail-dir)
 		 (system* #$gmi "new"))))))
-    (shepherd-timer '(notmuch-new)
+    (shepherd-timer '(mail-notmuch-new)
 		    "*/10 * * * *"
 		    #~(#$notmuch-script)
 		    #:requirement '())))

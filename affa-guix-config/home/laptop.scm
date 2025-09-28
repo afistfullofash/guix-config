@@ -47,6 +47,7 @@
                   home-shepherd-service-type
                   (list laptop-restic-backup-timer
 			home-notmuch-new-timer
+			home-natalieatkinson95-proton-sync-timer
 			home-tnatkinson95-gmail-sync-timer)))
 
 (define laptop-home-channels-service

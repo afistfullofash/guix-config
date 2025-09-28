@@ -6,6 +6,7 @@
   #:use-module (gnu system)
   
   #:use-module (gnu services)
+  #:use-module (gnu services dns)
   #:use-module (gnu services linux)
   #:use-module (gnu services cups)
   #:use-module (gnu services desktop)
@@ -44,6 +45,8 @@
            sbcl-stumpwm-battery-portable
            sbcl-stumpwm-notify
            sbcl-stumpwm-pamixer
+	   sbcl-stumpwm-ttf-fonts
+	   sbcl-clx-truetype
            sbcl-slynk))
     (native-inputs
      (list pkg-config
@@ -69,6 +72,8 @@
                                     "battery-portable"
                                     "notify"
                                     "pamixer"
+				    "ttf-fonts"
+				    "clx-truetype"
                                     "slynk")
                    ;; Where to find those systems
                    #:dependency-prefixes
@@ -78,6 +83,8 @@
                           "sbcl-stumpwm-battery-portable"
                           "sbcl-stumpwm-notify"
                           "sbcl-stumpwm-pamixer"
+			  "sbcl-stumpwm-ttf-fonts"
+			  "sbcl-clx-truetype"
                           "sbcl-slynk"))))))
            (delete 'copy-source)
            (delete 'build)
@@ -97,11 +104,20 @@ natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current
 	      (service kernel-module-loader-service-type
 		       '("i2c-dev" "i2c-piix4"))
 	      (udev-rules-service 'openrgb openrgb)
+	      (service unbound-service-type)
+	      (simple-service
+	       'resolvconf etc-service-type
+	       (list `("resolvconf.conf" ,(mixed-text-file
+					   "resolv.conf"
+					   "name_servers=127.0.0.1"))))
 	      (service iwd-service-type
 		       (iwd-configuration
-			 (shepherd-provision '(iwd networking wireless-daemon))
+			(shepherd-provision '(iwd networking wireless-daemon))
 			 (config
 			  (iwd-settings
+			   (network
+			    (iwd-network-settings
+			     (name-resolving-service 'resolvconf)))
 			    (general
 			     (iwd-general-settings
 			       (enable-network-configuration? #t)))))))
@@ -177,6 +193,9 @@ natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current
 		  ;; sbcl-stumpwm-notify wanted these
 		  "pkg-config"
 		  "libfixposix"
+		  ;; sbcl-stumpwm-ttf-fonts
+		  "freetype"
+		  "fontconfig"
 		  ;; For setting the screenshot time
 		  "sbcl-local-time"))
 	       (list stumpwm-with-extensions)

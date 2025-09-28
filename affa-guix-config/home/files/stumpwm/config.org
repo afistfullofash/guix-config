@@ -103,6 +103,7 @@
           :type string)
          (mode-line-border
           :initarg :mode-line-border
+          :initform *mode-line-border-color*
           :type string)
          
          ;; These are the default colors of *colors* in order
@@ -147,7 +148,7 @@
           :initform "white"
           :type string)))
 
-      (defun apply-theme (theme)
+      (defun apply-theme-raw (theme)
         (set-fg-color (slot-value theme 'fg))
         (set-bg-color (slot-value theme 'bg))
         (set-border-color (slot-value theme 'border))
@@ -155,8 +156,8 @@
         (set-unfocus-color (slot-value theme 'unfocus))
 
         (setf *mode-line-foreground-color* (slot-value theme 'mode-line-fg)
-      	*mode-line-background-color* (slot-value theme 'mode-line-bg)
-      	*mode-line-border-color* (slot-value theme 'mode-line-border))
+      	,*mode-line-background-color* (slot-value theme 'mode-line-bg)
+      	,*mode-line-border-color* (slot-value theme 'mode-line-border))
         
         (setf *colors* (list 
       		  (slot-value theme 'black)
@@ -170,6 +171,15 @@
       		  (slot-value theme 'custom-one)
       		  (slot-value theme 'custom-two)))
         (update-color-map (current-screen)))
+
+      (defun apply-theme (theme)
+        (apply-theme-raw (make-instance 'theme))
+        (apply-theme-raw theme))
+    #+end_src
+*** Default
+    #+begin_src lisp
+      (add-theme 'default
+      	   (make-instance 'theme))
     #+end_src
 *** Spacemacs
     #+begin_src lisp
@@ -209,55 +219,75 @@
 
       (add-theme 'gruvbox-light
       	   (let ((fg "#3c3836")
+      		 (fg4 "#7c6f64")
       		 (bg "#fbf1c7")
-      		 (border "#d65d0e"))
+      		 ;; 124
+      		 (red '("#cc241d" "#9d0006"))
+      		 ;; 106
+      		 (green '("#98971a" "#79740e"))
+      		 ;; 172
+      		 (yellow '("#d79921" "#b57614"))
+      		 ;; 66
+      		 (blue '("#458588" "#076678"))
+      		 ;; 132
+      		 (purple '("#b16286" "#8f3f71"))
+      		 ;; 72
+      		 (aqua '("#689d6a" "#427b58"))
+      		 (orange '("#d65d0e" "#af3a03"))
+      		 ;; 243
+      		 (gray '("#7c6f64" "#928374"))
+      		 ;; Bright is bg1
+      		 (bg2 '("#d5c4a1" "#ebdbb2"))
+      		 ;; Bright is bg3
+      		 (bg4 '("#a89984" "#bdae93")))
           	     (make-instance 'theme
           			    :fg fg
           			    :bg bg
-          			    :border border
+          			    :border (car orange)
           			    :focus fg
           			    :unfocus bg
 
           			    :mode-line-fg fg
           			    :mode-line-bg bg
-          			    :mode-line-border border
-      			    :black bg
-      			    :red "#cc241d"
-      			    :green "#98971a"
-      			    :yellow "#d79921"
-      			    :blue "#458588"
-      			    :magenta "#b16286"
-      			    :cyan "#689d6a"
-      			    :white fg
+          			    :mode-line-border (car orange)
       			    
-      			    :custom-one "#ebdbb2"
-      			    :custom-two "#a89984")))
+      			    :black gray
+      			    :red red
+      			    :green green
+      			    :yellow yellow
+      			    :blue blue
+      			    :magenta purple
+      			    :cyan aqua
+      			    :white (list fg fg4)
+      			    
+      			    :custom-one bg2
+      			    :custom-two bg4)))
     #+end_src
 *** Dracula
     #+begin_src lisp
       (add-theme 'dracula
-           	   (let ((fg "#F8F8F2")
-           		 (bg "#282A36")
+           	   (let ((fg '("#F8F8F2" "#f1fa8c"))
+           		 (bg '("#282A36" "#44475a"))
            		 (border "#8BE9FD")
-           		 (purple "#BD93F9"))
+           		 (purple '("#BD93F9" "#ff79c6")))
            	     (make-instance 'theme
-           			    :fg fg
-           			    :bg bg
-           			    :border purple
+           			    :fg (car fg)
+           			    :bg (car bg)
+           			    :border (car purple)
            			    :focus border
-           			    :unfocus purple
+           			    :unfocus (car purple)
 
-      			      :mode-line-fg purple
-           			    :mode-line-bg bg
-           			    :mode-line-border purple
+      			    :mode-line-fg (car purple)
+           			    :mode-line-bg (car bg)
+           			    :mode-line-border (car purple)
 
-           			    :black bg
-           			    :white fg
-      			      :red "#FF5555"
+           			    :black  bg
+           			    :white  fg
+      			    :red "#FF5555"
            			    :green "#50FA7B"
            			    :yellow "#F1FA8C"
            			    :blue "#8BE9FD"
-           			    :magenta "#BD93F9"
+      			    :magenta purple
            			    :cyan "#FF79C6"
            			    :custom-one "#44475A"
            			    :custom-two "#6272A4")))
@@ -265,6 +295,13 @@
 ** Configuration
    #+begin_src lisp
      (set-system-themeing)
+
+     (defvar *fonts* (list "-adobe-courier-normal-r-normal-*-14-*-*-*-m-*-*-*"
+     		      ;; also bold
+      		      "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*"
+      		      "-*-new century schoolbook-r-normal-*-*-*-*-*-*-*-*-*-*"
+      		      "-*-times-*-*-*-*-*-*-*-*-*-*-*-*"))
+     (set-font (nth 0 *fonts*))
 
      (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
 
@@ -285,8 +322,6 @@
     #+end_src
 *** Mode Line
     #+begin_src lisp
-      (set-font "-adobe-courier-bold-r-normal-*-14-*-*-*-*-*-*-*")
-
       (defvar *show-mode-line-time* t)
 
       (setf *window-format* " %n %10c ")
@@ -319,22 +354,35 @@
       	  msg
       	  mode-line-close-changes))
 
-      (add-screen-mode-line-formatter #\M 'fmt-head-window-list)
-      (defun fmt-head-window-list (ml)
+      (add-screen-mode-line-formatter #\M 'fmt-pretty-head-window-list)
+      (defun fmt-pretty-head-window-list (ml)
         "Using *window-format*, return a 1 line list of the windows, space seperated."
         (format nil "~{~a~^~}"
-                (mapcar (lambda (w)
-                          (format-with-on-click-id 
-                           (let ((str (format-expand *window-formatters*
-                                                     ,*window-format*
-                                                     w)))
-                             (if (eq w (current-window))
-                                 (stumpwm::fmt-highlight (format nil "~a " str))
-                                 (format nil "~a|" str)))
-                           :ml-on-click-focus-window
-                           (stumpwm::window-id w)))
-                        (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml) (stumpwm::mode-line-head ml))
-                               #'< :key #'window-number))))
+      	  (let ((base-fmt
+      		  (mapcar (lambda (w)
+      			    (format-with-on-click-id 
+      			     (let ((str (format-expand *window-formatters*
+      						       ,*window-format*
+      						       w)))
+      			       (if (eq w (current-window))
+      				   (stumpwm::fmt-highlight (format nil " ~a " str))
+      				   (format nil "~a|" str)))
+      			     :ml-on-click-focus-window
+      			     (stumpwm::window-id w)))
+      			  (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
+      								 (stumpwm::mode-line-head ml))
+      					  #'< :key #'window-number))))
+      	    ;; Reparse strings and remove the | from the element befor the active window
+      	    (if (> (length base-fmt) 0)
+      		(loop for win-fmt-el from 1 to (- (length base-fmt) 1)
+      		      do (if (search "^r^(:on-click-end)" (nth win-fmt-el base-fmt))
+      			     (let* ((pos (- win-fmt-el 1))
+      				    (pos-str (nth pos base-fmt)))
+      			       (setf (nth pos base-fmt)
+      				     (cl-ppcre:regex-replace-all "\\|\\^\\(:on-click-end\\)"
+      								 pos-str
+      								 "\^\(\:on-click-end\)"))))))
+      	    base-fmt)))
 
       (setf *screen-mode-line-format*      
             (list
@@ -361,10 +409,15 @@
                         #'(lambda (win) (stumpwm:repack-window-numbers)))
 
       (defun toggle-modeline-all-screens ()
-        ;; Turn on the modeline
+        "We almost allways want to interact with the modeline on all screens"
         (mapcar (lambda (head)
       	    (toggle-mode-line (current-screen) head))
       	  (screen-heads (current-screen))))
+
+      (defun reload-mode-line ()
+        "This runs toggle-modeline-all-screens twice so that we get the settings refreshed"
+        (toggle-modeline-all-screens)
+        (toggle-modeline-all-screens))
 
       (toggle-modeline-all-screens)
     #+end_src
@@ -486,6 +539,10 @@
           "Ask for the user to confirm before reloading init file."
         	    (if confirm
         		(reload-init)))
+
+        (defcommand reload-mode-line () ()
+          "Runs reload-mode-line. This allows the themeing etc to be changed"
+        	    (reload-mode-line))
    #+end_src
 ** Misc
    #+begin_src lisp
@@ -554,6 +611,7 @@
       (defparameter *theme-map*
           	      (let ((m (make-sparse-keymap)))
           		(define-key m (kbd "t") "toggle-theme")
+      		(define-key m (kbd "m") "reload-mode-line")
                       m))
 
 
@@ -565,9 +623,9 @@
 
       (defparameter *system-map*
                     (let ((m (make-sparse-keymap)))
-          		(define-key m (kbd "s") *screenshot-map*)
-      		(define-key m (kbd "t") *theme-map*)
-          		(define-key m (kbd "p") *power-map*)
+          		(define-key m (kbd "s") '*screenshot-map*)
+      		(define-key m (kbd "t") '*theme-map*)
+          		(define-key m (kbd "p") '*power-map*)
       		(define-key m (kbd "r") "reload-rc-clean")
           		(define-key m (kbd "v") "volume-control")
           		m))
@@ -576,12 +634,12 @@
     #+begin_src lisp
       (defparameter *program-map*
       	      (let ((m (make-sparse-keymap)))
-      		(define-key m (kbd "f") |*firefox-map*|)
-      		(define-key m (kbd "e") |*emacs-map*|)
-      		(define-key m (kbd "c") |*alacritty-map*|)
-      		(define-key m (kbd "p") |*keepassxc-map*|)
-      		(define-key m (kbd "s") |*steam-map*|)
-      		(define-key m (kbd "i") |*icedove-map*|)
+      		(define-key m (kbd "f") '|*firefox-map*|)
+      		(define-key m (kbd "e") '|*emacs-map*|)
+      		(define-key m (kbd "c") '|*alacritty-map*|)
+      		(define-key m (kbd "p") '|*keepassxc-map*|)
+      		(define-key m (kbd "s") '|*steam-map*|)
+      		(define-key m (kbd "i") '|*icedove-map*|)
       		m))
     #+end_src
 *** Root Map
@@ -596,8 +654,8 @@
       (define-key *root-map* (kbd "F3") "user-switch-to-screen 0")
 
 
-      (define-key *root-map* (kbd "p") *program-map*)
-      (define-key *root-map* (kbd "s") *system-map*)
+      (define-key *root-map* (kbd "p") '*program-map*)
+      (define-key *root-map* (kbd "s") '*system-map*)
     #+end_src
 *** Top Map
     #+begin_src lisp

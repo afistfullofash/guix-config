@@ -42,17 +42,6 @@
 	    base-home-services
 	    base-home-backup-service))
 
-(define nnn-plugins-repo
-  (origin
-    (uri (git-reference
-	  (url "https://github.com/jarun/nnn.git")
-	  (commit "v5.1")))
-    (method git-fetch)
-    (sha256
-     (base32
-      "17mygdwdsb49zd0w1r4injaybmwp99dhhaabj30i7aas3ca4asgv"))))
-
-
 (define terminal-packages
   (list
    ;; Top Replacement
@@ -66,8 +55,6 @@
    ;; fuzzy finding
    "fzf"
    "fzf-tab"
-   ;; file manager (probably remove) 
-   "nnn"
    ;; grep replacement
    "ripgrep"
    "mpv"
@@ -82,17 +69,30 @@
    "hunspell"
    "hunspell-dict-en"))
 
-(define development-packages
+(define common-lisp-packages
+  (list "sbcl"
+	"sbcl-slynk"
+	"sbcl-legit"))
+
+(define git-packages
   (list "git"
-	"git:credential-libsecret"
-	"git-lfs"
-	"pre-commit"
-	"awscliv2"
-	"boundary"
-	"gawk"
-	"jq"
-	"kubectl"
-	"terraform"))
+	 "git:credential-libsecret"
+	 "git-lfs"
+	 "pre-commit"))
+
+(define work-programming-packages
+  (list  "awscliv2"
+	 "boundary"
+	 "gawk"
+	 "jq"
+	 "kubectl"
+	 "terraform"))
+
+(define development-packages
+  (append
+   git-packages
+   work-programming-packages
+   common-lisp-packages))
 
 ;;; This tangles the emacs init org file into init.el
 ;;; Ensuring that the emacs config is never out of date
@@ -299,7 +299,6 @@
 		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
 		    ("BROWSER" . ,(specification->package "firefox"))
 		    ("BAT_THEME" . "Dracula")
-		    ("NNN_FIFO" . "/tmp/nnn.fifo")
 		    ("TREE_SITTER_LIBDIR"
 		     . ,#~(string-join (map (lambda (pkg)
 					      (string-append pkg "/lib"))
@@ -359,7 +358,6 @@
     ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
     ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
     ("lsd" ,dracula-lsd-theme-repo)
-    ("nnn/plugins" ,nnn-plugins-repo)
     ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
     ("autorandr" ,(local-file "files/autorandr"
 			      #:recursive? #t))
