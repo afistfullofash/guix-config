@@ -32,7 +32,8 @@
 		     (network "host")
 		     (volumes (list "/home/natalie/src/home-assistant/config:/config"))
 		     (environment (list '("TZ" . "Australia/Sydney")))
-		     (extra-arguments '("--privileged"))))))))
+		     (extra-arguments '("--privileged"))
+		     (auto-start? #f)))))))
 
 (define laptop-system-services
   (list home-assistant-system-service))

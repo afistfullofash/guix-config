@@ -31,6 +31,7 @@
          "~/.config/rclone"
          "~/Pictures"
 	 "~/Passwords"
+	 "~/Documents"
 	 "~/src/guix-config"
 	 "~/src/afistfullofash"
 	 "~/org")
@@ -48,7 +49,8 @@
                   (list laptop-restic-backup-timer
 			home-notmuch-new-timer
 			home-natalieatkinson95-proton-sync-timer
-			home-tnatkinson95-gmail-sync-timer)))
+			home-tnatkinson95-gmail-sync-timer
+			home-work-email-sync-timer)))
 
 (define laptop-home-channels-service
   (simple-service 'laptop-home-channels-service

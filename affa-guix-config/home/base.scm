@@ -30,9 +30,9 @@
   #:use-module (affa-guix-config home utils)
 
   #:use-module (affa-guix-config themes dracula)
+  #:use-module (affa-guix-config packages runst)
   
   #:use-module (afistfullofash packages boundary)
-  ;; #:use-module (afistfullofash packages runst)
   #:use-module (afistfullofash packages codex)
   #:use-module (afistfullofash packages emacs-xyz)
   #:use-module (afistfullofash packages fonts)
@@ -74,11 +74,15 @@
 	"sbcl-slynk"
 	"sbcl-legit"))
 
+(define rust-packages
+  (list "rust"
+	"rust:cargo"))
+
 (define git-packages
   (list "git"
-	 "git:credential-libsecret"
-	 "git-lfs"
-	 "pre-commit"))
+	"git:credential-libsecret"
+	"git-lfs"
+	"pre-commit"))
 
 (define work-programming-packages
   (list  "awscliv2"
@@ -91,6 +95,7 @@
 (define development-packages
   (append
    git-packages
+   rust-packages
    work-programming-packages
    common-lisp-packages))
 
@@ -154,7 +159,8 @@
 	"emacs-cape"
 	"emacs-corfu"
 	"emacs-sly"
-	"emacs-jinx"))
+	"emacs-jinx"
+	"emacs-yasnippet"))
 
 (define tree-sitter-grammars
   (list tree-sitter-typescript
@@ -202,7 +208,9 @@
    "firefox"
    ;; Backup if firefox fails
    "google-chrome-stable"
-   ;; "calibre"
+   ;; Vlc
+   "vlc"
+   "calibre"
    "pavucontrol"
    ;; Screenshot tool
    "maim"
@@ -226,32 +234,33 @@
 	"wireplumber"
 	;; Required by dirvish
 	;; Currently breaking things
-	;; "vips"
+	"vips"
 	"poppler"
 	"mediainfo"
 	"openssh"
 	;; Background Setter
 	"feh"
-	;; "runst"
 	"tabbed"
 	;; Runs autorun files
 	"dex"
+	"freecad"
 	"glibc-locales"
 	"rclone"))
 
 
-;; (define runst-service
-;;   (simple-service
-;;    'runst home-shepherd-service-type
-;;    (list
-;;     (shepherd-service
-;;      (documentation "Run the runst notification daemon")
-;;      (requirement '(x11-display))
-;;      (auto-start? #t)
-;;      (provision '(runst))
-;;      (start #~(make-forkexec-constructor
-;;                (list #$(file-append runst "/bin/runst"))))
-;;      (stop #~(make-kill-destructor))))))
+(define runst-service
+  (simple-service
+   'runst home-shepherd-service-type
+   (list
+    (shepherd-service
+     (documentation "Run the runst notification daemon")
+     (requirement '(x11-display))
+     (auto-start? #t)
+     (provision '(runst))
+     (start #~(make-forkexec-constructor
+               (list #$(file-append runst "/bin/runst"))
+	       #:log-file "runst.log"))
+     (stop #~(make-kill-destructor))))))
 
 (define autorandr-service
   (simple-service
@@ -376,7 +385,7 @@
 
 (define base-home-services
   (list
-   ;; runst-service
+   runst-service
    autorandr-service
    environment-variables-service
    base-home-channels-service
