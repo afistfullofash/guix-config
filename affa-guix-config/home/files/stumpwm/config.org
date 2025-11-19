@@ -1,5 +1,6 @@
 #+TITLE: StumpWM Config
 #+PROPERTY: header-args:lisp :tangle init.lisp :exports both :eval never
+In general we are not allowing any variable setting or function calls outside of a defun. The only exected exception to this is the inital load underneath this and the finishing actions section which runs all the init-* defuns.
 * Initial Config
 Start slynk for debugging purposes first and then load in our required stumpwm contrib modules
   #+begin_src lisp
@@ -8,51 +9,13 @@ Start slynk for debugging purposes first and then load in our required stumpwm c
     (slynk:create-server :port 1337
     		     :dont-close t)
 
-    (setq *startup-message* (format nil "Welcome Natalie!"))
+    (setf *startup-message* (format nil "Welcome Natalie!"))
 
     (asdf:load-system "local-time")
     (asdf:load-system "pamixer")
     (asdf:load-system "battery-portable")
   #+end_src
 * Visual
-StumpWM kinda gives us incomplete color formatters for magnitude so make some extra ones which close off that changes
-  #+begin_src lisp
-    ;; These are bright by default switch to green, yellow and red
-    (defun set-bar-med-color ()
-      (setf *bar-med-color* (format nil "^2^(:bg \"~A\")" (slot-value (with-current-theme) 'mode-line-bg))))
-
-    (defun set-bar-hi-color ()
-      (setf *bar-hi-color* (format nil "^3*^(:bg \"~A\")" (slot-value (with-current-theme) 'mode-line-bg))))
-
-    (defun set-bar-crit-color ()
-      (setf *bar-crit-color* (format nil "^1*^(:bg \"~A\")" (slot-value (with-current-theme) 'mode-line-bg))))
-
-    (defun bar-med-color-closer ()
-      (format nil "^9^(:bg \"~A\")" (slot-value (with-current-theme) 'mode-line-bg)))
-
-    (defun bar-hi-color-closer ()
-      (format nil "^9^(:bg \"~A\")" (slot-value (with-current-theme) 'mode-line-bg)))
-
-    (defun bar-crit-color-closer ()
-      (format nil "^9^(:bg \"~A\")" (slot-value (with-current-theme) 'mode-line-bg)))
-
-    (defun bar-zone-color-closer (amount &optional (med 20) (hi 50) (crit 90) reverse)
-      "Return a color command based on the magnitude of the argument. If
-    the limits for the levels aren't specified, they default to sensible
-    values for a percentage. With reverse, lower numbers are more
-    critical."
-      (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
-    	(cond ((past crit) (bar-crit-color-closer))
-                  ((past hi) (bar-hi-color-closer))
-                  ((past med) (bar-med-color-closer))
-                  (t ""))))
-
-    (defun get-bar-zone-color-string (amount &optional (med 20) (hi 50) (crit 90) reverse)
-      (format nil "~a~a~a"
-    	  (bar-zone-color amount med hi crit reverse)
-    	  amount
-    	  (bar-zone-color-closer amount med hi crit reverse)))
-#+end_src
 ** Themeing
 This is a quick themeing system for stumpwm with a couple of theme options.
 
@@ -172,8 +135,10 @@ This gives us some very general functions to generate and apply /themes/ with.
       (defun get-theme (theme-name)
         (gethash theme-name *themes*))
 
+
       (defun with-current-theme ()
         (get-theme *current-theme*))
+
 
       (defun apply-theme-raw (theme)
         (set-fg-color (slot-value theme 'fg))
@@ -322,24 +287,7 @@ This gives us some very general functions to generate and apply /themes/ with.
        			    :custom-two "#6272A4")))
 #+end_src
 ** Configuration
-#+begin_src lisp
-  (set-system-themeing)
 
-  (defvar *fonts* (list "-adobe-courier-normal-r-normal-*-14-*-*-*-m-*-*-*"
-  		      ;; also bold
-   		      "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*"
-   		      "-*-new century schoolbook-r-normal-*-*-*-*-*-*-*-*-*-*"
-   		      "-*-times-*-*-*-*-*-*-*-*-*-*-*-*"))
-  (set-font (nth 0 *fonts*))
-
-  (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
-
-  (setq stumpwm:*input-window-gravity* :center
-        stumpwm:*message-window-gravity* :center
-        
-        stumpwm:*message-window-padding* 10
-        stumpwm:*message-window-y-padding* 10)
-#+end_src
    
 *** Notify
 Currently the stumpwm package built from systems/base.scm cannot load the notify package.
@@ -351,56 +299,94 @@ So this is chucked into a function while I debug it.
 #+end_src
 *** Mode Line
 #+begin_src lisp
+  ;; These are bright by default switch to green, yellow and red
+  (defun ml-foreground-color (color)
+    (if (typep color 'list)
+        (format nil "^(:fg \"~A\")" (car color))
+        (format nil "^(:fg \"~A\")" color)))
+
+  (defun ml-background-color (color)
+    (if (typep color 'list)
+        (format nil "^(:bg \"~A\")" (car color))
+        (format nil "^(:bg \"~A\")" color)))
+
+  (defun set-bar-med-color ()
+    (setf stumpwm::*bar-med-color*
+    	(ml-foreground-color
+    	 (slot-value (with-current-theme) 'green))))
+
+  (defun set-bar-hi-color ()
+    (setf stumpwm::*bar-hi-color*
+    	(ml-foreground-color
+    	 (slot-value (with-current-theme) 'yellow))))
+
+  (defun set-bar-crit-color ()
+    (setf stumpwm::*bar-crit-color*
+    	(ml-foreground-color
+    	 (slot-value (with-current-theme) 'red))))
+
+  (defun get-bar-zone-color-string (amount &optional (med 20) (hi 50) (crit 90) reverse)
+    (format nil "~a~a~a"
+    	  (bar-zone-color amount med hi crit reverse)
+    	  amount
+    	  ;; Reset the color once we are done
+    	  (ml-foreground-color
+    	   (slot-value (with-current-theme) 'mode-line-fg))))
+
   (defvar *show-mode-line-time* t)
 
-  (setf *window-format* " %n %10c ")
   (defun trimmed-shell-command (command)
     (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
   	       (run-shell-command command t)))
 
-  (defun mode-line-close-changes ()
-    (format nil "^(:fg \"~A\" :bg \"~A\")" *mode-line-foreground-color* *mode-line-background-color*))
+  (defun mode-line-clear-changes ()
+    (format nil "^(:fg \"~A\")^(:bg \"~A\")"
+  	  (slot-value (with-current-theme) 'mode-line-fg)
+  	  (slot-value (with-current-theme) 'mode-line-bg)))
 
-  (defvar light-bg "^(:bg 1)")
-  (defvar medium-bg "^(:bg 8)")
-  (defvar dark-bg "^(:bg 9)")
+  (defun light-bg () (ml-background-color (slot-value (with-current-theme) 'red)))
+  (defun medium-bg () (ml-background-color (slot-value (with-current-theme) 'custom-one)))
+  (defun dark-bg () (ml-background-color (slot-value (with-current-theme) 'custom-two)))
 
   (defun low-priority-message (msg)
     (format nil "~a~a~a"
-  	  light-bg
+  	  (light-bg)
   	  msg
-  	  (mode-line-close-changes)))
+  	  (mode-line-clear-changes)))
 
   (defun medium-priority-message (msg)
     (format nil "~a~a~a"
-  	  medium-bg
+  	  (medium-bg)
   	  msg
-  	  (mode-line-close-changes)))
+  	  (mode-line-clear-changes)))
 
   (defun high-priority-message (msg)
     (format nil "~a~a~a"
-  	  dark-bg
+  	  (dark-bg)
   	  msg
-  	  (mode-line-close-changes)))
+  	  (mode-line-clear-changes)))
+
+  (defun error-message-bar (msg)
+    (format nil " ^(:fg \"~A\")~A~A" (slot-value (with-current-theme) 'red) msg (mode-line-clear-changes)))
 
   (add-screen-mode-line-formatter #\M 'fmt-pretty-head-window-list)
   (defun fmt-pretty-head-window-list (ml)
     "Using *window-format*, return a 1 line list of the windows, space seperated."
     (format nil "~{~a~^~}"
   	  (let ((base-fmt
-  		 (mapcar (lambda (w)
-  			   (format-with-on-click-id 
-  			    (let ((str (format-expand *window-formatters*
-  						      ,*window-format*
-  						      w)))
-  			      (if (eq w (current-window))
-  				  (stumpwm::fmt-highlight (format nil " ~a " str))
-  				(format nil "~a|" str)))
-  			    :ml-on-click-focus-window
-  			    (stumpwm::window-id w)))
-  			 (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
-  								(stumpwm::mode-line-head ml))
-  					 #'< :key #'window-number))))
+  		  (mapcar (lambda (w)
+  			    (format-with-on-click-id 
+  			     (let ((str (format-expand *window-formatters*
+  						       ,*window-format*
+  						       w)))
+  			       (if (eq w (current-window))
+  				   (stumpwm::fmt-highlight (format nil " ~a " str))
+  				   (format nil "~a|" str)))
+  			     :ml-on-click-focus-window
+  			     (stumpwm::window-id w)))
+  			  (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
+  								 (stumpwm::mode-line-head ml))
+  					  #'< :key #'window-number))))
   	    ;; Reparse strings and remove the | from the element before the active window
   	    (if (> (length base-fmt) 0)
   		(loop for win-fmt-el from 1 to (- (length base-fmt) 1)
@@ -413,31 +399,40 @@ So this is chucked into a function while I debug it.
   								 "\^\(\:on-click-end\)"))))))
   	    base-fmt)))
 
-  (setf *screen-mode-line-format*      
-        (list
-         '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
-  		   ;; This looks weird if we don't add a double space after the battery
-  		   " %B  "))
-         '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
-         '(:eval (let ((tnatkinson-email-count (parse-integer (trimmed-shell-command "notmuch count tag:tnatkinson95 and tag:unread and not tag:promotions")))
-  		     (natalieatkinson-email-count (parse-integer (trimmed-shell-command "notmuch count tag:natalienatkinson95 and tag:unread and not tag:promotions")))
-  		     (work-email-count (parse-integer (trimmed-shell-command "notmuch count tag:work and tag:unread"))))
-  		 (if (> (+ tnatkinson-email-count natalieatkinson-email-count work-email-count) 0)
-  		     (medium-priority-message
-  		      (format nil " ~a ~a ~a Emails "
-  			      (get-bar-zone-color-string tnatkinson-email-count 5 10 15)
-  			      (get-bar-zone-color-string natalieatkinson-email-count 5 10 15)
-  			      (get-bar-zone-color-string work-email-count 5 10 15)))
-  		   "")))
-         '(:eval )
-         "%M"))
+  (defun ml-email-fmt ()
+    (flet ((notmuch-count
+  	     (tags)
+  	   (parse-integer (trimmed-shell-command (format nil "notmuch count ~A" tags)))))
+      (let* ((tnatkinson-email-count (notmuch-count "tag:tnatkinson95 and tag:unread and not tag:promotions"))
+  	   (natalieatkinson-email-count (notmuch-count "tag:natalienatkinson95 and tag:unread and not tag:promotions"))
+  	   (work-email-count (notmuch-count "tag:work and tag:unread")))
+        (if (> (+ tnatkinson-email-count natalieatkinson-email-count work-email-count) 0)
+  	  (medium-priority-message
+  	   (format nil " ~a ~a ~a Emails "
+  		   (get-bar-zone-color-string tnatkinson-email-count 5 10 15)
+  		   (get-bar-zone-color-string natalieatkinson-email-count 5 10 15)
+  		   (get-bar-zone-color-string work-email-count 5 10 15)))
+  	  ""))))
 
+  (defun ml-window-list-fmt ()
+    (format nil "~A%M" (mode-line-clear-changes)))
+
+  (defun get-mode-line-format ()
+    (list
+     (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
+         ;; This looks weird if we don't add a double space after the battery
+         " %B  ")
+     (if *show-mode-line-time* "^R %d ^r" "")
+     (ml-email-fmt)
+     (ml-window-list-fmt)))
+
+  (defun init-window-number-fixes ()
   ;;; When windows are desroyed window numbers are not synced
   ;;; 2kays <https://github.com/2kays> posted a solution on
   ;;; the TipsAndTricks section of the wiki
   ;;; This will repack window numbers every time a window is killed
-  (stumpwm:add-hook stumpwm:*destroy-window-hook*
-                    #'(lambda (win) (stumpwm:repack-window-numbers)))
+    (stumpwm:add-hook stumpwm:*destroy-window-hook*
+                      #'(lambda (win) (stumpwm:repack-window-numbers))))
 
   (defun toggle-modeline-all-screens ()
     "We almost allways want to interact with the modeline on all screens"
@@ -450,8 +445,55 @@ So this is chucked into a function while I debug it.
     (toggle-modeline-all-screens)
     (toggle-modeline-all-screens))
 
-  (toggle-modeline-all-screens)
+  (defun init-mode-line ()
+    (setf *window-format* " %n %10c ")  
+    
+    (set-bar-med-color)
+    (set-bar-hi-color)
+    (set-bar-crit-color)
+
+    (setf *screen-mode-line-format*      
+  	(list
+  	 '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
+  		     ;; This looks weird if we don't add a double space after the battery
+  		     " %B  "))
+  	 '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
+  	 '(:eval (ml-email-fmt))
+  	 ;; '(:eval (multiple-value-bind
+  	 ;; 		     (output error exit-code)
+  	 ;; 		   (uiop:run-program "ping -c 1 8.8.8.8" :ignore-error-status t)
+  	 ;; 		 (if (not (equal exit-code 0))
+  	 ;; 		     (error-message-bar "Network Error"))))
+  	 "%M"))
+
+    (init-window-number-fixes)
+
+    (toggle-modeline-all-screens))
+
 #+end_src
+*** Run init
+#+begin_src lisp
+  (defvar *fonts* (list "-adobe-courier-normal-r-normal-*-14-*-*-*-m-*-*-*"
+  		      ;; also bold
+   		      "-*-helvetica-medium-r-normal-*-14-*-*-*-*-*-*-*"
+   		      "-*-new century schoolbook-r-normal-*-*-*-*-*-*-*-*-*-*"
+   		      "-*-times-*-*-*-*-*-*-*-*-*-*-*-*"))
+
+  (defun init-system-themeing ()
+    (set-system-themeing)
+    (set-font (nth 0 *fonts*))
+
+    (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
+    
+    (setf stumpwm:*input-window-gravity* :center
+  	stumpwm:*message-window-gravity* :center
+        
+  	stumpwm:*message-window-padding* 10
+  	stumpwm:*message-window-y-padding* 10))
+
+
+#+end_src
+
 * User functions
 #+begin_src lisp
   (defun make-percent-bar (percent &optional title)
@@ -479,14 +521,14 @@ So this is chucked into a function while I debug it.
   		    "Screen Brightness")))
 
   (defcommand screen-brightness-up () ()
-  	    "Increase the brightness of the screen"
-  	    (run-shell-command "sudo brillo -A 10")
-  	    (show-screen-brightness))
+    "Increase the brightness of the screen"
+    (run-shell-command "sudo brillo -A 10")
+    (show-screen-brightness))
 
   (defcommand screen-brightness-down () ()
-  	    "Decrease the brightness of the screen"
-  	    (run-shell-command "sudo brillo -U 10")
-  	    (show-screen-brightness))  
+    "Decrease the brightness of the screen"
+    (run-shell-command "sudo brillo -U 10")
+    (show-screen-brightness))  
 
   (defun show-keyboard-brightness ()
     (stumpwm:message (make-percent-bar
@@ -494,14 +536,14 @@ So this is chucked into a function while I debug it.
   		    "Keyboard Brightness")))
 
   (defcommand keyboard-brightness-up () ()
-  	    "Increase the brightness of the keyboard"
-  	    (run-shell-command "sudo brillo -kA 10")
-  	    (show-keyboard-brightness))
+    "Increase the brightness of the keyboard"
+    (run-shell-command "sudo brillo -kA 10")
+    (show-keyboard-brightness))
 
   (defcommand keyboard-brightness-down () ()
-  	    "Decrease the brightness of the keyboard"
-  	    (run-shell-command "sudo brillo -kU 10")
-  	    (show-keyboard-brightness))
+    "Decrease the brightness of the keyboard"
+    (run-shell-command "sudo brillo -kU 10")
+    (show-keyboard-brightness))
 
 #+end_src
 ** Screenshots
@@ -512,20 +554,20 @@ So this is chucked into a function while I debug it.
      :format '(:YEAR "-" (:MONTH 2) "-" :DAY "-" :SHORT-WEEKDAY "-" :HOUR12 "_" :MIN "_" :SEC "_" :AMPM)))
 
   (defparameter *screenshot-path*
-  	      (format nil "~a/Pictures/Screenshots/~a.png"
-  		      (getenv "HOME")
-  		      (timestamp-string)))
+    (format nil "~a/Pictures/Screenshots/~a.png"
+  	  (getenv "HOME")
+  	  (timestamp-string)))
 
   ;; Setup bindings for less common aplications which would be opened then closed
   (defcommand screenshot () ()
-  	    "Take a screenshot and save it to screenshot directory"
-  	    (run-shell-command (format nil "maim ~a"
-  				       ,*screenshot-path*)))
+    "Take a screenshot and save it to screenshot directory"
+    (run-shell-command (format nil "maim ~a"
+  			     ,*screenshot-path*)))
 
   (defcommand screenshot-select () ()
-  	    "Select a area for a screenshot and save it to screenshot directory"
-  	    (run-shell-command (format nil "maim --select ~a"
-  				       ,*screenshot-path*)))
+    "Select a area for a screenshot and save it to screenshot directory"
+    (run-shell-command (format nil "maim --select ~a"
+  			     ,*screenshot-path*)))
 #+end_src
 ** Volume
 #+begin_src lisp
@@ -536,57 +578,58 @@ So this is chucked into a function while I debug it.
     (stumpwm:message (make-percent-bar (pamixer:get-volume) "Volume")))
 
   (defcommand notify-volume-up () ()
-  	    (run-commands "pamixer-volume-up")
-  	    (show-volume-bar))
+    (run-commands "pamixer-volume-up")
+    (show-volume-bar))
 
   (defcommand notify-volume-down () ()
-  	    (run-commands "pamixer-volume-down")
-  	    (show-volume-bar))
+    (run-commands "pamixer-volume-down")
+    (show-volume-bar))
 
   (defcommand volume-control () ()
-  	    "Start volume control"
-  	    (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
+    "Start volume control"
+    (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
 #+end_src
 ** Theme
 #+begin_src lisp
   (defcommand toggle-theme () ()
-       	    "Toggle the system theme"
-       	    (toggle-system-themeing))
+    "Toggle the system theme"
+    (toggle-system-themeing))
 #+end_src
 ** System
 #+begin_src lisp
   ;;; Shutdown and Reboot
   (defcommand shutdown (confirm) ((:y-or-n "Confirm Shutdown "))
-  	    "Ask for the user to confirm before shutting down."
-  	    (if confirm
-  		(run-shell-command "sudo shutdown")))
+    "Ask for the user to confirm before shutting down."
+    (if confirm
+        (run-shell-command "sudo shutdown")))
 
   (defcommand reboot (confirm) ((:y-or-n "Confirm Reboot "))
-  	    "Ask for the user to confirm before rebooting."
-  	    (if confirm
-  		(run-shell-command "sudo reboot")))
+    "Ask for the user to confirm before rebooting."
+    (if confirm
+        (run-shell-command "sudo reboot")))
 
   (defcommand reload-init (confirm) ((:y-or-n "Confirm Reloading init file "))
-  	    "Ask for the user to confirm before reloading init file."
-  	    (if confirm
-  		(reload-init)))
+    "Ask for the user to confirm before reloading init file."
+    (if confirm
+        (reload-init)))
 
   (defcommand reload-mode-line () ()
-  	    "Runs reload-mode-line. This allows the themeing etc to be changed"
-  	    (reload-mode-line))
+    "Runs reload-mode-line. This allows the themeing etc to be changed"
+    (reload-mode-line))
 #+end_src
 ** Misc
 #+begin_src lisp
   (defcommand user-switch-to-screen (screen-num) ((:number "Screen Number: "))
-  	    "Only works when there is a currently open window on the screen"
-  	    (select-window-by-number (window-number
-  				      (car (head-windows (current-group)
-  							 (nth screen-num (group-heads (current-group)))))))
-  	    (group-wake-up (current-group)))
+    "Only works when there is a currently open window on the screen"
+    (select-window-by-number (window-number
+  			    (car (head-windows (current-group)
+  					       (nth screen-num (group-heads (current-group)))))))
+    (group-wake-up (current-group)))
 #+end_src
 * Keybindings
 #+begin_src lisp
-  (set-prefix-key (kbd "C-t"))
+  (defun init-keybindings ()
+    (set-prefix-key (kbd "C-t")))
 #+end_src
 ** Keybinding Macros
 #+begin_src lisp
@@ -605,10 +648,10 @@ So this is chucked into a function while I debug it.
        (defcommand ,(intern (format nil "~a" alias)) () () (run-shell-command ,program-name))
        
        (defcommand ,(intern (format nil "run-or-raise-~a" alias)) () ()
-  		 (run-or-raise ,program-name '(:class ,window-class)))
+         (run-or-raise ,program-name '(:class ,window-class)))
        
        (defcommand ,(intern (format nil "run-or-pull-~a" alias)) () ()
-  		 (run-or-pull ,program-name '(:class ,window-class)))
+         (run-or-pull ,program-name '(:class ,window-class)))
        
        (stumpwm::fill-keymap ,(intern (format nil "*~a-map*" alias))
   			   (kbd "p") ,(format nil "run-or-pull-~a" alias)
@@ -617,17 +660,20 @@ So this is chucked into a function while I debug it.
 #+end_src
 ** Program Bindings
 #+begin_src lisp
-  (make-program-binding "firefox" "Firefox")
+  (defun init-program-binding ()
+    (make-program-binding "firefox" "Firefox")
 
-  (make-program-binding "alacritty" "Alacritty")
+    (make-program-binding "alacritty" "Alacritty")
 
-  (make-program-binding "emacs" "Emacs" "emacs")
+    (make-program-binding "emacs" "Emacs" "emacs")
 
-  (make-program-binding "keepassxc" "keepassxc")
+    (make-program-binding "keepassxc" "keepassxc")
 
-  (make-program-binding "steam" "steam")
+    (make-program-binding "steam" "steam")
 
-  (make-program-binding "firefox -P work --class firefox-work" "firefox-work" "firefox-work")
+    (make-program-binding "firefox -P work --class firefox-work" "firefox-work" "firefox-work")
+
+    (make-program-binding "firefox -P media --class firefox-media" "firefox-media" "firefox-media"))
 
 #+end_src
 ** Keymaps
@@ -635,74 +681,90 @@ So this is chucked into a function while I debug it.
 #+begin_src lisp
    ;;; System Command Keymap
   (defparameter *screenshot-map*
-      	      (let ((m (make-sparse-keymap)))
-      		(define-key m (kbd "f") "screenshot")
-      		(define-key m (kbd "s") "screenshot-select")
-      		m))
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "f") "screenshot")
+      (define-key m (kbd "s") "screenshot-select")
+      m))
 
   (defparameter *theme-map*
-      	      (let ((m (make-sparse-keymap)))
-      		(define-key m (kbd "t") "toggle-theme")
-  		(define-key m (kbd "m") "reload-mode-line")
-                  m))
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "t") "toggle-theme")
+      (define-key m (kbd "m") "reload-mode-line")
+      m))
 
 
   (defparameter *power-map*
-      	      (let ((m (make-sparse-keymap)))
-      		(define-key m (kbd "p") "shutdown")
-      		(define-key m (kbd "r") "reboot")
-      		m)) 
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "p") "shutdown")
+      (define-key m (kbd "r") "reboot")
+      m)) 
 
   (defparameter *system-map*
-                (let ((m (make-sparse-keymap)))
-      		(define-key m (kbd "s") '*screenshot-map*)
-  		(define-key m (kbd "t") '*theme-map*)
-      		(define-key m (kbd "p") '*power-map*)
-  		(define-key m (kbd "r") "reload-rc-clean")
-      		(define-key m (kbd "v") "volume-control")
-      		m))
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "s") '*screenshot-map*)
+      (define-key m (kbd "t") '*theme-map*)
+      (define-key m (kbd "p") '*power-map*)
+      (define-key m (kbd "r") "reload-rc-clean")
+      (define-key m (kbd "v") "volume-control")
+      m))
 #+end_src
 *** Program Map
 #+begin_src lisp
   (defparameter *program-map*
-  	      (let ((m (make-sparse-keymap)))
-  		(define-key m (kbd "f") '|*firefox-map*|)
-  		(define-key m (kbd "w") '|*firefox-work-map*|)
-  		(define-key m (kbd "e") '|*emacs-map*|)
-  		(define-key m (kbd "c") '|*alacritty-map*|)
-  		(define-key m (kbd "p") '|*keepassxc-map*|)
-  		(define-key m (kbd "s") '|*steam-map*|)
-                  m))
+    (let ((m (make-sparse-keymap)))
+      (define-key m (kbd "f") '|*firefox-map*|)
+      (define-key m (kbd "w") '|*firefox-work-map*|)
+      (define-key m (kbd "m") '|*firefox-media-map*|)
+      (define-key m (kbd "e") '|*emacs-map*|)
+      (define-key m (kbd "c") '|*alacritty-map*|)
+      (define-key m (kbd "p") '|*keepassxc-map*|)
+      (define-key m (kbd "s") '|*steam-map*|)
+      m))
 #+end_src
 *** Root Map
 #+begin_src lisp
-  (define-key *root-map* (kbd "0") "remove")
-  (define-key *root-map* (kbd "1") "only")
-  (define-key *root-map* (kbd "2") "vsplit")
-  (define-key *root-map* (kbd "3") "hsplit")
+  (defun init-root-map ()
+    (define-key *root-map* (kbd "0") "remove")
+    (define-key *root-map* (kbd "1") "only")
+    (define-key *root-map* (kbd "2") "vsplit")
+    (define-key *root-map* (kbd "3") "hsplit")
 
-  (define-key *root-map* (kbd "F1") "user-switch-to-screen 2")
-  (define-key *root-map* (kbd "F2") "user-switch-to-screen 1")
-  (define-key *root-map* (kbd "F3") "user-switch-to-screen 0")
+    (define-key *root-map* (kbd "F1") "user-switch-to-screen 2")
+    (define-key *root-map* (kbd "F2") "user-switch-to-screen 1")
+    (define-key *root-map* (kbd "F3") "user-switch-to-screen 0")
 
 
-  (define-key *root-map* (kbd "p") '*program-map*)
-  (define-key *root-map* (kbd "s") '*system-map*)
+    (define-key *root-map* (kbd "p") '*program-map*)
+    (define-key *root-map* (kbd "s") '*system-map*))
 #+end_src
 *** Top Map
 #+begin_src lisp
-  (define-key *top-map* (kbd "XF86AudioRaiseVolume") "notify-volume-up")
-  (define-key *top-map* (kbd "XF86AudioLowerVolume") "notify-volume-down")
-  (define-key *top-map* (kbd "XF86AudioMute") "pamixer-toggle-mute")
+  (defun init-top-map ()
+    (define-key *top-map* (kbd "XF86AudioRaiseVolume") "notify-volume-up")
+    (define-key *top-map* (kbd "XF86AudioLowerVolume") "notify-volume-down")
+    (define-key *top-map* (kbd "XF86AudioMute") "pamixer-toggle-mute")
 
-  (define-key *top-map* (kbd "XF86MonBrightnessUp") "screen-brightness-up")
-  (define-key *top-map* (kbd "XF86MonBrightnessDown") "screen-brightness-down")
+    (define-key *top-map* (kbd "XF86MonBrightnessUp") "screen-brightness-up")
+    (define-key *top-map* (kbd "XF86MonBrightnessDown") "screen-brightness-down")
 
-  (define-key *top-map* (kbd "XF86KbdBrightnessUp") "keyboard-brightness-up")
-  (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down")
+    (define-key *top-map* (kbd "XF86KbdBrightnessUp") "keyboard-brightness-up")
+    (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down"))
 
 #+end_src
 * Final Actions
 #+begin_src lisp
-  (run-shell-command "dex -a -s $XDG_CONFIG_HOME/autostart/")
+  (defun run-all-inits ()
+    ;; Themes
+    (init-system-themeing)
+    (init-mode-line)
+
+    ;; Keymaps
+    (init-keybindings)
+    (init-program-binding)
+    (init-root-map)
+    (init-top-map)
+    
+    (run-shell-command "dex -a -s $XDG_CONFIG_HOME/autostart/"))
+
+  (run-all-inits)
 #+end_src
