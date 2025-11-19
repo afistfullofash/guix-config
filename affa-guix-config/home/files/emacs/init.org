@@ -575,7 +575,7 @@ I have the [[*Org Modern][org-modern]] configuration under themes.
     (org-indent-mode-turns-on-hiding-stars nil))
 #+end_src
 *** Org Journal
-Switching between this is Org Roam
+
 #+begin_src emacs-lisp
   (defun afistfullofash/org-journal-find-location ()
     ;; Open today's journal, but specify a non-nil prefix argument in order to
@@ -600,19 +600,6 @@ Switching between this is Org Roam
     :custom
     (org-journal-dir "~/org/journal/")
     (org-journal-date-format "%A, %d %B %Y"))
-#+end_src
-*** Org Roam
-#+begin_src emacs-lisp
-  (use-package org-roam
-    :hook
-    (after-init . (org-roam-db-autosync-mode))
-    :bind (("C-c n n" . org-roam-capture)
-  	 ("C-c n l" . org-roam-buffer-toggle)
-  	 ("C-c n f" . org-roam-node-find)
-  	 ("C-c n i" . org-roam-node-insert))
-    :custom
-    (org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-    (org-roam-directory (file-truename "~/org")))
 #+end_src
 *** Org Capture
 **** Templates
@@ -661,8 +648,12 @@ Capture a Journal Entry
 *** Indent Bars
 #+begin_src emacs-lisp
   (use-package indent-bars
+    :custom
+    (indent-bars-color '(highlight :face-bg t :blend 0.9))
     :hook ((yaml-mode . indent-bars-mode)
-   	 (python-mode . indent-bars-mode)))
+  	 (yaml-ts-mode . indent-bars-mode)
+      	 (python-mode . indent-bars-mode)
+  	 (python-mode . indent-bars-mode)))
 #+end_src
 *** Rainbow Delimeters
 #+begin_src emacs-lisp
@@ -722,8 +713,8 @@ It is disabled for now
     (org-insert-heading-respect-content t)
 
     ;; Org styling, hide markup etc.
-    (org-hide-emphasis-markers t)
-    (org-pretty-entities t)
+    (org-hide-emphasis-markers f)
+    (org-pretty-entities f)
     (org-agenda-tags-column 0)
     (org-ellipsis "…"))
 
