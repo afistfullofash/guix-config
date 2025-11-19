@@ -128,8 +128,7 @@
 	;; Org Mode
 	"emacs-org-modern"
 	"emacs-org-modern-indent"
-	"emacs-org-roam"
-	"emacs-org-journal"
+        "emacs-org-journal"
 	"emacs-notmuch"
 	"emacs-nyan-mode-1.1.4"
 	"emacs-diredfl"
@@ -160,7 +159,9 @@
 	"emacs-corfu"
 	"emacs-sly"
 	"emacs-jinx"
-	"emacs-yasnippet"))
+	"emacs-yasnippet"
+	"emacs-syslog-mode"
+	"emacs-rainbow-mode"))
 
 (define tree-sitter-grammars
   (list tree-sitter-typescript
@@ -216,6 +217,8 @@
    "maim"
    ;; Image Viewer
    "sxiv"
+   ;; Photo Management
+   "darktable"
    ;; Document Viewer
    "zathura"))
 
@@ -229,7 +232,7 @@
   (list "fonts-nerd-fonts-dejavu"
 	"font-dejavu"
 	"autorandr"
-	"protonup-ng"
+	"protonup"
 	"gnupg"
 	"wireplumber"
 	;; Required by dirvish
