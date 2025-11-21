@@ -480,20 +480,6 @@ We have a slynk connection running on StumpWM at port 1337 so that we can test c
 
   (use-package lsp-ui
     :commands lsp-ui-mode)
-
-  (use-package lsp-scheme
-    :after lsp-mode
-    :custom
-    ;; One of: "guile"  "chicken"  "gambit"  "chez"  "racket" …
-    ;; Pick the implementation you'll use most often.
-    (lsp-scheme-implementation "guile")  ; change to "chicken" etc. if needed
-    ;; If you keep multiple Schemes, make it project-specific:
-    ;; (dir-locals-set-class-variables
-    ;;  'my-scheme
-    ;;  '((scheme-mode . ((lsp-scheme-implementation . "chicken")))))
-    ;; (dir-locals-set-directory-class "/path/to/project/" 'my-scheme)
-    )
-
 #+end_src
 ** Org Mode
 This org configuration is going to split the main org use-package up a bit so I can notate it a little better. While I like that I can just drop in and out of src blocks when I wish in Literate Programming I have yet to have worked out how to get fontification working correctly with [[*Rainbow Delimeters][rainbow-delimiters]] and miss-matched pairs.
