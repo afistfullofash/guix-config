@@ -553,21 +553,21 @@ So this is chucked into a function while I debug it.
      nil (local-time:now)
      :format '(:YEAR "-" (:MONTH 2) "-" :DAY "-" :SHORT-WEEKDAY "-" :HOUR12 "_" :MIN "_" :SEC "_" :AMPM)))
 
-  (defparameter *screenshot-path*
-    (format nil "~a/Pictures/Screenshots/~a.png"
-  	  (getenv "HOME")
-  	  (timestamp-string)))
+  (defun screenshot-path ()
+      (format nil "~a/Pictures/Screenshots/~a.png"
+  	    (getenv "HOME")
+  	    (timestamp-string)))
 
   ;; Setup bindings for less common aplications which would be opened then closed
   (defcommand screenshot () ()
-    "Take a screenshot and save it to screenshot directory"
-    (run-shell-command (format nil "maim ~a"
-  			     ,*screenshot-path*)))
+  	    "Take a screenshot and save it to screenshot directory"
+  	    (run-shell-command (format nil "maim ~a"
+  				       (screenshot-path))))
 
   (defcommand screenshot-select () ()
-    "Select a area for a screenshot and save it to screenshot directory"
-    (run-shell-command (format nil "maim --select ~a"
-  			     ,*screenshot-path*)))
+  	    "Select a area for a screenshot and save it to screenshot directory"
+  	    (run-shell-command (format nil "maim --select ~a"
+  				       (screenshot-path))))
 #+end_src
 ** Volume
 #+begin_src lisp
