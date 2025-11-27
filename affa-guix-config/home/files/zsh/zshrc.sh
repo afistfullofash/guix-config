@@ -196,3 +196,9 @@ gfr() {
     print
     gsr ${SYSTEM} && ghr ${SYSTEM} && sudo reboot
 }
+
+gitmezip() {
+    GIT_HASH=$(git rev-parse HEAD)
+    REPO_DIR_NAME=${PWD##*/}
+    git archive --format=zip --output ../${REPO_DIR_NAME}-${GIT_HASH}.zip HEAD
+}
