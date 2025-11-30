@@ -75,8 +75,12 @@
 	"sbcl-legit"))
 
 (define rust-packages
+  ;; Unfortunantly it seems I need to pollute these
+  ;; I currently dont know how to make emacs open a guix shell environment
+  ;; when it is inside a relevant project
   (list "rust"
-	"rust:cargo"))
+	"rust:cargo"
+	"rust:tools"))
 
 (define git-packages
   (list "git"
