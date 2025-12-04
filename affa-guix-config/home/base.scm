@@ -357,14 +357,18 @@
   `((".themes/Dracula" ,dracula-gtk-theme-repo)
     (".icons/Dracula" ,dracula-gtk-icons)
     (".Xresources" ,dracula-xresources-theme-repo)
+    ;; Setup Git for multiple emails
+    ;; This gets configured based on file path
     (".gitconfig" ,(local-file "files/git/gitconfig"))
     (".gitignore" ,(local-file "files/git/gitignore"))
     ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
     ;; For some reason this does not work when we pass directories to it
     (".stumpwm.d/init.lisp" ,stumpwm-init-lisp)
+    ;; Emacs
+    (".emacs.d/init.el" ,emacs-init-el)
+    ;; SSH Public Keys
     (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
     (".ssh/nat.pub" ,(local-file "files/ssh/nat.pub"))
-    (".emacs.d/init.el" ,emacs-init-el)
     ;; Email
     ("mail/.notmuch/hooks/post-new" ,(local-file "files/notmuch/post-new"))
     ("mail/work/.gmailieer.json" ,(local-file "files/gmi/work.gmailieer.json"))
