@@ -89,7 +89,7 @@
 	"pre-commit"))
 
 (define work-programming-packages
-  (list  "awscliv2"
+  (list  "awscli"
 	 "boundary"
 	 "gawk"
 	 "jq"
