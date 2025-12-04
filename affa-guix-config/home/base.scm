@@ -365,6 +365,9 @@
     (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
     (".ssh/nat.pub" ,(local-file "files/ssh/nat.pub"))
     (".emacs.d/init.el" ,emacs-init-el)
+    ;; Email
+    ("mail/.notmuch/hooks/post-new" ,(local-file "files/notmuch/post-new"))
+    ("mail/work/.gmailieer.json" ,(local-file "files/gmi/work.gmailieer.json"))
     ;; Ensure screenshot directory exists
     ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
 
