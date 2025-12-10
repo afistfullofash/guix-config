@@ -36,8 +36,7 @@
   #:use-module (afistfullofash packages codex)
   #:use-module (afistfullofash packages emacs-xyz)
   #:use-module (afistfullofash packages fonts)
-  #:use-module (afistfullofash packages terraform)
-
+  
   #:export (base-home-environment
 	    base-home-services
 	    base-home-backup-service))
@@ -93,8 +92,7 @@
 	 "boundary"
 	 "gawk"
 	 "jq"
-	 "kubectl"
-	 "terraform"))
+	 "kubectl"))
 
 (define development-packages
   (append
