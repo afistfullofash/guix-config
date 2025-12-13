@@ -31,6 +31,8 @@
 
   #:use-module (affa-guix-config themes dracula)
   #:use-module (affa-guix-config packages runst)
+
+  #:use-module (affa-guix-config packages guix-reconfiguration-wrapper)
   
   #:use-module (afistfullofash packages boundary)
   #:use-module (afistfullofash packages codex)
@@ -60,7 +62,9 @@
    ;; prompt replacement
    "starship"
    "codex"
-   "unzip"))
+   "unzip"
+
+   "guix-reconfiguration-wrapper"))
 
 (define spellcheck-packages
   (list
@@ -208,8 +212,6 @@
    "steam"
    ;; Main browser
    "firefox"
-   ;; Backup if firefox fails
-   "google-chrome-stable"
    ;; Vlc
    "vlc"
    "calibre"

@@ -1,0 +1,22 @@
+[project]
+name = "guix-reconfiguration-wrapper"
+version = "0.0.1"
+authors = [
+{ name="Natalie Atkinson", email="natalie.atkinson95@pm.me" },
+]
+description = "A wrapper for guix home and system reconfiguration"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+
+[project.urls]
+Homepage = "https://github.com/afistfullofash/guix-config/"
+Issues = "https://github.com/afistfullofash/guix-config/issues"
+
+[project.scripts]
+guix-reconfiguration-wrapper = "wrapper.cli:cli"

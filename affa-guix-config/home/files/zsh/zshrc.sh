@@ -84,116 +84,38 @@ ssh_network() {
   done
 }
 
-is_config_worktree_dirty() {
-    STARTING_DIR=$(pwd)
-    cd "${HOME}/src/guix-config/"
-    DIRTYNESS=$(git status --porcelain | wc -l)
-    cd ${STARTING_DIR}
-    return ${DIRTYNESS}
-}
-
 # Guix Home Reconfigure
 ghr() {
-    if [[ is_config_worktree_dirty -gt 0 ]]; then
-	print -P "%B%F{red+}Ensure there is a clean git worktree before pull%f%b"
-	return 1
-    fi
-    if [ -z "${1}" ]; then
-	print -P "%B%F{red+}No Home given to configure%f%b"
-	return 1
-    fi
     SYSTEM=${1}
-    print
-    print
-    print -P "%B%F{magenta+}Running Home Guix Pull%f%b"
-    print
-    print
-    guix pull
-    hash guix
-    ghrq $SYSTEM
+    guix-reconfiguration-wrapper home ${SYSTEM} full
 }
 
 # Guix Home Reconfigure Quick
 ghrq() {
-    if [ -z "${1}" ]; then
-	print -P "%B%F{red}No Home given to configure%f%b"
-	return 1
-    fi    
     SYSTEM=${1}
-    print
-    print
-    print -P "%B%F{magenta+}Running Guix Reconfigure Home%f%b"
-    print -P "%B$SYSTEM%b"
-    print
-    print
-    source ~/.pass/restic.env
-    guix home reconfigure  -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/affa-guix-config/home/${SYSTEM}.scm
+    guix-reconfiguration-wrapper home ${SYSTEM} quick
 }
 
 # Guix System Reconfigure
 gsr() {
-    if [[ is_config_worktree_dirty -gt 0 ]]; then
-	print -P "%B%F{red+}Ensure there is a clean git worktree before pull%f%b"
-	return 1
-    fi
-    if [ -z "${1}" ]; then
-	print -P "%B%F{red+}No System given to configure%f%b"
-	return 1
-    fi    
     SYSTEM=${1}
-    print
-    print
-    print -P "%B%F{magenta+}Running System Guix Pull%f%b"
-    print
-    print
-    sudo guix pull
-    gsrq $SYSTEM
+    guix-reconfiguration-wrapper system ${SYSTEM} full
 }
 
 # Guix System Reconfigure Quick
 gsrq() {
-    if [ -z "${1}" ]; then
-	print -P "%B%F{red+}No System given to configure%f%b"
-	return 1
-    fi    
     SYSTEM=${1}
-    print
-    print
-    print -P "%B%F{magenta+}Running Guix Reconfigure System%f%b"
-    print -P "%B$SYSTEM%b"
-    print
-    print
-    sudo guix system reconfigure -L ${HOME}/src/guix-config/ ${HOME}/src/guix-config/affa-guix-config/systems/${SYSTEM}.scm
+    guix-reconfiguration-wrapper system ${SYSTEM} quick
 }
 
 # Guix Full Reconfigures
 gfrq() {
-    if [ -z "${1}" ]; then
-	print -P "%B%F{red+}No System given to configure%f%b"
-	return 1
-    fi    
     SYSTEM=${1}
-    print
-    print
-    print -P "%B%F{magenta+}Running Complete Guix Reconfigure Quick%f%b"
-    print -P "%B$SYSTEM%b"
-    print
-    print
     gsrq ${SYSTEM} && ghrq ${SYSTEM} && sudo reboot
 }
 
 gfr() {
-    if [ -z "${1}" ]; then
-	print -P "%B%F{red+}No System given to configure%f%b"
-	return 1
-    fi    
     SYSTEM=${1}
-    print
-    print
-    print -P "%B%F{magenta+}Running Complete Guix Reconfigure%f%b"
-    print -P "%B$SYSTEM%b"
-    print
-    print
     gsr ${SYSTEM} && ghr ${SYSTEM} && sudo reboot
 }
 
