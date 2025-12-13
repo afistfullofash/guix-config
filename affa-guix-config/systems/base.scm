@@ -92,12 +92,20 @@
            (delete 'remove-temporary-cache)
            (delete 'cleanup)))))))
 
+(define sudo-user-programs
+  (string-join
+   (list
+    "/run/current-system/profile/bin/brillo"
+    "/home/natalie/.config/guix/current/bin/guix"
+    "/run/current-system/profile/sbin/shutdown"
+    "/run/current-system/profile/sbin/reboot")
+   ","))
+
 (define etc-sudoers-config
   (plain-file "etc-sudoers-config"
-              "Defaults  timestamp_timeout=480
-root      ALL=(ALL) ALL
-%wheel    ALL=(ALL) ALL
-natalie  ALL=(ALL) NOPASSWD:/run/current-system/profile/sbin/reboot,/run/current-system/profile/sbin/shutdown,/home/natalie/.config/guix/current/bin/guix,/run/current-system/profile/bin/brillo"))
+              (string-append
+	       (plain-file-content %sudoers-specification)
+	       (format #f "natalie ALL=(ALL) NOPASSWD:~a" sudo-user-programs))))
 
 (define base-system-services
   (append (list
