@@ -167,7 +167,7 @@
 		   (group "users")
 		   (home-directory "/home/natalie")
 		   (shell (file-append zsh "/bin/zsh"))
-		   (supplementary-groups '("wheel" "netdev" "audio" "video" "docker" "lp")))
+		   (supplementary-groups '("wheel" "netdev" "audio" "video" "docker" "lp" "dialout")))
 		  %base-user-accounts))
 
   (sudoers-file etc-sudoers-config)
