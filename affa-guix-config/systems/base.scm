@@ -35,6 +35,10 @@
 	    base-system-services
 	    stumpwm-with-extensions))
 
+(define %user
+  '((short "natalie")
+    (full "Natalie Akinson")))
+
 (define stumpwm-with-extensions
   (package
     (inherit stumpwm)
@@ -96,7 +100,7 @@
   (string-join
    (list
     "/run/current-system/profile/bin/brillo"
-    "/home/natalie/.config/guix/current/bin/guix"
+    (format #f "/home/~a/.config/guix/current/bin/guix" (cadr (assoc 'short %user)))
     "/run/current-system/profile/sbin/shutdown"
     "/run/current-system/profile/sbin/reboot")
    ","))
@@ -105,52 +109,56 @@
   (plain-file "etc-sudoers-config"
               (string-append
 	       (plain-file-content %sudoers-specification)
-	       (format #f "natalie ALL=(ALL) NOPASSWD:~a" sudo-user-programs))))
+	       (format #f "~a ALL=(ALL) NOPASSWD:~a"
+		       (cadr (assoc 'short %user))
+		       sudo-user-programs))))
 
 (define base-system-services
-  (append (list
-	      (service kernel-module-loader-service-type
-		       '("i2c-dev" "i2c-piix4"))
-	      (udev-rules-service 'openrgb openrgb)
-	      (service unbound-service-type)
-	      (simple-service
-	       'resolvconf etc-service-type
-	       (list `("resolvconf.conf" ,(mixed-text-file
-					   "resolv.conf"
-					   "name_servers=127.0.0.1"))))
-	      (service iwd-service-type
-		       (iwd-configuration
-			(shepherd-provision '(iwd networking wireless-daemon))
-			 (config
-			  (iwd-settings
-			   (network
-			    (iwd-network-settings
-			     (name-resolving-service 'resolvconf)))
-			    (general
-			     (iwd-general-settings
-			       (enable-network-configuration? #t)))))))
-	      (service bluetooth-service-type
-		       (bluetooth-configuration (auto-enable? #t)
-						(multi-profile 'multiple)))
-	      (service containerd-service-type)
-	      (service docker-service-type)
-	      (service cups-service-type
-		       (cups-configuration
-			(web-interface? #t)))
-	      (service gnome-keyring-service-type)
-	      (set-xorg-configuration
-	       (xorg-configuration (keyboard-layout (keyboard-layout "au")))))
-	     (modify-services %desktop-services
-	       (delete wpa-supplicant-service-type)
-	       (delete network-manager-service-type)
-	       (guix-service-type config => (guix-configuration
-					     (inherit config)
-					     (substitute-urls
-					      (append (list "https://substitutes.nonguix.org")
-						      %default-substitute-urls))
-					     (authorized-keys
-					      (append (list (local-file "files/nonguix/signing-key.pub"))
-						      %default-authorized-guix-keys)))))))
+  (append
+   (list
+    (service kernel-module-loader-service-type
+	     '("i2c-dev" "i2c-piix4"))
+    (udev-rules-service 'openrgb openrgb)
+    (service unbound-service-type)
+    (simple-service
+     'resolvconf etc-service-type
+     (list `("resolvconf.conf" ,(mixed-text-file
+				 "resolv.conf"
+				 "name_servers=127.0.0.1"))))
+    (service iwd-service-type
+	     (iwd-configuration
+	      (shepherd-provision '(iwd networking wireless-daemon))
+	      (config
+	       (iwd-settings
+		(network
+		 (iwd-network-settings
+		  (name-resolving-service 'resolvconf)))
+		(general
+		 (iwd-general-settings
+		  (enable-network-configuration? #t)))))))
+    (service bluetooth-service-type
+	     (bluetooth-configuration (auto-enable? #t)
+				      (multi-profile 'multiple)))
+    (service containerd-service-type)
+    (service docker-service-type)
+    (service cups-service-type
+	     (cups-configuration
+	      (web-interface? #t)))
+    (service gnome-keyring-service-type)
+    (set-xorg-configuration
+     (xorg-configuration (keyboard-layout (keyboard-layout "au")))))
+   (modify-services %desktop-services
+     (delete wpa-supplicant-service-type)
+     (delete network-manager-service-type)
+     (guix-service-type config => (guix-configuration
+				   (inherit config)
+				   (substitute-urls
+				    (append (list "https://substitutes.nonguix.org")
+					    %default-substitute-urls))
+				   (authorized-keys
+				    (append (list (local-file "files/nonguix/signing-key.pub"))
+					    %default-authorized-guix-keys)))))))
+
 (define base-system-operating-system
   (operating-system
     (host-name "base")
@@ -162,12 +170,18 @@
     (keyboard-layout (keyboard-layout "au"))
 
     (users (cons* (user-account
-		   (name "natalie")
-		   (comment "Natalie Atkinson")
+		   (name (cadr (assoc 'short %user)))
+		   (comment (cadr (assoc 'full %user)))
 		   (group "users")
-		   (home-directory "/home/natalie")
+		   (home-directory (format #f "/home/~a" (cadr (assoc 'short %user))))
 		   (shell (file-append zsh "/bin/zsh"))
-		   (supplementary-groups '("wheel" "netdev" "audio" "video" "docker" "lp" "dialout")))
+		   (supplementary-groups '("wheel"
+					   "netdev"
+					   "audio"
+					   "video"
+					   "docker"
+					   "lp"
+					   "dialout")))
 		  %base-user-accounts))
 
   (sudoers-file etc-sudoers-config)
