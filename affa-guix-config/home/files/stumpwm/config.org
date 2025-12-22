@@ -454,17 +454,19 @@ So this is chucked into a function while I debug it.
 
     (setf *screen-mode-line-format*      
   	(list
+  	 "%M^>"
+  	 '(:eval (ml-email-fmt))
+  	 '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
   	 '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
   		     ;; This looks weird if we don't add a double space after the battery
-  		     " %B  "))
-  	 '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
-  	 '(:eval (ml-email-fmt))
+  		     " %B "))
+
   	 ;; '(:eval (multiple-value-bind
   	 ;; 		     (output error exit-code)
   	 ;; 		   (uiop:run-program "ping -c 1 8.8.8.8" :ignore-error-status t)
   	 ;; 		 (if (not (equal exit-code 0))
   	 ;; 		     (error-message-bar "Network Error"))))
-  	 "%M"))
+  	 ))
 
     (init-window-number-fixes)
 
