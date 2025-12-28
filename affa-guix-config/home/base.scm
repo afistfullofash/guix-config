@@ -13,6 +13,8 @@
 
   #:use-module (gnu packages)
   #:use-module (gnu packages tree-sitter)
+  #:use-module (gnu packages bash)
+  #:use-module (gnu packages mail)
   #:use-module (gnu packages xdisorg)
 
   #:use-module (gnu services)
@@ -370,7 +372,19 @@
     (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
     (".ssh/nat.pub" ,(local-file "files/ssh/nat.pub"))
     ;; Email
-    ("mail/.notmuch/hooks/post-new" ,(local-file "files/notmuch/post-new"))
+    ("mail/.notmuch/hooks/post-new" ,(program-file
+				      "post-new"
+				      #~(begin
+					  (let ((tags '(("+personal +tnatkinson95" "is:new and path:tnatkinson95-gmail/**")
+							("+personal +natalienatkinson95" "is:new and path:natalieatkinson95-pm/**")  
+							("+work +tomatkinson" "is:new and path:work/**")
+							("+calendar" "is:new and body:'View on Google Calendar'")
+							("+important" "is:new and tag:work and from:*@liven.com.au or tag:calendar"))))
+					    (for-each
+					     (lambda (tag)
+					       (system* #$(file-append notmuch "/bin/notmuch") "tag" (car tag) "--" (cadr tag)))
+					     tags))
+					  (system* #$(file-append notmuch "/bin/notmuch") "tag" "-new" "--" "is:new"))))
     ("mail/work/.gmailieer.json" ,(local-file "files/gmi/work.gmailieer.json"))
     ;; Ensure screenshot directory exists
     ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
