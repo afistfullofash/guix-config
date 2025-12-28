@@ -17,7 +17,7 @@
   #:export (guix-reconfiguration-wrapper))
 
 
-(define-public guix-reconfiguration-wrapper
+(define guix-reconfiguration-wrapper
   (package
     (name "guix-reconfiguration-wrapper")
     (version "0.0.2")
@@ -34,5 +34,3 @@
     (description
      "A wrapper for guix home and system reconfiguration")
     (license license:gpl3+)))
-
-guix-reconfiguration-wrapper
