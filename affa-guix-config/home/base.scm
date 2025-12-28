@@ -224,6 +224,8 @@
    "sxiv"
    ;; Photo Management
    "darktable"
+   "digikam"
+   "rawtherapee"
    ;; Document Viewer
    "zathura"))
 
