@@ -399,20 +399,78 @@ So this is chucked into a function while I debug it.
   								 "\^\(\:on-click-end\)"))))))
   	    base-fmt)))
 
-  (defun ml-email-fmt ()
+  (defun ml-email-data ()
     (flet ((notmuch-count
   	     (tags)
   	   (parse-integer (trimmed-shell-command (format nil "notmuch count ~A" tags)))))
       (let* ((tnatkinson-email-count (notmuch-count "tag:tnatkinson95 and tag:unread and not tag:promotions"))
   	   (natalieatkinson-email-count (notmuch-count "tag:natalienatkinson95 and tag:unread and not tag:promotions"))
   	   (work-email-count (notmuch-count "tag:work and tag:unread")))
-        (if (> (+ tnatkinson-email-count natalieatkinson-email-count work-email-count) 0)
-  	  (medium-priority-message
-  	   (format nil " ~a ~a ~a Emails "
-  		   (get-bar-zone-color-string tnatkinson-email-count 5 10 15)
-  		   (get-bar-zone-color-string natalieatkinson-email-count 5 10 15)
-  		   (get-bar-zone-color-string work-email-count 5 10 15)))
-  	  ""))))
+        (list :tnatkinson tnatkinson-email-count
+  	    :natalieatkinson natalieatkinson-email-count
+  	    :work work-email-count))))
+
+  (add-screen-mode-line-formatter #\E 'ml-email-fmt)
+  (defun ml-email-fmt (ml)
+    (let ((email-counts (ml-email-data)))
+      (if (> (+ (getf email-counts :tnatkinson)
+  	      (getf email-counts :natalieatkinson)
+  	      (getf email-counts :work))
+  	   0)
+  	(medium-priority-message
+  	 (format nil " ~a ~a ~a Emails "
+  		 (get-bar-zone-color-string (getf  email-counts :tnatkinson)
+  					    5 10 15)
+  		 (get-bar-zone-color-string (getf  email-counts :natalieatkinson)
+  					    5 10 15)
+  		 (get-bar-zone-color-string (getf email-counts :workc) 5 10 15)))
+  	"")))
+
+  (defun ml-read-file-as-integer (path)
+    (with-open-file (s path :direction :input)
+      (parse-integer (string-trim '(#\Newline #\Space)
+                                  (read-line s)))))
+
+  (defun ml-read-file-as-string (path)
+    (with-open-file (s path :direction :input)
+      (string-trim '(#\Newline #\Space)
+                   (read-line s))))
+
+  (defun ml-hwmon-directories ()
+    (directory "/sys/class/hwmon/hwmon*"))
+
+  (defun ml-temperature-files (hwmon-dir)
+    (directory (merge-pathnames "temp*_input" hwmon-dir)))
+
+  (defun ml-read-temperatures ()
+    (loop for hwmon in (ml-hwmon-directories)
+          for name-path = (merge-pathnames "name" hwmon)
+          for chip-name = (when (probe-file name-path)
+                            (ml-read-file-as-string name-path))
+          append
+            (loop for temp-file in (ml-temperature-files hwmon)
+                  for milli-c = (ml-read-file-as-integer temp-file)
+                  collect
+                    (list :chip chip-name
+                          :sensor (pathname-name temp-file)
+                          :celsius (/ milli-c 1000.0)))))
+
+  (defun ml-get-hottest ()
+    (let ((hottest (list :celsius 0)))
+      (dolist (entry (ml-read-temperatures))
+        (if (> (getf entry :celsius) (getf hottest :celsius))
+  	  (setf hottest entry)))
+      hottest))
+
+  (add-screen-mode-line-formatter #\H 'ml-tempreture-fmt)
+  (defun ml-tempreture-fmt (ml)
+    (let ((hottest (ml-get-hottest)))
+      (if (> (getf hottest :celsius) 50)
+  	(medium-priority-message
+  	 (format nil " ~a ~a "
+  		 (get-bar-zone-color-string (getf hottest :celsius) 50 60 80)
+  		 (getf hottest :sensor)))
+  	"")))
 
   (defun ml-window-list-fmt ()
     (format nil "~A%M" (mode-line-clear-changes)))
@@ -454,8 +512,7 @@ So this is chucked into a function while I debug it.
 
     (setf *screen-mode-line-format*      
   	(list
-  	 "%M^>"
-  	 '(:eval (ml-email-fmt))
+  	 "%M^>%H%E"
   	 '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
   	 '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
   		     ;; This looks weird if we don't add a double space after the battery
