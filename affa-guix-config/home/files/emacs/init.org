@@ -139,6 +139,14 @@ to using
     :hook (emacs-startup . global-flycheck-mode))
 #+end_src
 ** Dired
+#+begin_src emacs-lisp
+  (use-package dired
+    :hook (dired-mode . dired-omit-mode)
+    :bind (:map dired-mode-map
+            ( "."     . dired-omit-mode))
+    :custom (dired-omit-files (rx (seq bol "."))))
+#+end_src
+
 *** Dirvish
 #+begin_src emacs-lisp
   (use-package dirvish
