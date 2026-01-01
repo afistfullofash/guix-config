@@ -303,68 +303,100 @@ So this is chucked into a function while I debug it.
   (defun ml-foreground-color (color)
     (if (typep color 'list)
         (format nil "^(:fg \"~A\")" (car color))
-        (format nil "^(:fg \"~A\")" color)))
+      (format nil "^(:fg \"~A\")" color)))
 
   (defun ml-background-color (color)
     (if (typep color 'list)
         (format nil "^(:bg \"~A\")" (car color))
-        (format nil "^(:bg \"~A\")" color)))
+      (format nil "^(:bg \"~A\")" color)))
+
+  ;; These are used for high, medium and low priority messages
+  ;; They should follow becoming shades of the normal backgrounds
+  (defun light-bg ()
+    "Gets the current brightest background shade"
+    (ml-background-color (slot-value (with-current-theme) 'red)))
+  (defun medium-bg ()
+    "Gets the current medium background shade"
+    (ml-background-color (slot-value (with-current-theme) 'custom-one)))
+  (defun dark-bg ()
+    "Gets the current darkest background shade"
+    (ml-background-color (slot-value (with-current-theme) 'custom-two)))
+
+
+  ;; These are for colored prioity needing colors
+  (defun ml-fmt-low-priority-bg ()
+    "Gets a Ok Background Shade (normally green)"
+    (ml-background-color (slot-value (with-current-theme) 'green)))
+  (defun ml-fmt-medium-priority-bg ()
+    "Gets a Warning background shade"
+    (ml-background-color (slot-value (with-current-theme) 'yellow)))
+  (defun ml-fmt-high-priority-bg ()
+    "Gets a Alert background shade"
+    (ml-background-color (slot-value (with-current-theme) 'red)))
 
   (defun set-bar-med-color ()
     (setf stumpwm::*bar-med-color*
-    	(ml-foreground-color
-    	 (slot-value (with-current-theme) 'green))))
+      	(ml-foreground-color
+      	 (slot-value (with-current-theme) 'green))))
 
   (defun set-bar-hi-color ()
     (setf stumpwm::*bar-hi-color*
-    	(ml-foreground-color
-    	 (slot-value (with-current-theme) 'yellow))))
+      	(ml-foreground-color
+      	 (slot-value (with-current-theme) 'yellow))))
 
   (defun set-bar-crit-color ()
     (setf stumpwm::*bar-crit-color*
-    	(ml-foreground-color
-    	 (slot-value (with-current-theme) 'red))))
+      	(ml-foreground-color
+      	 (slot-value (with-current-theme) 'red))))
+
+  (defun mode-line-clear-changes ()
+    (format nil "^(:fg \"~A\")^(:bg \"~A\")"
+    	  (slot-value (with-current-theme) 'mode-line-fg)
+    	  (slot-value (with-current-theme) 'mode-line-bg)))
 
   (defun get-bar-zone-color-string (amount &optional (med 20) (hi 50) (crit 90) reverse)
     (format nil "~a~a~a"
-    	  (bar-zone-color amount med hi crit reverse)
-    	  amount
-    	  ;; Reset the color once we are done
-    	  (ml-foreground-color
-    	   (slot-value (with-current-theme) 'mode-line-fg))))
+      	  (stumpwm:bar-zone-color amount med hi crit reverse)
+      	  amount
+      	  ;; Reset the color once we are done
+      	  (ml-foreground-color
+      	   (slot-value (with-current-theme) 'mode-line-fg))))
+
+  (defun ml-fmt-background-color-by-range (message amount &optional (med 20) (hi 50) (crit 90) reverse)
+    (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
+      (let ((open-color (cond ((past crit) (ml-fmt-high-priority-bg))
+  			    ((past hi) (ml-fmt-medium-priority-bg))
+  			    ((past med) (ml-fmt-low-priority-bg))
+  			    (t ""))))
+        (format nil "~a~a~a~a"
+  	      open-color
+  	      (ml-foreground-color (slot-value (with-current-theme) 'black))
+  	      message
+  	      (mode-line-clear-changes)))))
 
   (defvar *show-mode-line-time* t)
 
   (defun trimmed-shell-command (command)
     (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
-  	       (run-shell-command command t)))
-
-  (defun mode-line-clear-changes ()
-    (format nil "^(:fg \"~A\")^(:bg \"~A\")"
-  	  (slot-value (with-current-theme) 'mode-line-fg)
-  	  (slot-value (with-current-theme) 'mode-line-bg)))
-
-  (defun light-bg () (ml-background-color (slot-value (with-current-theme) 'red)))
-  (defun medium-bg () (ml-background-color (slot-value (with-current-theme) 'custom-one)))
-  (defun dark-bg () (ml-background-color (slot-value (with-current-theme) 'custom-two)))
+    	       (run-shell-command command t)))
 
   (defun low-priority-message (msg)
     (format nil "~a~a~a"
-  	  (light-bg)
-  	  msg
-  	  (mode-line-clear-changes)))
+    	  (light-bg)
+    	  msg
+    	  (mode-line-clear-changes)))
 
   (defun medium-priority-message (msg)
     (format nil "~a~a~a"
-  	  (medium-bg)
-  	  msg
-  	  (mode-line-clear-changes)))
+    	  (medium-bg)
+    	  msg
+    	  (mode-line-clear-changes)))
 
   (defun high-priority-message (msg)
     (format nil "~a~a~a"
-  	  (dark-bg)
-  	  msg
-  	  (mode-line-clear-changes)))
+    	  (dark-bg)
+    	  msg
+    	  (mode-line-clear-changes)))
 
   (defun error-message-bar (msg)
     (format nil " ^(:fg \"~A\")~A~A" (slot-value (with-current-theme) 'red) msg (mode-line-clear-changes)))
