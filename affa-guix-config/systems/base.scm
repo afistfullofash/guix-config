@@ -146,7 +146,10 @@
 	      (web-interface? #t)))
     (service gnome-keyring-service-type)
     (set-xorg-configuration
-     (xorg-configuration (keyboard-layout (keyboard-layout "au")))))
+     (xorg-configuration (keyboard-layout
+			  (keyboard-layout
+			   "us"
+			   #:options '("ctrl:nocaps"))))))
    (modify-services %desktop-services
      (delete wpa-supplicant-service-type)
      (delete network-manager-service-type)
@@ -167,8 +170,9 @@
     (firmware (list linux-firmware))
     (locale "en_AU.utf8")
     (timezone "Australia/Sydney")
-    (keyboard-layout (keyboard-layout "au"))
-
+    (keyboard-layout (keyboard-layout
+		      "us"
+		      #:options '("ctrl:nocaps")))
     (users (cons* (user-account
 		   (name (cadr (assoc 'short %user)))
 		   (comment (cadr (assoc 'full %user)))
