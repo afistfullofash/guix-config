@@ -1,7 +1,14 @@
 #!/bin/sh
-notmuch tag +personal +tnatkinson95 -- "is:new and path:tnatkinson95-gmail/**"
-notmuch tag +personal +natalienatkinson95 -- "is:new and path:natalieatkinson95-pm/**"
-notmuch tag +work +tomatkinson -- "is:new and path:work/**"
+notmuch tag +personal -- "is:new and path:tnatkinson95-gmail/**"
+notmuch tag +tnatkinson95 -- "is:new and path:tnatkinson95-gmail/**"
+
+notmuch tag +personal -- "is:new and path:natalieatkinson95-pm/**"
+notmuch tag +natalienatkinson95 -- "is:new and path:natalieatkinson95-pm/**"
+
+notmuch tag +work -- "is:new and path:work/**"
+notmuch tag +tomatkinson -- "is:new and path:work/**"
+
 notmuch tag +calendar -- "is:new and body:'View on Google Calendar'"
 notmuch tag +important -- "is:new and tag:work and from:*@liven.com.au or tag:calendar"
+
 notmuch tag -new -- is:new
