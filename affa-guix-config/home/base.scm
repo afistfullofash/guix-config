@@ -64,9 +64,7 @@
    ;; prompt replacement
    "starship"
    "codex"
-   "unzip"
-
-   "guix-reconfiguration-wrapper"))
+   "unzip"))
 
 (define spellcheck-packages
   (list
@@ -452,5 +450,6 @@
 			      language-server-packages
 			      zsh-plugins
 			      misc-packages))
+		     (list guix-reconfiguration-wrapper)
 		     tree-sitter-grammars))
    (services base-home-services)))
