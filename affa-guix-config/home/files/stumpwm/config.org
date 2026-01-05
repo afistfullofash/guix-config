@@ -455,7 +455,7 @@ So this is chucked into a function while I debug it.
     					    5 10 15)
     		 (get-bar-zone-color-string (getf  email-counts :natalieatkinson)
     					    5 10 15)
-    		 (get-bar-zone-color-string (getf email-counts :workc) 5 10 15)))
+    		 (get-bar-zone-color-string (getf email-counts :work) 5 10 15)))
         "")))
 
   (defun ml-read-file-as-integer (path)
