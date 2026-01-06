@@ -442,26 +442,60 @@ So this is chucked into a function while I debug it.
     		:natalieatkinson natalieatkinson-email-count
     		:work work-email-count))))
 
+  (defun ml-space-bar (el)
+    (format nil " ~a" el))
+
+  (defun ml-email-space-bar (email-count)
+    (ml-space-bar (format nil "~a"
+  		   (get-bar-zone-color-string
+  		    email-count
+  		    5 10 15))))
+
+  (defun in-work-hours (work-times)
+  	   ;; Extract relevent data
+  	   (let* ((workdays (getf work-times :days))
+  		  (workhours (getf work-times :hours))
+  		  ;; Make this clearer
+  		  (start-time (car workhours))
+  		  (end-time (cadr workhours))
+ ;; Make the current day and hour nicer  		  
+  		  (current-time (local-time:now))
+  		  (day-of-week (local-time:timestamp-day-of-week current-time))
+  		  (hour-of-day (local-time:timestamp-hour current-time)))
+  	     (if (and (member day-of-week workdays)
+  		      (and (>= hour-of-day start-time)
+  			   (< hour-of-day end-time)))
+  		 t
+  		 nil)))
+
   (add-screen-mode-line-formatter #\E 'ml-email-fmt)
   (defun ml-email-fmt (ml)
-    (let ((email-counts (ml-email-data)))
-      (if (> (+ (getf email-counts :tnatkinson)
-    	      (getf email-counts :natalieatkinson)
-    	      (getf email-counts :work))
-    	   0)
-    	(medium-priority-message
-    	 (format nil " ~a ~a ~a Emails "
-    		 (get-bar-zone-color-string (getf  email-counts :tnatkinson)
-    					    5 10 15)
-    		 (get-bar-zone-color-string (getf  email-counts :natalieatkinson)
-    					    5 10 15)
-    		 (get-bar-zone-color-string (getf email-counts :work) 5 10 15)))
-        "")))
+    (declare (ignorable ml))
+    (let* ((email-counts (ml-email-data))
+  	 (tnatkinson-count (getf email-counts :tnatkinson))
+  	 (natalie-count (getf email-counts :natalieatkinson))
+  	 (work-count (getf email-counts :work)))
+      (if (> (+ tnatkinson-count
+  	      natalie-count
+  	      work-count)
+  	   0)
+  	(let ((tnatkinson-bar (ml-email-space-bar tnatkinson-count))
+  	      (natalie-bar (ml-email-space-bar natalie-count))
+  	      (work-bar (if (in-work-hours '(:days (1 2 3 4 5)
+  					     :hours (9 17)))
+  			    (ml-email-space-bar work-count)
+  			    "")))
+  	  (medium-priority-message
+  	   (format nil "~a~a~a Emails "
+  		   tnatkinson-bar
+  		   natalie-bar
+  		   work-bar)))
+  	"")))
 
   (defun ml-read-file-as-integer (path)
     (with-open-file (s path :direction :input)
-  		  (parse-integer (string-trim '(#\Newline #\Space)
-  					      (read-line s)))))
+      (parse-integer (string-trim '(#\Newline #\Space)
+  				(read-line s)))))
 
   (defun ml-read-file-as-string (path)
     (with-open-file (s path :direction :input)
