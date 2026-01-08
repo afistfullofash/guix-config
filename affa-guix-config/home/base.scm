@@ -378,7 +378,7 @@
        #~(begin
 	   (let ((tags '((("+personal" "+tnatkinson95")
 			  "is:new and path:tnatkinson95-gmail/**")
-			 (("+personal" "+natalienatkinson95")
+			 (("+personal" "+natalieatkinson95")
 			  "is:new and path:natalieatkinson95-pm/**")  
 			 (("+work" "+tomatkinson")
 			  "is:new and path:work/**")

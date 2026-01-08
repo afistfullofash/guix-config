@@ -436,7 +436,7 @@ So this is chucked into a function while I debug it.
     	  (tags)
     	  (parse-integer (trimmed-shell-command (format nil "notmuch count ~A" tags)))))
   	(let* ((tnatkinson-email-count (notmuch-count "tag:tnatkinson95 and tag:unread and not tag:promotions"))
-    	       (natalieatkinson-email-count (notmuch-count "tag:natalienatkinson95 and tag:unread and not tag:promotions"))
+    	       (natalieatkinson-email-count (notmuch-count "tag:natalieatkinson95 and tag:unread and not tag:promotions"))
     	       (work-email-count (notmuch-count "tag:work and tag:unread")))
             (list :tnatkinson tnatkinson-email-count
     		:natalieatkinson natalieatkinson-email-count

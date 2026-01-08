@@ -615,6 +615,7 @@ Capture a Journal Entry
     :custom
     (notmuch-saved-searches '((:name "All" :query "*")
   			    (:name "Unread" :query "tag:unread")
+  			    (:name "Important" :query "tag:unread and not tag:work")
   			    (:name "Work"
   				   :query "tag:work and from:*@liven* and not from:devops@*liven* and not from:liventeam.atlassian.net and not from:notify@getguru.com"))))
 #+end_src
