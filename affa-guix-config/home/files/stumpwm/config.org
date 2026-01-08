@@ -19,28 +19,6 @@ Start slynk for debugging purposes first and then load in our required stumpwm c
 ** Themeing
 This is a quick themeing system for stumpwm with a couple of theme options.
 
-*** General Functions
-#+begin_src lisp
-  (defvar *theme-type-env-name* "AFFOA_SYSTEM_THEME_TYPE")
-
-  (defun set-system-themeing ()
-    (let ((system-theme (getenv *theme-type-env-name*)))
-      (if (equal "dark" system-theme)
-  	(apply-theme 'dracula)
-  	(apply-theme 'gruvbox-light)))
-    (set-bar-med-color)
-    (set-bar-hi-color)
-    (set-bar-crit-color))
-
-  (defun toggle-system-themeing ()
-    (if (equal (getenv *theme-type-env-name*) "dark")
-        (setf (getenv *theme-type-env-name*) "light")
-        (setf (getenv *theme-type-env-name*) "dark"))
-    (set-system-themeing)
-    (toggle-modeline-all-screens)
-    (toggle-modeline-all-screens)
-    (stumpwm:message "Remember to restart emacs"))
-#+end_src
 *** Basic StumpWM Themeing Sytem 
 This gives us some very general functions to generate and apply /themes/ with.
     
@@ -286,9 +264,30 @@ This gives us some very general functions to generate and apply /themes/ with.
        			    :custom-one "#44475A"
        			    :custom-two "#6272A4")))
 #+end_src
-** Configuration
+*** General Functions
+#+begin_src lisp
+  (defvar *theme-type-env-name* "AFFOA_SYSTEM_THEME_TYPE")
 
-   
+  (defun set-system-themeing ()
+    (let ((system-theme (getenv *theme-type-env-name*)))
+      (if (equal "dark" system-theme)
+  	(apply-theme 'dracula)
+  	(apply-theme 'gruvbox-light)))
+    (set-bar-med-color)
+    (set-bar-hi-color)
+    (set-bar-crit-color))
+
+  (defun toggle-system-themeing ()
+    (if (equal (getenv *theme-type-env-name*) "dark")
+        (setf (getenv *theme-type-env-name*) "light")
+        (setf (getenv *theme-type-env-name*) "dark"))
+    (set-system-themeing)
+    (toggle-modeline-all-screens)
+    (toggle-modeline-all-screens)
+    (stumpwm:message "Remember to restart emacs"))
+#+end_src
+
+** Configuration
 *** Notify
 Currently the stumpwm package built from systems/base.scm cannot load the notify package.
 So this is chucked into a function while I debug it.
