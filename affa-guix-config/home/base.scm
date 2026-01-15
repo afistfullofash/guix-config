@@ -7,6 +7,7 @@
   #:use-module (gnu home services shells)
   #:use-module (gnu home services sound)
   #:use-module (gnu home services ssh)
+  #:use-module (gnu home services gnupg) 
   #:use-module (gnu home services syncthing)
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services backup)
@@ -16,6 +17,7 @@
   #:use-module (gnu packages bash)
   #:use-module (gnu packages mail)
   #:use-module (gnu packages xdisorg)
+  #:use-module (gnu packages gnupg)
 
   #:use-module (gnu services)
 
@@ -443,6 +445,12 @@
    (service home-syncthing-service-type)
    (service home-redshift-service-type)
    (service home-ssh-agent-service-type)
+   (service home-gpg-agent-service-type
+            (home-gpg-agent-configuration
+             (pinentry-program
+              (file-append pinentry "/bin/pinentry"))
+             (extra-content "allow-loopback-pinentry")
+             (default-cache-ttl 3600)))
    (service home-openssh-service-type ssh-configuration)
    (service home-files-service-type home-file-locations)
    (service home-xdg-configuration-files-service-type xdg-config-file-locations)

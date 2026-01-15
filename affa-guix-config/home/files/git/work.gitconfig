@@ -1,5 +1,6 @@
 [user]
 	name = Natalie Atkinson
-	email = tomatkinson@liven.com.au
+	email = natatkinson@liven.com.au
+	signingkey = 7389ED18407F290D180FEE1671A255D2E872262A
 [url "ssh://git@gitlab.com/"]
     insteadOf = https://gitlab.com/

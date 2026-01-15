@@ -1,11 +1,13 @@
 [user]
 	name = Natalie Atkinson
 	email = natalie.atkinson95@pm.me
-
+	signingkey = 885CAB9439765DF8B71ECC949A9CA99577AE3ACA
 [includeIf "gitdir:~/work/**"]
 	path = ~/work/.gitconfig
 [core]
 	excludesFile = ~/.gitignore
+[commit]
+	gpgsign = true
 [credential]
 	helper = libsecret
 [filter "lfs"]
