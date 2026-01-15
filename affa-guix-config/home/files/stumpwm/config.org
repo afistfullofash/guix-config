@@ -335,67 +335,67 @@ So this is chucked into a function while I debug it.
 
   (defun set-bar-med-color ()
     (setf stumpwm::*bar-med-color*
-      	(ml-foreground-color
-      	 (slot-value (with-current-theme) 'green))))
+       	(ml-foreground-color
+       	 (slot-value (with-current-theme) 'green))))
 
   (defun set-bar-hi-color ()
     (setf stumpwm::*bar-hi-color*
-      	(ml-foreground-color
-      	 (slot-value (with-current-theme) 'yellow))))
+       	(ml-foreground-color
+       	 (slot-value (with-current-theme) 'yellow))))
 
   (defun set-bar-crit-color ()
     (setf stumpwm::*bar-crit-color*
-      	(ml-foreground-color
-      	 (slot-value (with-current-theme) 'red))))
+       	(ml-foreground-color
+       	 (slot-value (with-current-theme) 'red))))
 
   (defun mode-line-clear-changes ()
     (format nil "^(:fg \"~A\")^(:bg \"~A\")"
-    	  (slot-value (with-current-theme) 'mode-line-fg)
-    	  (slot-value (with-current-theme) 'mode-line-bg)))
+     	  (slot-value (with-current-theme) 'mode-line-fg)
+     	  (slot-value (with-current-theme) 'mode-line-bg)))
 
   (defun get-bar-zone-color-string (amount &optional (med 20) (hi 50) (crit 90) reverse)
     (format nil "~a~a~a"
-      	  (stumpwm:bar-zone-color amount med hi crit reverse)
-      	  amount
-      	  ;; Reset the color once we are done
-      	  (ml-foreground-color
-      	   (slot-value (with-current-theme) 'mode-line-fg))))
+       	  (stumpwm:bar-zone-color amount med hi crit reverse)
+       	  amount
+       	  ;; Reset the color once we are done
+       	  (ml-foreground-color
+       	   (slot-value (with-current-theme) 'mode-line-fg))))
 
   (defun ml-fmt-background-color-by-range (message amount &optional (med 20) (hi 50) (crit 90) reverse)
     (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
-      (let ((open-color (cond ((past crit) (ml-fmt-high-priority-bg))
-  			    ((past hi) (ml-fmt-medium-priority-bg))
-  			    ((past med) (ml-fmt-low-priority-bg))
-  			    (t ""))))
-        (format nil "~a~a~a~a"
-  	      open-color
-  	      (ml-foreground-color (slot-value (with-current-theme) 'black))
-  	      message
-  	      (mode-line-clear-changes)))))
+  	(let ((open-color (cond ((past crit) (ml-fmt-high-priority-bg))
+   				((past hi) (ml-fmt-medium-priority-bg))
+   				((past med) (ml-fmt-low-priority-bg))
+   				(t ""))))
+  	  (format nil "~a~a~a~a"
+   		  open-color
+   		  (ml-foreground-color (slot-value (with-current-theme) 'black))
+   		  message
+   		  (mode-line-clear-changes)))))
 
   (defvar *show-mode-line-time* t)
 
   (defun trimmed-shell-command (command)
     (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
-    	       (run-shell-command command t)))
+     	       (run-shell-command command t)))
 
   (defun low-priority-message (msg)
     (format nil "~a~a~a"
-    	  (light-bg)
-    	  msg
-    	  (mode-line-clear-changes)))
+     	  (light-bg)
+     	  msg
+     	  (mode-line-clear-changes)))
 
   (defun medium-priority-message (msg)
     (format nil "~a~a~a"
-    	  (medium-bg)
-    	  msg
-    	  (mode-line-clear-changes)))
+     	  (medium-bg)
+     	  msg
+     	  (mode-line-clear-changes)))
 
   (defun high-priority-message (msg)
     (format nil "~a~a~a"
-    	  (dark-bg)
-    	  msg
-    	  (mode-line-clear-changes)))
+     	  (dark-bg)
+     	  msg
+     	  (mode-line-clear-changes)))
 
   (defun error-message-bar (msg)
     (format nil " ^(:fg \"~A\")~A~A" (slot-value (with-current-theme) 'red) msg (mode-line-clear-changes)))
@@ -404,102 +404,102 @@ So this is chucked into a function while I debug it.
   (defun fmt-pretty-head-window-list (ml)
     "Using *window-format*, return a 1 line list of the windows, space seperated."
     (format nil "~{~a~^~}"
-    	  (let ((base-fmt
-    		 (mapcar (lambda (w)
-    			   (format-with-on-click-id 
-    			    (let ((str (format-expand *window-formatters*
-    						      ,*window-format*
-    						      w)))
-    			      (if (eq w (current-window))
-    				  (stumpwm::fmt-highlight (format nil " ~a " str))
-    				(format nil "~a|" str)))
-    			    :ml-on-click-focus-window
-    			    (stumpwm::window-id w)))
-    			 (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
-    								(stumpwm::mode-line-head ml))
-    					 #'< :key #'window-number))))
-    	    ;; Reparse strings and remove the | from the element before the active window
-    	    (if (> (length base-fmt) 0)
-    		(loop for win-fmt-el from 1 to (- (length base-fmt) 1)
-    		      do (if (search "^r^(:on-click-end)" (nth win-fmt-el base-fmt))
-    			     (let* ((pos (- win-fmt-el 1))
-    				    (pos-str (nth pos base-fmt)))
-    			       (setf (nth pos base-fmt)
-    				     (cl-ppcre:regex-replace-all "\\|\\^\\(:on-click-end\\)"
-    								 pos-str
-    								 "\^\(\:on-click-end\)"))))))
-    	    base-fmt)))
+     	  (let ((base-fmt
+     		 (mapcar (lambda (w)
+     			   (format-with-on-click-id 
+     			    (let ((str (format-expand *window-formatters*
+     						      ,*window-format*
+     						      w)))
+     			      (if (eq w (current-window))
+     				  (stumpwm::fmt-highlight (format nil " ~a " str))
+     				(format nil "~a|" str)))
+     			    :ml-on-click-focus-window
+     			    (stumpwm::window-id w)))
+     			 (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
+     								(stumpwm::mode-line-head ml))
+     					 #'< :key #'window-number))))
+     	    ;; Reparse strings and remove the | from the element before the active window
+     	    (if (> (length base-fmt) 0)
+     		(loop for win-fmt-el from 1 to (- (length base-fmt) 1)
+     		      do (if (search "^r^(:on-click-end)" (nth win-fmt-el base-fmt))
+     			     (let* ((pos (- win-fmt-el 1))
+     				    (pos-str (nth pos base-fmt)))
+     			       (setf (nth pos base-fmt)
+     				     (cl-ppcre:regex-replace-all "\\|\\^\\(:on-click-end\\)"
+     								 pos-str
+     								 "\^\(\:on-click-end\)"))))))
+     	    base-fmt)))
 
   (defun ml-email-data ()
     (flet ((notmuch-count
-    	  (tags)
-    	  (parse-integer (trimmed-shell-command (format nil "notmuch count ~A" tags)))))
-  	(let* ((tnatkinson-email-count (notmuch-count "tag:tnatkinson95 and tag:unread and not tag:promotions"))
-    	       (natalieatkinson-email-count (notmuch-count "tag:natalieatkinson95 and tag:unread and not tag:promotions"))
-    	       (work-email-count (notmuch-count "tag:work and tag:unread")))
+     	  (tags)
+     	  (parse-integer (trimmed-shell-command (format nil "notmuch count ~A" tags)))))
+   	(let* ((tnatkinson-email-count (notmuch-count "tag:tnatkinson95 and tag:unread and not tag:promotions"))
+     	       (natalieatkinson-email-count (notmuch-count "tag:natalieatkinson95 and tag:unread and not tag:promotions"))
+     	       (work-email-count (notmuch-count "tag:work and tag:unread")))
             (list :tnatkinson tnatkinson-email-count
-    		:natalieatkinson natalieatkinson-email-count
-    		:work work-email-count))))
+     		:natalieatkinson natalieatkinson-email-count
+     		:work work-email-count))))
 
   (defun ml-space-bar (el)
     (format nil " ~a" el))
 
   (defun ml-email-space-bar (email-count)
     (ml-space-bar (format nil "~a"
-  		   (get-bar-zone-color-string
-  		    email-count
-  		    5 10 15))))
+   			(get-bar-zone-color-string
+   			 email-count
+   			 5 10 15))))
 
   (defun in-work-hours (work-times)
-  	   ;; Extract relevent data
-  	   (let* ((workdays (getf work-times :days))
-  		  (workhours (getf work-times :hours))
-  		  ;; Make this clearer
-  		  (start-time (car workhours))
-  		  (end-time (cadr workhours))
- ;; Make the current day and hour nicer  		  
-  		  (current-time (local-time:now))
-  		  (day-of-week (local-time:timestamp-day-of-week current-time))
-  		  (hour-of-day (local-time:timestamp-hour current-time)))
-  	     (if (and (member day-of-week workdays)
-  		      (and (>= hour-of-day start-time)
-  			   (< hour-of-day end-time)))
-  		 t
-  		 nil)))
+    ;; Extract relevent data
+    (let* ((workdays (getf work-times :days))
+   	 (workhours (getf work-times :hours))
+   	 ;; Make this clearer
+   	 (start-time (car workhours))
+   	 (end-time (cadr workhours))
+  	 ;; Make the current day and hour nicer  		  
+   	 (current-time (local-time:now))
+   	 (day-of-week (local-time:timestamp-day-of-week current-time))
+   	 (hour-of-day (local-time:timestamp-hour current-time)))
+      (if (and (member day-of-week workdays)
+   	     (and (>= hour-of-day start-time)
+   		  (< hour-of-day end-time)))
+   	t
+        nil)))
 
   (add-screen-mode-line-formatter #\E 'ml-email-fmt)
   (defun ml-email-fmt (ml)
     (declare (ignorable ml))
     (let* ((email-counts (ml-email-data))
-  	 (tnatkinson-count (getf email-counts :tnatkinson))
-  	 (natalie-count (getf email-counts :natalieatkinson))
-  	 (work-count (getf email-counts :work)))
+   	 (tnatkinson-count (getf email-counts :tnatkinson))
+   	 (natalie-count (getf email-counts :natalieatkinson))
+   	 (work-count (getf email-counts :work)))
       (if (> (+ tnatkinson-count
-  	      natalie-count
-  	      work-count)
-  	   0)
-  	(let ((tnatkinson-bar (ml-email-space-bar tnatkinson-count))
-  	      (natalie-bar (ml-email-space-bar natalie-count))
-  	      (work-bar (if (in-work-hours '(:days (1 2 3 4 5)
-  					     :hours (9 17)))
-  			    (ml-email-space-bar work-count)
-  			    "")))
-  	  (medium-priority-message
-  	   (format nil "~a~a~a Emails "
-  		   tnatkinson-bar
-  		   natalie-bar
-  		   work-bar)))
-  	"")))
+   	      natalie-count
+   	      work-count)
+   	   0)
+   	(let ((tnatkinson-bar (ml-email-space-bar tnatkinson-count))
+   	      (natalie-bar (ml-email-space-bar natalie-count))
+   	      (work-bar (if (in-work-hours '(:days (1 2 3 4 5)
+   						   :hours (9 17)))
+   			    (ml-email-space-bar work-count)
+   			  "")))
+   	  (medium-priority-message
+   	   (format nil "~a~a~a Emails "
+   		   tnatkinson-bar
+   		   natalie-bar
+   		   work-bar)))
+        "")))
 
   (defun ml-read-file-as-integer (path)
     (with-open-file (s path :direction :input)
-      (parse-integer (string-trim '(#\Newline #\Space)
-  				(read-line s)))))
+  		  (parse-integer (string-trim '(#\Newline #\Space)
+   					      (read-line s)))))
 
   (defun ml-read-file-as-string (path)
     (with-open-file (s path :direction :input)
-  		  (string-trim '(#\Newline #\Space)
-  			       (read-line s))))
+   		  (string-trim '(#\Newline #\Space)
+   			       (read-line s))))
 
   (defun ml-hwmon-directories ()
     (directory "/sys/class/hwmon/hwmon*"))
@@ -524,17 +524,17 @@ So this is chucked into a function while I debug it.
     (let ((hottest (list :celsius 0)))
       (dolist (entry (ml-read-temperatures))
         (if (> (getf entry :celsius) (getf hottest :celsius))
-    	  (setf hottest entry)))
+     	  (setf hottest entry)))
       hottest))
 
   (defun ml-get-human-name (sensors)
     (let ((chip-name (getf sensors :chip)))
       (cond ((equal chip-name "mt7921_phy0") "Wi-Fi")
-    	  ((equal chip-name "amdgpu") "GPU")
-    	  ((equal chip-name "nvme") "SSD")
-    	  ((equal chip-name "k10temp") "CPU")
-    	  ((equal chip-name "acpitz") "ACPI")
-    	  (t chip-name))))
+     	  ((equal chip-name "amdgpu") "GPU")
+     	  ((equal chip-name "nvme") "SSD")
+     	  ((equal chip-name "k10temp") "CPU")
+     	  ((equal chip-name "acpitz") "ACPI")
+     	  (t chip-name))))
 
   (add-screen-mode-line-formatter #\H 'ml-tempreture-fmt)
   (defun ml-tempreture-fmt (ml)
@@ -562,18 +562,18 @@ So this is chucked into a function while I debug it.
      (ml-window-list-fmt)))
 
   (defun init-window-number-fixes ()
-    ;;; When windows are desroyed window numbers are not synced
-    ;;; 2kays <https://github.com/2kays> posted a solution on
-    ;;; the TipsAndTricks section of the wiki
-    ;;; This will repack window numbers every time a window is killed
+     ;;; When windows are desroyed window numbers are not synced
+     ;;; 2kays <https://github.com/2kays> posted a solution on
+     ;;; the TipsAndTricks section of the wiki
+     ;;; This will repack window numbers every time a window is killed
     (stumpwm:add-hook stumpwm:*destroy-window-hook*
                       #'(lambda (win) (stumpwm:repack-window-numbers))))
 
   (defun toggle-modeline-all-screens ()
     "We almost allways want to interact with the modeline on all screens"
     (mapcar (lambda (head)
-    	    (toggle-mode-line (current-screen) head))
-    	  (screen-heads (current-screen))))
+     	    (toggle-mode-line (current-screen) head))
+     	  (screen-heads (current-screen))))
 
   (defun reload-mode-line ()
     "This runs toggle-modeline-all-screens twice so that we get the settings refreshed"
@@ -588,19 +588,19 @@ So this is chucked into a function while I debug it.
     (set-bar-crit-color)
 
     (setf *screen-mode-line-format*      
-    	(list
-    	 "%M^>%H%E"
-    	 '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
-    	 '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
-    		     ;; This looks weird if we don't add a double space after the battery
-    		     " %B "))
+     	(list
+     	 "%M^>%H%E"
+     	 '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
+     	 '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
+     		     ;; This looks weird if we don't add a double space after the battery
+     		     " %B "))
 
-    	 ;; '(:eval (multiple-value-bind
-    	 ;; 		     (output error exit-code)
-    	 ;; 		   (uiop:run-program "ping -c 1 8.8.8.8" :ignore-error-status t)
-    	 ;; 		 (if (not (equal exit-code 0))
-    	 ;; 		     (error-message-bar "Network Error"))))
-    	 ))
+     	 ;; '(:eval (multiple-value-bind
+     	 ;; 		     (output error exit-code)
+     	 ;; 		   (uiop:run-program "ping -c 1 8.8.8.8" :ignore-error-status t)
+     	 ;; 		 (if (not (equal exit-code 0))
+     	 ;; 		     (error-message-bar "Network Error"))))
+     	 ))
 
     (init-window-number-fixes)
 
