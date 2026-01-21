@@ -540,7 +540,7 @@ So this is chucked into a function while I debug it.
   (defun ml-tempreture-fmt (ml)
     (declare (ignorable ml))
     (let ((hottest (ml-get-hottest)))
-      (if (> (getf hottest :celsius) 60)
+      (if (> (getf hottest :celsius) 70)
      	(medium-priority-message
    	 (ml-fmt-background-color-by-range
    	  (format nil " ~,1fC ~a "
