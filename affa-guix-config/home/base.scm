@@ -421,7 +421,8 @@
     ("autorandr" ,(local-file "files/autorandr"
 			      #:recursive? #t))
     ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
-
+    ("guix/shell-authorized-directories" ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
+					    (plain-file "shell-authorized-directories" auth-directorys)))
     ;; Autostarts
     ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
 
