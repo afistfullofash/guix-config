@@ -66,6 +66,7 @@
    ;; prompt replacement
    "starship"
    "codex"
+   "zip"
    "unzip"))
 
 (define spellcheck-packages
