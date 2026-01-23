@@ -2,5 +2,7 @@
 	name = Natalie Atkinson
 	email = natatkinson@liven.com.au
 	signingkey = 7389ED18407F290D180FEE1671A255D2E872262A
+[core]
+	sshCommand = ssh -F /dev/null -o "IdentityAgent=/run/user/1001/ssh-agent/socket" -o UserKnownHostsFile=~/.ssh/known_hosts -i ~/.ssh/work.pub -o IdentitiesOnly=yes
 [url "ssh://git@gitlab.com/"]
     insteadOf = https://gitlab.com/
