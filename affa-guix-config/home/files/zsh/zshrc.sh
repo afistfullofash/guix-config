@@ -65,12 +65,15 @@ alias ps='procs'
 alias find='fd'
 alias less='bat'
 
+kill_steam() {
+    kill -9 $(procs steam | awk '{ print $1 }' | tail -n +3)
+}
+
 ssh_ping() {
   while ! ssh $1 true; do
     sleep 5
   done; echo "Host is back up at $(date)!"
 }
-
 
 ssh_repeat() {
   until ssh $1; do
