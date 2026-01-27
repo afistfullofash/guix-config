@@ -318,6 +318,7 @@
   (simple-service 'base-environment-variables-service
 		  home-environment-variables-service-type
 		  `(("GTK_THEME" .  "Dracula")
+		    ("LIBSEAT_BACKEND" . "logind")
 		    ("GUILE_LOAD_PATH" . ,(environment-variable-seperated-path
 					   '("/src/guix-config"
 					     "/src/afistfullofash")))
