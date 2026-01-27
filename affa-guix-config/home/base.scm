@@ -416,13 +416,21 @@
     ("qt5ct/colors" ,dracula-qt5-theme-repo)
     ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
     ;; Specific Programs
+    ;; Mahogany
+    ("mahogany/init.lisp" ,(local-file "files/mahogany/init.lisp"))
+    ;; Alacritty
     ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
     ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
+    ;; LSD
     ("lsd" ,dracula-lsd-theme-repo)
+    ;; Startship
     ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
+    ;; Autorandr
     ("autorandr" ,(local-file "files/autorandr"
 			      #:recursive? #t))
+    ;; Runst
     ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
+    ;; Guix
     ("guix/shell-authorized-directories" ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
 					    (plain-file "shell-authorized-directories" auth-directorys)))
     ;; Autostarts

@@ -29,6 +29,8 @@
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
 
+  #:use-module (affa-guix-config packages mahogany)
+
   #:use-module (srfi srfi-1)
 
   #:export (base-system-operating-system
@@ -68,28 +70,28 @@
                  ;; Avoid SBCL poking homedir during image build
                  (setenv "HOME" "/tmp")
                  (build-program program outputs
-                   ;; Start stumpwm normally
-                   #:entry-program '((stumpwm:stumpwm) 0)
-                   ;; ASDF systems to pre-bundle
-                   #:dependencies '("stumpwm"
-                                    "local-time"
-                                    "battery-portable"
-                                    "notify"
-                                    "pamixer"
-				    "ttf-fonts"
-				    "clx-truetype"
-                                    "slynk")
-                   ;; Where to find those systems
-                   #:dependency-prefixes
-                   (map (lambda (input) (assoc-ref inputs input))
-                        '("stumpwm"
-                          "sbcl-local-time"
-                          "sbcl-stumpwm-battery-portable"
-                          "sbcl-stumpwm-notify"
-                          "sbcl-stumpwm-pamixer"
-			  "sbcl-stumpwm-ttf-fonts"
-			  "sbcl-clx-truetype"
-                          "sbcl-slynk"))))))
+				;; Start stumpwm normally
+				#:entry-program '((stumpwm:stumpwm) 0)
+				;; ASDF systems to pre-bundle
+				#:dependencies '("stumpwm"
+						 "local-time"
+						 "battery-portable"
+						 "notify"
+						 "pamixer"
+						 "ttf-fonts"
+						 "clx-truetype"
+						 "slynk")
+				;; Where to find those systems
+				#:dependency-prefixes
+				(map (lambda (input) (assoc-ref inputs input))
+				     '("stumpwm"
+				       "sbcl-local-time"
+				       "sbcl-stumpwm-battery-portable"
+				       "sbcl-stumpwm-notify"
+				       "sbcl-stumpwm-pamixer"
+				       "sbcl-stumpwm-ttf-fonts"
+				       "sbcl-clx-truetype"
+				       "sbcl-slynk"))))))
            (delete 'copy-source)
            (delete 'build)
            (delete 'check)
@@ -135,7 +137,9 @@
 		  (name-resolving-service 'resolvconf)))
 		(general
 		 (iwd-general-settings
-		  (enable-network-configuration? #t)))))))
+		  (enable-network-configuration? #t)
+		  (extra-options '((Country . "AU")))))
+		))))
     (service bluetooth-service-type
 	     (bluetooth-configuration (auto-enable? #t)
 				      (multi-profile 'multiple)))
@@ -159,7 +163,8 @@
 				    (append (list "https://substitutes.nonguix.org")
 					    %default-substitute-urls))
 				   (authorized-keys
-				    (append (list (local-file "files/nonguix/signing-key.pub"))
+				    (append (list (local-file
+						   "files/nonguix/signing-key.pub"))
 					    %default-authorized-guix-keys)))))))
 
 (define base-system-operating-system
@@ -183,12 +188,13 @@
 					   "netdev"
 					   "audio"
 					   "video"
+					   "input"
 					   "docker"
 					   "lp"
 					   "dialout")))
 		  %base-user-accounts))
 
-  (sudoers-file etc-sudoers-config)
+    (sudoers-file etc-sudoers-config)
     
     (packages (append
 	       (specifications->packages
@@ -223,12 +229,13 @@
 		  "freetype"
 		  "fontconfig"
 		  ;; For setting the screenshot time
-		  "sbcl-local-time"))
-	       (list stumpwm-with-extensions)
+		  "sbcl-local-time"
+		  "waybar"))
+	       (list stumpwm-with-extensions
+		     mahogany)
 	       %base-packages))
 
-    (services
-     base-system-services)
+    (services base-system-services)
     
     (file-systems (cons*
                    (file-system
@@ -237,7 +244,7 @@
                      (type "tmpfs")
                      (check? #f))
                    %base-file-systems))
-		      
+    
     (bootloader (bootloader-configuration
 		 (bootloader grub-efi-bootloader)
 		 (targets (list "/boot/efi"))
