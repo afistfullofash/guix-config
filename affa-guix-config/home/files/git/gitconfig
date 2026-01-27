@@ -2,10 +2,12 @@
 	name = Natalie Atkinson
 	email = natalie.atkinson95@pm.me
 	signingkey = 885CAB9439765DF8B71ECC949A9CA99577AE3ACA
-[includeIf "gitdir:~/work/**"]
-	path = ~/work/.gitconfig
+
+
 [core]
+	sshCommand = ssh -F /dev/null -o "IdentityAgent=/run/user/1001/ssh-agent/socket" -o UserKnownHostsFile=~/.ssh/known_hosts -i ~/.ssh/nat.pub -o IdentitiesOnly=yes
 	excludesFile = ~/.gitignore
+
 [commit]
 	gpgsign = true
 [credential]
@@ -15,3 +17,6 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+
+[includeIf "gitdir:~/work/**"]
+	path = ~/work/.gitconfig
