@@ -34,14 +34,16 @@
   #:use-module (affa-guix-config home utils)
 
   #:use-module (affa-guix-config themes dracula)
-  #:use-module (affa-guix-config packages runst)
-
   #:use-module (affa-guix-config packages guix-reconfiguration-wrapper)
+
+  #:use-module (affa-guix-config services notifications)
   
   #:use-module (afistfullofash packages boundary)
   #:use-module (afistfullofash packages codex)
   #:use-module (afistfullofash packages emacs-xyz)
   #:use-module (afistfullofash packages fonts)
+
+
   
   #:export (base-home-environment
 	    base-home-services
@@ -259,20 +261,6 @@
 	"rclone"))
 
 
-(define runst-service
-  (simple-service
-   'runst home-shepherd-service-type
-   (list
-    (shepherd-service
-     (documentation "Run the runst notification daemon")
-     (requirement '(x11-display))
-     (auto-start? #t)
-     (provision '(runst))
-     (start #~(make-forkexec-constructor
-               (list #$(file-append runst "/bin/runst"))
-	       #:log-file "runst.log"))
-     (stop #~(make-kill-destructor))))))
-
 (define autorandr-service
   (simple-service
    'autorandr home-shepherd-service-type
@@ -428,8 +416,6 @@
     ;; Autorandr
     ("autorandr" ,(local-file "files/autorandr"
 			      #:recursive? #t))
-    ;; Runst
-    ("runst/runst.toml" ,(local-file "files/runst/runst.toml"))
     ;; Guix
     ("guix/shell-authorized-directories" ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
 					    (plain-file "shell-authorized-directories" auth-directorys)))
@@ -446,7 +432,16 @@
 
 (define base-home-services
   (list
-   runst-service
+   (service home-dunst-service-type
+	    (home-dunst-configuration
+	     (base-config dracula-dunst-theme)
+	     (config
+	      (home-dunst-extra-config
+	       (global
+		(home-dunst-global-config
+		 (frame-width 5)
+		 (frame-color "#BD93F9")))))))
+   
    autorandr-service
    environment-variables-service
    base-home-channels-service

@@ -1,6 +1,9 @@
 (define-module (affa-guix-config themes dracula)
   #:use-module (guix packages)
   #:use-module (guix git-download)
+  #:use-module (guix packages)
+  #:use-module (guix build-system copy)
+    #:use-module ((guix licenses) #:prefix license:)
 
   #:export (dracula-gtk-theme-repo
 	    dracula-qt5-theme-repo
@@ -8,7 +11,8 @@
 	    dracula-alacritty-theme-repo
 	    dracula-starship-theme-repo
 	    dracula-lsd-theme-repo
-	    dracula-xresources-theme-repo))
+	    dracula-xresources-theme-repo
+	    dracula-dunst-theme))
 
 (define dracula-gtk-theme-repo
   (origin
@@ -79,3 +83,25 @@
     (sha256
      (base32
       "1dkfa2q392vy7ky5kx0vd44xcb9c7x15z38x4acfma3f16q6vyg9"))))
+
+(define dracula-dunst-theme
+  (let ((commit "907f345d81dba9566eff59dd89afb321118da180")
+	(revision "0")
+	(version "0.0.0"))
+    (package
+      (name "dracula-dunst-theme")
+      (version (git-version version revision commit))
+      (source (origin
+		(uri (git-reference
+		      (url "https://github.com/dracula/dunst.git")
+		      (commit commit)))
+		(method git-fetch)
+		(sha256
+		 (base32
+		  "0m8qzwlmacqk27l24iqyimyjgsz5ypmvs39hd5fl7if6b1vlcrwx"))))
+      (build-system copy-build-system)
+      (arguments '(#:install-plan '(("dunstrc" "dunstrc"))))
+      (home-page "https://draculatheme.com/dunst")
+      (synopsis "Dracula theme for dunst")
+      (description "Dracula theme for dunst")
+      (license license:expat))))
