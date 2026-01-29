@@ -96,18 +96,10 @@
 	"git-lfs"
 	"pre-commit"))
 
-(define work-programming-packages
-  (list  "awscli"
-	 "boundary"
-	 "gawk"
-	 "jq"
-	 "kubectl"))
-
 (define development-packages
   (append
    git-packages
    rust-packages
-   work-programming-packages
    common-lisp-packages))
 
 ;;; This tangles the emacs init org file into init.el
