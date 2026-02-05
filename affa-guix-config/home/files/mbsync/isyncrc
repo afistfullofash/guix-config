@@ -1,0 +1,28 @@
+IMAPAccount natalie-atkinson-proton
+# Address to connect to
+Host 127.0.0.1
+Port 1143
+User natalie.atkinson95@pm.me
+PassCmd "secret-tool lookup service mbsync"
+TLSType None
+
+IMAPStore natalie-atkinson-proton-remote
+Account natalie-atkinson-proton
+
+MaildirStore natalie-atkinson-proton-local
+SubFolders Verbatim
+# The trailing "/" is important
+Path ~/mail/natalieatkinson95-pm/
+Inbox ~/mail/natalieatkinson95-pm/INBOX
+Flatten .
+
+Channel natalie-atkinson-proton
+Far :natalie-atkinson-proton-remote:
+Near :natalie-atkinson-proton-local:
+Sync All
+Expunge Both
+MaxMessages 100
+# Exclude everything under the internal [Gmail] folder, except the interesting folders
+Patterns * !Drafts !"All Mail"
+Create Both
+SyncState *

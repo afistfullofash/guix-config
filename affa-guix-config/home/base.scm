@@ -13,6 +13,8 @@
   #:use-module (gnu home services backup)
 
   #:use-module (gnu packages)
+  #:use-module (gnu packages base)
+  #:use-module (gnu packages gnome)
   #:use-module (gnu packages tree-sitter)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages mail)
@@ -28,6 +30,7 @@
   #:use-module (guix packages)
   #:use-module (guix store)
   #:use-module (guix utils)
+  
   
   #:use-module (ice-9 popen)
 
@@ -252,6 +255,20 @@
 	"glibc-locales"
 	"rclone"))
 
+(define isyncrc
+  (computed-file
+   "isyncrc"
+   (with-imported-modules '((guix build utils))
+     #~(begin
+	 (use-modules (guix build utils))
+	  (let ((template #$(local-file "files/mbsync/isyncrc"))
+		(tool-path (string-append #$libsecret "/bin/secret-tool")))
+	    (copy-file template "isyncrc.tmp")
+	    ;; Use 'sed' to replace the placeholder with the store path
+	    (invoke #$(file-append sed "/bin/sed") "-i"
+		    (string-append "s|secret-tool|" tool-path "|g")
+		    "isyncrc.tmp")
+	    (copy-file "isyncrc.tmp" #$output))))))
 
 (define autorandr-service
   (simple-service
@@ -338,7 +355,6 @@
 	 (rename-file (string-append (dirname #$(local-file "files/stumpwm/config.org")) "/init.lisp")
 		      #$output)))))
 
-
 (define home-file-locations
   `((".themes/Dracula" ,dracula-gtk-theme-repo)
     (".icons/Dracula" ,dracula-gtk-icons)
@@ -356,31 +372,6 @@
     (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
     (".ssh/nat.pub" ,(local-file "files/ssh/nat.pub"))
     ;; Email
-    ("mail/.notmuch/hooks/post-new"
-     ,(program-file
-       "post-new"
-       #~(begin
-	   (let ((tags '((("+personal" "+tnatkinson95")
-			  "is:new and path:tnatkinson95-gmail/**")
-			 (("+personal" "+natalieatkinson95")
-			  "is:new and path:natalieatkinson95-pm/**")  
-			 (("+work" "+tomatkinson")
-			  "is:new and path:work/**")
-			 (("+calendar")
-			  "is:new and body:'View on Google Calendar'")
-			 (("+important")
-			  "is:new and tag:work and from:*@liven.com.au or tag:calendar"))))
-	     (for-each
-	      (lambda (group)
-		(for-each 
-		 (lambda (tag)
-		   (system*
-		    #$(file-append notmuch "/bin/notmuch")
-		    "tag" tag
-		    "--" (cadr group)))
-		 (car group)))
-	      tags))
-	   (system* #$(file-append notmuch "/bin/notmuch") "tag" "-new" "--" "is:new"))))
     ("mail/work/.gmailieer.json" ,(local-file "files/gmi/work.gmailieer.json"))
     ;; Ensure screenshot directory exists
     ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
@@ -408,6 +399,10 @@
     ;; Autorandr
     ("autorandr" ,(local-file "files/autorandr"
 			      #:recursive? #t))
+    ;;mbsync
+    ("isyncrc" ,isyncrc)
+    ("afew/config" ,(local-file "files/afew/config"))
+    (".notmuch-config" ,(local-file "files/notmuch/notmuch-config"))
     ;; Guix
     ("guix/shell-authorized-directories" ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
 					    (plain-file "shell-authorized-directories" auth-directorys)))

@@ -474,6 +474,12 @@ We have a slynk connection running on StumpWM at port 1337 so that we can test c
   	 (ts-mode . prettier-js-mode)
   	 (json-ts-mode . prettier-js-mode)))
 #+end_src
+*** Go
+#+begin_src emacs-lisp
+    (use-package go-ts-mode
+      :mode (".go$"))
+
+#+end_src
 ** Language Server Protocol
 #+begin_src emacs-lisp
   ;;; Lsp-mode

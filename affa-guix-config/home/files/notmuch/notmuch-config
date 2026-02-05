@@ -1,0 +1,17 @@
+[database]
+path=/home/natalie/mail
+
+[user]
+name=Natalie Atkinson
+primary_email=natalie.atkinson95@pm.me
+other_email=tnatkinson95@gmail.com;natatkinson@liven.com.au
+
+[new]
+tags=unread;inbox;
+ignore=.mbsyncstate;.uidvalidity;*.gmailieer.json;.lock;
+
+[search]
+exclude_tags=deleted;spam;
+
+[maildir]
+synchronize_flags=true

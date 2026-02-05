@@ -13,9 +13,7 @@
   
   #:export (home-hydroxide-service
 	    home-tnatkinson95-gmail-sync-timer
-	    home-work-email-sync-timer
-	    home-natalieatkinson95-proton-sync-timer
-	    home-notmuch-new-timer))
+	    home-mail-sync-timer))
 
 
 (define home-hydroxide-service
@@ -46,37 +44,35 @@
 		    #~(#$gmi-script)
 		    #:requirement '())))
 
-(define home-work-email-sync-timer
-  (let ((gmi-script
+(define home-mail-sync-timer
+  (let ((email-sync-script
 	 (program-file
-	  "gmi-script"
-	  (let ((mail-dir (home-file-path "/mail/work/"))
-		(gmi (file-append lieer "/bin/gmi")))
+	  "sync-mail"
+	  (let* ((mail-dir (home-file-path "/mail"))
+		 (work-mail-dir (string-append mail-dir "/work/"))
+		 (gmi-bin (file-append lieer "/bin/gmi"))
+		 (mbsync-bin (file-append isync "/bin/mbsync"))
+		 (notmuch-bin (file-append notmuch "/bin/notmuch"))
+		 (afew-bin (file-append afew "/bin/afew")))
 	    #~(begin
-		 (chdir #$mail-dir)
-		 (system* #$gmi "sync"))))))
-    (shepherd-timer '(mail-work-email-sync)
-		    "*/5 * * * *"
-		    #~(#$gmi-script)
-		    #:requirement '())))
+		(unless (zero? (system* #$gmi-bin "pull" "-C" #$work-mail-dir))
+		  (error "Lieer pull failed"))
+		
+		(unless (zero? (system* #$mbsync-bin "-a" "--pull"))
+		  (error "mbsync pull failed"))
 
+		(unless (zero? (system* #$notmuch-bin "new"))
+		  (error "Notmuch indexing failed"))
 
-(define home-natalieatkinson95-proton-sync-timer
-  (shepherd-timer '(mail-natalieatkinson95-proton-sync)
-		  "*/5 * * * *"
-		  #~(#$(file-append isync "/bin/mbsync") "natalie-atkinson-proton")
-		  #:requirement '()))
+		(unless (zero? (system* #$afew-bin "--tag" "--new"))
+		  (error "Afew Tagging failed"))
 
-(define home-notmuch-new-timer
-  (let ((notmuch-script
-	 (program-file
-	  "notmuch-script"
-	  (let ((mail-dir (home-file-path "/mail/"))
-		(gmi (file-append notmuch "/bin/notmuch")))
-	    #~(begin
-		 (chdir #$mail-dir)
-		 (system* #$gmi "new"))))))
-    (shepherd-timer '(mail-notmuch-new)
+		(unless (zero? (system* #$gmi-bin "push" "-C" #$work-mail-dir))
+		  (error "Lieer push failed"))
+
+		(unless (zero? (system* mbsync-bin "-a" "--push"))
+		  (error "mbsync push failed")))))))
+    (shepherd-timer '(mail-sync)
 		    "*/2 * * * *"
-		    #~(#$notmuch-script)
+		    #~(#$email-sync-script)
 		    #:requirement '())))
