@@ -70,7 +70,7 @@
 		(unless (zero? (system* #$gmi-bin "push" "-C" #$work-mail-dir))
 		  (error "Lieer push failed"))
 
-		(unless (zero? (system* mbsync-bin "-a" "--push"))
+		(unless (zero? (system* #$mbsync-bin "-a" "--push"))
 		  (error "mbsync push failed")))))))
     (shepherd-timer '(mail-sync)
 		    "*/2 * * * *"
