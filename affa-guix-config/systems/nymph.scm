@@ -2,16 +2,6 @@
   #:use-module (affa-guix-config systems laptop)
 
   #:use-module (gnu)
-  #:use-module (gnu system)
-  #:use-module (gnu services)
-  #:use-module (gnu services linux)
-  #:use-module (gnu services xorg)
-
-  #:use-module (gnu services containers)
-  
-  #:use-module (guix packages)
-  #:use-module (guix utils)
-
   
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
@@ -26,6 +16,9 @@
     (inherit laptop-operating-system)
     (host-name "nymph")
 
+    (firmware (list sof-firmware 
+                    linux-firmware))
+    
     (swap-devices (list (swap-space
                          (target (uuid
                                   "846d349f-f175-4d7d-a9e7-e67611cf53eb")))))
