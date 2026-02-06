@@ -114,7 +114,7 @@
      #~(begin
 	 (use-modules (guix build utils))
 	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs-lucid") "/bin/emacs")))
-		(init-org-file #$(local-file "files/emacs/init.org")))
+		(init-org-file #$(config-file "/emacs/init.org")))
 	   (format #t "Tangling ~a...\n" init-org-file)
 	   (invoke emacs-bin
 		   "--batch"
@@ -122,7 +122,7 @@
 		   init-org-file ; Open the org file in a buffer
 		   "--eval" "(require 'org)"
 		   "--eval" "(org-babel-tangle)"))
-	 (rename-file (string-append (dirname #$(local-file "files/emacs/init.org")) "/init.el")
+	 (rename-file (string-append (dirname #$(config-file "/emacs/init.org")) "/init.el")
 		      #$output)))))
 
 (define emacs-packages
@@ -261,7 +261,7 @@
    (with-imported-modules '((guix build utils))
      #~(begin
 	 (use-modules (guix build utils))
-	  (let ((template #$(local-file "files/mbsync/isyncrc"))
+	  (let ((template #$(config-file "/mbsync/isyncrc"))
 		(tool-path (string-append #$libsecret "/bin/secret-tool")))
 	    (copy-file template "isyncrc.tmp")
 	    ;; Use 'sed' to replace the placeholder with the store path
@@ -344,7 +344,7 @@
      #~(begin
 	 (use-modules (guix build utils))
 	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs-lucid") "/bin/emacs")))
-		(init-org-file #$(local-file "files/stumpwm/config.org")))
+		(init-org-file #$(config-file "/stumpwm/config.org")))
 	   (format #t "Tangling ~a...\n" init-org-file)
 	   (invoke emacs-bin
 		   "--batch"
@@ -352,7 +352,7 @@
 		   init-org-file       ; Open the org file in a buffer
 		   "--eval" "(require 'org)"
 		   "--eval" "(org-babel-tangle)"))
-	 (rename-file (string-append (dirname #$(local-file "files/stumpwm/config.org")) "/init.lisp")
+	 (rename-file (string-append (dirname #$(config-file "/stumpwm/config.org")) "/init.lisp")
 		      #$output)))))
 
 (define home-file-locations
@@ -361,20 +361,20 @@
     (".Xresources" ,dracula-xresources-theme-repo)
     ;; Setup Git for multiple emails
     ;; This gets configured based on file path
-    (".gitconfig" ,(local-file "files/git/gitconfig"))
-    (".gitignore" ,(local-file "files/git/gitignore"))
-    ("work/.gitconfig" ,(local-file "files/git/work.gitconfig"))
+    (".gitconfig" ,(config-file "/git/gitconfig"))
+    (".gitignore" ,(config-file "/git/gitignore"))
+    ("work/.gitconfig" ,(config-file "/git/work.gitconfig"))
     ;; For some reason this does not work when we pass directories to it
     (".stumpwm.d/init.lisp" ,stumpwm-init-lisp)
     ;; Emacs
     (".emacs.d/init.el" ,emacs-init-el)
     ;; SSH Public Keys
-    (".ssh/work.pub" ,(local-file "files/ssh/work.pub"))
-    (".ssh/nat.pub" ,(local-file "files/ssh/nat.pub"))
+    (".ssh/work.pub" ,(config-file "/ssh/work.pub"))
+    (".ssh/nat.pub" ,(config-file "/ssh/nat.pub"))
     ;; Email
-    ("mail/work/.gmailieer.json" ,(local-file "files/gmi/work.gmailieer.json"))
+    ("mail/work/.gmailieer.json" ,(config-file "/gmi/work.gmailieer.json"))
     ;; Ensure screenshot directory exists
-    ("Pictures/Screenshots/.keep" ,(local-file "files/keep"))))
+    ("Pictures/Screenshots/.keep" ,(config-file "/keep"))))
 
 (define xdg-config-file-locations
   ;; This Stats with a heap of THEMEING
@@ -382,32 +382,32 @@
     ;; GTK
     ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
     ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
-    ("gtk-4.0/settings.ini" ,(local-file "files/gtk-4.0/settings.ini"))
+    ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
     ;; QT5
     ("qt5ct/colors" ,dracula-qt5-theme-repo)
-    ("qt5ct/qt5ct.conf" ,(local-file "files/qt5ct/qt5ct.conf"))
+    ("qt5ct/qt5ct.conf" ,(config-file "/qt5ct/qt5ct.conf"))
     ;; Specific Programs
     ;; Mahogany
-    ("mahogany/init.lisp" ,(local-file "files/mahogany/init.lisp"))
+    ("mahogany/init.lisp" ,(config-file "/mahogany/init.lisp"))
     ;; Alacritty
-    ("alacritty/alacritty.toml" ,(local-file "files/alacritty/alacritty.toml"))
+    ("alacritty/alacritty.toml" ,(config-file "/alacritty/alacritty.toml"))
     ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
     ;; LSD
     ("lsd" ,dracula-lsd-theme-repo)
     ;; Startship
     ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
     ;; Autorandr
-    ("autorandr" ,(local-file "files/autorandr"
+    ("autorandr" ,(config-file "/autorandr"
 			      #:recursive? #t))
     ;;mbsync
     ("isyncrc" ,isyncrc)
-    ("afew/config" ,(local-file "files/afew/config"))
-    (".notmuch-config" ,(local-file "files/notmuch/notmuch-config"))
+    ("afew/config" ,(config-file "/afew/config"))
+    (".notmuch-config" ,(config-file "/notmuch/notmuch-config"))
     ;; Guix
     ("guix/shell-authorized-directories" ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
 					    (plain-file "shell-authorized-directories" auth-directorys)))
     ;; Autostarts
-    ("autostart/keepassxc.desktop" ,(local-file "files/autostart/keepassxc.desktop"))))
+    ("autostart/keepassxc.desktop" ,(config-file "/autostart/keepassxc.desktop"))))
 
 (define ssh-configuration
   (home-openssh-configuration
@@ -450,7 +450,7 @@
    (service home-zsh-service-type
 	    (home-zsh-configuration
 	     (zshrc (list
-		     (local-file "files/zsh/zshrc.sh")))))))
+		     (config-file "/zsh/zshrc.sh")))))))
 
 (define base-home-environment
   (home-environment
