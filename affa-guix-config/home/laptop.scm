@@ -35,13 +35,8 @@
 	 "~/src/guix-config"
 	 "~/src/afistfullofash"
 	 "~/org")
-   `(("AWS_ACCESS_KEY_ID" . ,(getenv "B2_ACCESS_KEY_ID"))
-     ("AWS_SECRET_ACCESS_KEY" . ,(getenv "B2_SECRET_ACCESS_KEY"))
-     ("AWS_DEFAULT_REGION"    . ,(getenv "B2_REGION"))
-     ("RESTIC_REPOSITORY"     . ,(getenv "RESTIC_REPOSITORY"))
-     ("RESTIC_PASSWORD_FILE"  . ,(getenv "RESTIC_PASSWORD_FILE")))
    #:schedule (daily-at 8 30)
-   #:extra-args '("--one-file-system" "--verbose")))
+   #:extra-args '("-vv")))
 
 (define laptop-home-timers
   (simple-service 'laptop-home-timers
@@ -54,13 +49,8 @@
 		  home-channels-service-type
 		  (list
 		   (channel
-		    (name 'guix-android)
-		    (url "https://framagit.org/tyreunom/guix-android.git")
-		    (introduction
-		     (make-channel-introduction
-		      "d031d039b1e5473b030fa0f272f693b469d0ac0e"
-		      (openpgp-fingerprint
-		       "1EFB 0909 1F17 D28C CBF9  B13A 53D4 57B2 D636 EE82")))))))
+		    (name 'affa-guix-config)
+		    (url "file://~/src/guix-config")))))
 
 (define laptop-home-services
   (list laptop-environment-variables-service
