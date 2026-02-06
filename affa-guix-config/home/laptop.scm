@@ -73,5 +73,3 @@
    (inherit base-home-environment)
    (services (append laptop-home-services
 		     base-home-services))))
-
-laptop-home-environment
