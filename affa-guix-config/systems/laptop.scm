@@ -62,5 +62,3 @@
 					 'fat32))
                            (type "vfat"))
 			 %base-file-systems))))
-
-laptop-operating-system

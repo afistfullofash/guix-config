@@ -11,7 +11,7 @@ def cli():
         description="Handles Guix Reconfiguration Logic for afistfullofash's guix configuration",
     )
     parser.add_argument("target", choices=["system", "home"])
-    parser.add_argument("system", choices=["desktop", "laptop"])
+    parser.add_argument("system", choices=["desktop", "laptop", "nymph"])
     parser.add_argument("speed", choices=["full", "quick"])
 
     args = parser.parse_args()

@@ -1,6 +1,6 @@
 [project]
 name = "guix-reconfiguration-wrapper"
-version = "0.0.1"
+version = "0.0.3"
 authors = [
 { name="Natalie Atkinson", email="natalie.atkinson95@pm.me" },
 ]
