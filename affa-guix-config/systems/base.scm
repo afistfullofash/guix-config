@@ -15,6 +15,7 @@
   #:use-module (gnu services xorg)
   #:use-module (gnu services docker)
 
+  #:use-module (affa-guix-config services firmware)
   
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages autotools)
@@ -138,8 +139,7 @@
 		(general
 		 (iwd-general-settings
 		  (enable-network-configuration? #t)
-		  (extra-options '((Country . "AU")))))
-		))))
+		  (extra-options '((Country . "AU")))))))))
     (service bluetooth-service-type
 	     (bluetooth-configuration (auto-enable? #t)
 				      (multi-profile 'multiple)))
@@ -149,6 +149,7 @@
 	     (cups-configuration
 	      (web-interface? #t)))
     (service gnome-keyring-service-type)
+    (service fwupd-service-type)
     (set-xorg-configuration
      (xorg-configuration (keyboard-layout
 			  (keyboard-layout
