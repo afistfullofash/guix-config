@@ -3,7 +3,7 @@ IMAPAccount natalie-atkinson-proton
 Host 127.0.0.1
 Port 1143
 User natalie.atkinson95@pm.me
-PassCmd "secret-tool lookup service mbsync"
+PassCmd "secret-tool lookup service mbsync computer $(hostname) use proton-password"
 TLSType None
 
 IMAPStore natalie-atkinson-proton-remote
