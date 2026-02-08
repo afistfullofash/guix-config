@@ -1,4 +1,5 @@
 (define-module (affa-guix-config home laptop)
+  #:use-module (gnu)
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home services shepherd)
