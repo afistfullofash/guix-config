@@ -484,11 +484,11 @@ So this is chucked into a function while I debug it.
   	       (mode-line-clear-foreground)
   	       (mode-line-clear-background)))
 
-  (defun get-bar-zone-color-string (amount &optional (med 20) (hi 50) (crit 90) reverse)
-    (ml-fmt-safe-msg
+  (defun get-bar-zone-color-string (amount message &optional (med 20) (hi 50) (crit 90) reverse)
+    (ml-fmt-safe-change
      (concatenate 'string
     		(stumpwm:bar-zone-color amount med hi crit reverse)
-    		amount)))
+    		message)))
 
   (defun ml-fmt-background-color-by-range (message amount &optional (med 20) (hi 50) (crit 90) reverse)
     (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
@@ -547,7 +547,7 @@ So this is chucked into a function while I debug it.
     			       nil
     			       (parse-integer raw-count))))
     	       count)))
-       (let* ((tnatkinson-email-count
+      (let* ((tnatkinson-email-count
     	     (notmuch-count
     	      "tag:tnatkinson95 and tag:unread and not tag:promotions"))
     	   (natalieatkinson-email-count
@@ -564,9 +564,9 @@ So this is chucked into a function while I debug it.
   (defun ml-email-space-bar (email-count)
     (if email-count
         (ml-space-bar 
-         (get-bar-zone-color-string
-    	email-count
-    	5 10 15))
+         (get-bar-zone-color-string email-count
+  				  (write-to-string email-count)
+  				  5 10 15))
         (ml-space-bar (error-message-bar "Error"))))
 
   (defun in-work-hours (work-times)
