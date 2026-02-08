@@ -285,8 +285,7 @@
      (stop #~(make-kill-destructor))))))
 
 (define base-home-channels-service
-  (simple-service 'base-home-channels-service
-		  home-channels-service-type
+  (service home-channels-service-type
 		  (list
 		   (channel
 		     (name 'guix)
