@@ -49,22 +49,8 @@
                   (list laptop-restic-backup-timer
 			home-mail-sync-timer)))
 
-(define laptop-home-channels-service
-  (simple-service 'laptop-home-channels-service
-		  home-channels-service-type
-		  (list
-		   (channel
-		    (name 'guix-android)
-		    (url "https://framagit.org/tyreunom/guix-android.git")
-		    (introduction
-		     (make-channel-introduction
-		      "d031d039b1e5473b030fa0f272f693b469d0ac0e"
-		      (openpgp-fingerprint
-		       "1EFB 0909 1F17 D28C CBF9  B13A 53D4 57B2 D636 EE82")))))))
-
 (define laptop-home-services
   (list laptop-environment-variables-service
-	laptop-home-channels-service
 	home-hydroxide-service
         laptop-home-timers))
 
