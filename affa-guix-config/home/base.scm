@@ -1,4 +1,5 @@
 (define-module (affa-guix-config home base)
+  #:use-module (gnu)
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home services desktop)
@@ -401,7 +402,7 @@
     ;;mbsync
     ("isyncrc" ,isyncrc)
     ("afew/config" ,(config-file "/afew/config"))
-    (".notmuch-config" ,(config-file "/notmuch/notmuch-config"))
+    ("notmuch/default/config" ,(config-file "/notmuch/notmuch-config"))
     ;; Guix
     ("guix/shell-authorized-directories" ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
 					    (plain-file "shell-authorized-directories" auth-directorys)))
