@@ -16,6 +16,7 @@
 	emacs-nyan-mode
 	emacs-rainbow-delimiters
 	emacs-rainbow-mode
+	emacs-catppuccin-theme
 	
 	;; Org Mode
 	emacs-org-modern

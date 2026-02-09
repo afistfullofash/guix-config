@@ -734,7 +734,12 @@ It is disabled for now
   (use-package org-modern-indent
     :config ; Use config as we add late to the hook
     (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
-#+end_src     
+#+end_src
+**** Catppuccin
+#+begin_src emacs-lisp
+  (use-package catppuccin-theme)
+#+end_src
+
 **** Doom
 ***** Doom Themes
 #+begin_src emacs-lisp
@@ -748,7 +753,9 @@ It is disabled for now
     :config
     (if (equal (getenv "AFFOA_SYSTEM_THEME_TYPE") "dark")
         (load-theme 'doom-dracula t)
-      (load-theme 'doom-gruvbox-light t))
+      (load-theme 'catppuccin t)
+      (setq catppuccin-flavor 'latte)
+      (catppuccin-reload))
 
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
@@ -762,6 +769,7 @@ It is disabled for now
   (use-package doom-modeline
     :hook (after-init . doom-modeline-mode))
 #+end_src
+
 ** End Errata
 #+begin_src emacs-lisp
   (provide 'init.el)
