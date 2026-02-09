@@ -13,15 +13,6 @@
   #:use-module (gnu home services shepherd)
   #:use-module (gnu home services backup)
 
-  #:use-module (gnu packages)
-  #:use-module (gnu packages base)
-  #:use-module (gnu packages gnome)
-  #:use-module (gnu packages tree-sitter)
-  #:use-module (gnu packages bash)
-  #:use-module (gnu packages mail)
-  #:use-module (gnu packages xdisorg)
-  #:use-module (gnu packages gnupg)
-
   #:use-module (gnu services)
 
   #:use-module (guix channels)
@@ -31,80 +22,29 @@
   #:use-module (guix packages)
   #:use-module (guix store)
   #:use-module (guix utils)
-  
+
+  #:use-module (gnu packages gnome)
+  #:use-module (gnu packages xdisorg)
+  #:use-module (gnu packages gnupg)
   
   #:use-module (ice-9 popen)
 
   #:use-module (affa-guix-config home utils)
 
   #:use-module (affa-guix-config themes dracula)
-  #:use-module (affa-guix-config packages guix-reconfiguration-wrapper)
-
   #:use-module (affa-guix-config services notifications)
-  
-  #:use-module (afistfullofash packages boundary)
-  #:use-module (afistfullofash packages codex)
-  #:use-module (afistfullofash packages emacs-xyz)
-  #:use-module (afistfullofash packages fonts)
 
-
+  #:use-module (affa-guix-config home package-collections desktop)
+  #:use-module (affa-guix-config home package-collections emacs)
+  #:use-module (affa-guix-config home package-collections misc)
+  #:use-module (affa-guix-config home package-collections programming)
+  #:use-module (affa-guix-config home package-collections spellcheck)
+  #:use-module (affa-guix-config home package-collections terminal)
+  #:use-module (affa-guix-config home package-collections tree-sitter)
   
   #:export (base-home-environment
 	    base-home-services
 	    base-home-backup-service))
-
-(define terminal-packages
-  (list
-   ;; Top Replacement
-   "bottom"
-   ;; ls replacement
-   "lsd"
-   ;; cat replacement
-   "bat"
-   ;; ps replacement
-   "procs"
-   ;; fuzzy finding
-   "fzf"
-   "fzf-tab"
-   ;; grep replacement
-   "ripgrep"
-   "mpv"
-   ;; prompt replacement
-   "starship"
-   "codex"
-   "zip"
-   "unzip"))
-
-(define spellcheck-packages
-  (list
-   "aspell"
-   "hunspell"
-   "hunspell-dict-en"))
-
-(define common-lisp-packages
-  (list "sbcl"
-	"sbcl-slynk"
-	"sbcl-legit"))
-
-(define rust-packages
-  ;; Unfortunantly it seems I need to pollute these
-  ;; I currently dont know how to make emacs open a guix shell environment
-  ;; when it is inside a relevant project
-  (list "rust"
-	"rust:cargo"
-	"rust:tools"))
-
-(define git-packages
-  (list "git"
-	"git:credential-libsecret"
-	"git-lfs"
-	"pre-commit"))
-
-(define development-packages
-  (append
-   git-packages
-   rust-packages
-   common-lisp-packages))
 
 ;;; This tangles the emacs init org file into init.el
 ;;; Ensuring that the emacs config is never out of date
@@ -125,136 +65,6 @@
 		   "--eval" "(org-babel-tangle)"))
 	 (rename-file (string-append (dirname #$(config-file "/emacs/init.org")) "/init.el")
 		      #$output)))))
-
-(define emacs-packages
-  (list "emacs-lucid"
-	"emacs-doom-themes"
-	"emacs-doom-modeline"
-	"emacs-nerd-icons"
-
-	;; Org Mode
-	"emacs-org-modern"
-	"emacs-org-modern-indent"
-        "emacs-org-journal"
-	"emacs-notmuch"
-	"emacs-nyan-mode-1.1.4"
-	"emacs-diredfl"
-	"emacs-format-all-the-code"
-	"emacs-expand-region"
-	"emacs-dirvish"
-	"emacs-rainbow-delimiters"
-	"emacs-guix"
-	"emacs-geiser-guile"
-	"emacs-indent-bars"
-	"emacs-dired-hacks"
-	"emacs-undo-tree"
-	"emacs-smartparens"
-	"emacs-magit"
-	"emacs-rustic"
-	"emacs-terraform-mode"
-	"emacs-web-mode"
-	"emacs-prettier"
-	"emacs-lsp-mode"
-	"emacs-lsp-ui"
-        "emacs-flycheck"
-	"emacs-vertico"
-	"emacs-orderless"
-	"emacs-marginalia"
-	"emacs-consult"
-	"emacs-cape"
-	"emacs-corfu"
-	"emacs-sly"
-	"emacs-jinx"
-	"emacs-yasnippet"
-	"emacs-syslog-mode"
-	"emacs-rainbow-mode"))
-
-(define tree-sitter-grammars
-  (list tree-sitter-typescript
-	tree-sitter-scheme
-	tree-sitter-rust
-	tree-sitter-lua
-	tree-sitter-ruby
-	tree-sitter-python
-	tree-sitter-php
-	tree-sitter-org
-	tree-sitter-nix
-	tree-sitter-meson
-	tree-sitter-markdown
-	tree-sitter-json
-	tree-sitter-javascript
-	tree-sitter-html
-	tree-sitter-hcl
-	tree-sitter-gomod
-	tree-sitter-yaml
-	tree-sitter-go
-	tree-sitter-dockerfile
-	tree-sitter-css
-	tree-sitter-cmake
-	tree-sitter-c-sharp
-	tree-sitter-bash))
-
-(define language-server-packages
-  (list "rust-analyzer"
-	"python-lsp-server"
-	"guile-lsp-server"
-	"sqls"))
-
-(define desktop-packages
-  (list
-   ;; Terminal
-   "alacritty"
-   ;; Password Management
-   "keepassxc"
-   ;; Email
-   "notmuch"
-   "lieer"
-   
-   "steam"
-   ;; Main browser
-   "firefox"
-   ;; Vlc
-   "vlc"
-   "calibre"
-   "pavucontrol"
-   ;; Screenshot tool
-   "maim"
-   ;; Image Viewer
-   "sxiv"
-   ;; Photo Management
-   "darktable"
-   "digikam"
-   "rawtherapee"
-   ;; Document Viewer
-   "zathura"))
-
-(define zsh-plugins
-  (list "zsh-autosuggestions"
-	"zsh-completions"
-	"zsh-history-substring-search"
-	"zsh-syntax-highlighting"))
-
-(define misc-packages
-  (list "fonts-nerd-fonts-dejavu"
-	"font-dejavu"
-	"autorandr"
-	"protonup"
-	"gnupg"
-	"wireplumber"
-	;; Required by dirvish
-	;; Currently breaking things
-	"vips"
-	"poppler"
-	"mediainfo"
-	"openssh"
-	;; Background Setter
-	"feh"
-	"tabbed"
-	;; Runs autorun files
-	"dex"
-	"freecad"
-	"glibc-locales"
-	"rclone"))
 
 (define isyncrc
   (computed-file
@@ -329,7 +139,7 @@
 		    ("TREE_SITTER_LIBDIR"
 		     . ,#~(string-join (map (lambda (pkg)
 					      (string-append pkg "/lib"))
-					    '#$tree-sitter-grammars) ;
+					    '#$tree-sitter-grammar-packages) ;
 				       ":"))
 		    ("AFFOA_SYSTEM_THEME_TYPE" . "dark")
 		    ;; Locale
@@ -454,15 +264,14 @@
 
 (define base-home-environment
   (home-environment
-   (packages (append (specifications->packages
-		      (append terminal-packages
-			      spellcheck-packages
-			      development-packages
-			      desktop-packages
-			      emacs-packages
-			      language-server-packages
-			      zsh-plugins
-			      misc-packages))
-		     (list guix-reconfiguration-wrapper)
-		     tree-sitter-grammars))
+   (packages (append 
+	      terminal-packages
+	      spellcheck-packages
+	      development-packages
+	      desktop-packages
+	      emacs-packages
+	      language-server-packages
+	      zsh-plugin-packages
+	      misc-packages
+	      tree-sitter-grammar-packages))
    (services base-home-services)))
