@@ -50,6 +50,7 @@
 	  "sync-mail"
 	  (let* ((mail-dir (home-file-path "/mail"))
 		 (work-mail-dir (string-append mail-dir "/work/"))
+		 (notmuch-config-file (home-file-path "/.config/notmuch/default/config"))
 		 (gmi-bin (file-append lieer "/bin/gmi"))
 		 (mbsync-bin (file-append isync "/bin/mbsync"))
 		 (notmuch-bin (file-append notmuch "/bin/notmuch"))
@@ -64,7 +65,11 @@
 		(unless (zero? (system* #$notmuch-bin "new"))
 		  (error "Notmuch indexing failed"))
 
-		(unless (zero? (system* #$afew-bin "--tag" "--new"))
+		(unless (zero? (system* #$afew-bin
+					"--notmuch-config"
+					#$notmuch-config-file
+					"--tag"
+					"--new"))
 		  (error "Afew Tagging failed"))
 
 		(unless (zero? (system* #$gmi-bin "push" "-C" #$work-mail-dir))
