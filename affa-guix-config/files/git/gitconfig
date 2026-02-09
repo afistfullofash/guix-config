@@ -5,7 +5,6 @@
 
 
 [core]
-	sshCommand = ssh -F /dev/null -o "IdentityAgent=/run/user/1001/ssh-agent/socket" -o UserKnownHostsFile=~/.ssh/known_hosts -i ~/.ssh/nat.pub -o IdentitiesOnly=yes
 	excludesFile = ~/.gitignore
 
 [commit]
