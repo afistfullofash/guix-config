@@ -2,6 +2,8 @@
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages mail)
+
+  #:use-module (afistfullofash packages emacs-xyz)
   
   #:export (emacs-packages))
 
@@ -17,6 +19,7 @@
 	emacs-rainbow-delimiters
 	emacs-rainbow-mode
 	emacs-catppuccin-theme
+	emacs-darkman
 	
 	;; Org Mode
 	emacs-org-modern

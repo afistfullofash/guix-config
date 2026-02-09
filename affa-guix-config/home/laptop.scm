@@ -7,6 +7,7 @@
   #:use-module (gnu services)
 
   #:use-module (gnu home services guix)
+  #:use-module (gnu home services desktop)
   #:use-module (guix channels)
   
   
@@ -53,7 +54,8 @@
 (define laptop-home-services
   (list laptop-environment-variables-service
 	home-hydroxide-service
-        laptop-home-timers))
+        laptop-home-timers
+	(service home-darkman-service-type)))
 
 (define laptop-home-environment
   (home-environment

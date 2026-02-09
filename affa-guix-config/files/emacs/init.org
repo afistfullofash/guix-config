@@ -38,7 +38,8 @@ Turn off mouse interface early in startup to avoid momentary display
             (menu-bar-mode   -1)
             (tool-bar-mode   -1)
             (scroll-bar-mode -1)
-            (tooltip-mode    -1))
+            (tooltip-mode    -1)
+            (setq custom-safe-themes t))
         #+end_src
 *** Backup Directorys
 We set the backup and autosave file directorys to .tmp folders. Otherwise they juse pollute the filesystem like nothing else. We check that they exist and create them if they dont as well.
@@ -737,7 +738,9 @@ It is disabled for now
 #+end_src
 **** Catppuccin
 #+begin_src emacs-lisp
-  (use-package catppuccin-theme)
+  (use-package catppuccin-theme
+    :custom
+    (catppuccin-flavor 'latte))
 #+end_src
 
 **** Doom
@@ -768,6 +771,13 @@ It is disabled for now
 #+begin_src emacs-lisp
   (use-package doom-modeline
     :hook (after-init . doom-modeline-mode))
+#+end_src
+*** Darkman
+#+begin_src emacs-lisp
+  (use-package darkman
+    :hook (after-init . darkman-mode)
+    :custom
+    (darkman-themes '(:light 'catppuccin :dark 'doom-dracula)))
 #+end_src
 
 ** End Errata
