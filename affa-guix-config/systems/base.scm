@@ -31,6 +31,7 @@
   #:use-module (nongnu system linux-initrd)
 
   #:use-module (affa-guix-config packages mahogany)
+  #:use-module (afistfullofash packages wm)
 
   #:use-module (srfi srfi-1)
 
@@ -41,63 +42,6 @@
 (define %user
   '((short "natalie")
     (full "Natalie Akinson")))
-
-(define stumpwm-with-extensions
-  (package
-    (inherit stumpwm)
-    (name "stumpwm-with-extensions")
-    (inputs
-     (list stumpwm
-           sbcl-local-time
-           sbcl-stumpwm-battery-portable
-           sbcl-stumpwm-notify
-           sbcl-stumpwm-pamixer
-	   sbcl-stumpwm-ttf-fonts
-	   sbcl-clx-truetype
-           sbcl-slynk))
-    (native-inputs
-     (list pkg-config
-           gcc-toolchain
-	   autoconf
-	   texinfo))
-    (arguments
-     (substitute-keyword-arguments (package-arguments stumpwm)
-       ((#:phases phases)
-        `(modify-phases ,phases
-           (replace 'build-program
-             (lambda* (#:key inputs outputs #:allow-other-keys)
-               (let* ((out (assoc-ref outputs "out"))
-                      (program (string-append out "/bin/stumpwm")))
-                 ;; Avoid SBCL poking homedir during image build
-                 (setenv "HOME" "/tmp")
-                 (build-program program outputs
-				;; Start stumpwm normally
-				#:entry-program '((stumpwm:stumpwm) 0)
-				;; ASDF systems to pre-bundle
-				#:dependencies '("stumpwm"
-						 "local-time"
-						 "battery-portable"
-						 "notify"
-						 "pamixer"
-						 "ttf-fonts"
-						 "clx-truetype"
-						 "slynk")
-				;; Where to find those systems
-				#:dependency-prefixes
-				(map (lambda (input) (assoc-ref inputs input))
-				     '("stumpwm"
-				       "sbcl-local-time"
-				       "sbcl-stumpwm-battery-portable"
-				       "sbcl-stumpwm-notify"
-				       "sbcl-stumpwm-pamixer"
-				       "sbcl-stumpwm-ttf-fonts"
-				       "sbcl-clx-truetype"
-				       "sbcl-slynk"))))))
-           (delete 'copy-source)
-           (delete 'build)
-           (delete 'check)
-           (delete 'remove-temporary-cache)
-           (delete 'cleanup)))))))
 
 (define sudo-user-programs
   (string-join
@@ -232,7 +176,7 @@
 		  ;; For setting the screenshot time
 		  "sbcl-local-time"
 		  "waybar"))
-	       (list stumpwm-with-extensions
+	       (list stumpwm-with-user-extensions
 		     mahogany)
 	       %base-packages))
 

@@ -20,7 +20,7 @@
 (define guix-reconfiguration-wrapper
   (package
     (name "guix-reconfiguration-wrapper")
-    (version "0.0.3")
+    (version "0.0.4")
     (source (local-file (string-append (current-source-directory) "/guix-reconfiguration-wrapper")
 			#:recursive? #t))
     (build-system pyproject-build-system)

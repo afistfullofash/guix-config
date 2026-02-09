@@ -28,6 +28,8 @@ def guix_home_reconfigure(system):
             "reconfigure",
             "-L",
             path.expanduser("~/src/guix-config/"),
+            "-L",
+            path.expanduser("~/src/afistfullofash/"),
             "-e",
             f"(use-modules (affa-guix-config home {system})) {system}-home-environment"
         ]
@@ -49,6 +51,8 @@ def guix_system_reconfigure(system):
             "guix",
             "system",
             "reconfigure",
+            "-L",
+            path.expanduser("~/src/afistfullofash/"),
             "-L",
             path.expanduser("~/src/guix-config/"),
             "-e",

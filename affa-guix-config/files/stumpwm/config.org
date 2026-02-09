@@ -305,90 +305,102 @@ This gives us some very general functions to generate and apply /themes/ with.
 #+end_src
 *** Catppuccin
 #+begin_src lisp
-  ;; 
-  (add-theme 'catppuccin-latte
-  	   ;; Latte Pallette
-  	   (let ((rosewater "#dc8a78")
-  		 (flamingo "#dd7878")
-  		 (pink "#ea76cb")
-  		 (mauve "#8839ef")
-  		 (red "#d20f39")
-  		 (maroon "#e64553")
-  		 (peach "#fe640b")
-  		 (yellow "#df8e1d")
-  		 (green "#40a02b")
-  		 (teal "#179299")
-  		 (sky "#04a5e5")
-  		 (saphire "#209fb5")
-  		 (blue "#1e66f5")
-  		 (lavender "#7287fd")
+  (let ((rosewater "#dc8a78")
+        (flamingo "#dd7878")
+        (pink "#ea76cb")
+        (mauve "#8839ef")
+        (red "#d20f39")
+        (maroon "#e64553")
+        (peach "#fe640b")
+        (yellow "#df8e1d")
+        (green "#40a02b")
+        (teal "#179299")
+        (sky "#04a5e5")
+        (saphire "#209fb5")
+        (blue "#1e66f5")
+        (lavender "#7287fd")
 
-  		 ;; Items
-  		 (text "#4c4f69")
+        ;; Items
+        (text "#4c4f69")
 
-  		 (subtext-1 "#5c5f77")
-  		 (subtext-0 "#6c6f85")
+        (subtext-1 "#5c5f77")
+        (subtext-0 "#6c6f85")
 
-  		 (overlay-2 "#7c7f93")
-  		 (overlay-1 "#8c8fa1")
-  		 (overlay-0 "#9ca0b0")
+        (overlay-2 "#7c7f93")
+        (overlay-1 "#8c8fa1")
+        (overlay-0 "#9ca0b0")
 
-  		 (surface-2 "#acb0be")
-  		 (surface-1 "#bcc0cc")
-  		 (surface-0 "#ccd0da")
+        (surface-2 "#acb0be")
+        (surface-1 "#bcc0cc")
+        (surface-0 "#ccd0da")
 
-  		 (base "#eff1f5")
-  		 (mantle "#e6e9ef")
-  		 (crust "#dce0e8")))	   
-       	   (make-instance 'theme
-       			  :fg text
-       			  :bg base
-       			  :border pink
-       			  :focus pink
-       			  :unfocus pink
+        (base "#eff1f5")
+        (mantle "#e6e9ef")
+        (crust "#dce0e8"))	   
+    (add-theme
+     'catppuccin-latte
+     ;; Latte Pallette
+     (make-instance 'theme
 
-  			  :mode-line-fg text
-       			  :mode-line-bg base
-       			  :mode-line-border pink
-
-       			  :black  overlay-2
-       			  :white  base
-  			  :red red
-       			  :green green
-       			  :yellow yellow
-       			  :blue blue
-  			  :magenta 
-       			  :cyan teal
-
-  			  :low green
-  			  :medium yellow
-  			  :high red
-  			  :light-fg fg
-       			  :custom-one mantle
-       			  :custom-two crust))
+  		  :fg text
+     		  :bg base
+     		  :border pink
+     		  :focus pink
+     		  :unfocus pink
+  		  
+  		  :mode-line-fg text
+     		  :mode-line-bg base
+     		  :mode-line-border pink
+  		  
+     		  :black  overlay-2
+  		  :red red
+     		  :green green
+  		  :yellow yellow
+     		  :blue blue
+  		  :magenta mauve
+     		  :cyan teal
+  		  :white  base
+  		  
+  		  :low green
+  		  :medium yellow
+  		  :high red
+  		  
+  		  :light-fg base
+  		  
+     		  :custom-one mantle
+     		  :custom-two crust)))
 #+end_src
 
 *** General Functions
 #+begin_src lisp
-  (defvar *theme-type-env-name* "AFFOA_SYSTEM_THEME_TYPE")
+  (defvar *system-theme-type* "dark")
 
-  (defun set-system-themeing ()
-    (let ((system-theme (getenv *theme-type-env-name*)))
-      (if (equal "dark" system-theme)
-  	(apply-theme 'dracula)
-  	(apply-theme 'catppucci-latte)))
-    (set-bar-med-color)
-    (set-bar-hi-color)
-    (set-bar-crit-color))
+  (defun set-system-themeing (theme)
+    (if (trivia:match theme
+  	("dark" t)
+  	("light" t)
+  	(_ nil))
+        (progn
+  	(setq *system-theme-type* theme)
+  	(run-shell-command (format nil "darkman set ~a" theme))
+  	(apply-theme (trivia:match theme
+  		       ("dark" 'dracula)
+  		       ("light" 'catppuccin-latte)))
+  	(set-bar-med-color)
+  	(set-bar-hi-color)
+  	(set-bar-crit-color)
+  	(toggle-modeline-all-screens)
+  	(toggle-modeline-all-screens))
+        
+        (stumpwm:message
+         (format
+  	nil
+  	"set-system-themeing: ~a is not either \"light\" or \"dark\"" theme))))
 
   (defun toggle-system-themeing ()
-    (if (equal (getenv *theme-type-env-name*) "dark")
-        (setf (getenv *theme-type-env-name*) "light")
-        (setf (getenv *theme-type-env-name*) "dark"))
-    (set-system-themeing)
-    (toggle-modeline-all-screens)
-    (toggle-modeline-all-screens)
-    (stumpwm:message "Remember to restart emacs"))
+    (set-system-themeing (trivia:match *system-theme-type*
+  				 ("dark" "light")
+  				 ("light" "dark"))))
 #+end_src
 
 ** Configuration
@@ -822,7 +834,7 @@ So this is chucked into a function while I debug it.
    		      "-*-times-*-*-*-*-*-*-*-*-*-*-*-*"))
 
   (defun init-system-themeing ()
-    (set-system-themeing)
+    (set-system-themeing "dark")
     (set-font (nth 0 *fonts*))
 
     (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")

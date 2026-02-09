@@ -31,7 +31,7 @@
 
   #:use-module (affa-guix-config home utils)
 
-  #:use-module (affa-guix-config themes dracula)
+  #:use-module (afistfullofash packages themes)
   #:use-module (affa-guix-config services notifications)
 
   #:use-module (affa-guix-config home package-collections desktop)
@@ -166,9 +166,9 @@
 		      #$output)))))
 
 (define home-file-locations
-  `((".themes/Dracula" ,dracula-gtk-theme-repo)
-    (".icons/Dracula" ,dracula-gtk-icons)
-    (".Xresources" ,dracula-xresources-theme-repo)
+  `((".themes/Dracula" ,(file-append gtk-dracula-theme "/Dracula"))
+    (".icons/Dracula" ,gtk-dracula-icons)
+    (".Xresources" ,xresources-dracula-theme)
     ;; Setup Git for multiple emails
     ;; This gets configured based on file path
     (".gitconfig" ,(config-file "/git/gitconfig"))
@@ -183,29 +183,33 @@
     (".ssh/nat.pub" ,(config-file "/ssh/nat.pub"))
     ;; Email
     ("mail/work/.gmailieer.json" ,(config-file "/gmi/work.gmailieer.json"))
+    (".local/share/darkman" ,(config-file "/darkman"
+					  #:recursive? #t))
     ;; Ensure screenshot directory exists
     ("Pictures/Screenshots/.keep" ,(config-file "/keep"))))
 
 (define xdg-config-file-locations
   ;; This Stats with a heap of THEMEING
-  `(("assets" ,(symlink-to "$HOME/.themes/Dracula/assets"))
+  `(("assets" ,(file-append gtk-dracula-theme "/Dracula/assets"))
     ;; GTK
-    ("gtk-4.0/gtk.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk.css"))
-    ("gtk-4.0/gtk-dark.css" ,(symlink-to "$HOME/.themes/Dracula/gtk-4.0/gtk-dark.css"))
+    ("gtk-4.0/gtk.css" ,(file-append gtk-dracula-theme "/Dracula/gtk-4.0/gtk.css"))
+    ("gtk-4.0/gtk-dark.css" ,(file-append gtk-dracula-theme "Dracula/gtk-4.0/gtk-dark.css"))
     ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
     ;; QT5
-    ("qt5ct/colors" ,dracula-qt5-theme-repo)
+    ("qt5ct/colors" ,qt5-dracula-theme)
     ("qt5ct/qt5ct.conf" ,(config-file "/qt5ct/qt5ct.conf"))
     ;; Specific Programs
     ;; Mahogany
     ("mahogany/init.lisp" ,(config-file "/mahogany/init.lisp"))
     ;; Alacritty
     ("alacritty/alacritty.toml" ,(config-file "/alacritty/alacritty.toml"))
-    ("alacritty/themes/dracula" ,dracula-alacritty-theme-repo)
+    ("alacritty/themes/dracula.toml" ,(file-append alacritty-dracula-theme "/dracula.toml"))
+    ("alacritty/themes/catppuccin.toml" ,(file-append alacritty-catppuccin-theme "/catppuccin-latte.toml"))
     ;; LSD
-    ("lsd" ,dracula-lsd-theme-repo)
+    ("lsd" ,lsd-dracula-theme)
     ;; Startship
-    ("starship.toml" ,(file-append dracula-starship-theme-repo "/starship.theme.toml"))
+    ("dracula.toml" ,(file-append starship-dracula-theme "/starship.theme.toml"))
+    ("catppuccin.toml" ,(file-append starship-catppuccin-theme "/themes/latte.toml"))
     ;; Autorandr
     ("autorandr" ,(config-file "/autorandr"
 			      #:recursive? #t))
@@ -231,7 +235,7 @@
   (list
    (service home-dunst-service-type
 	    (home-dunst-configuration
-	     (base-config dracula-dunst-theme)
+	     (base-config dunst-dracula-theme)
 	     (config
 	      (home-dunst-extra-config
 	       (global

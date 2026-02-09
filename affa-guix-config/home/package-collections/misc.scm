@@ -3,6 +3,7 @@
   #:use-module (gnu packages engineering)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages gnupg)
+  #:use-module (gnu packages glib)
   #:use-module (gnu packages image-processing)
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages linux)
@@ -28,6 +29,7 @@
 	wireplumber
 	;; Required by dirvish
 	vips
+	(list glib "bin")
 	poppler
 	mediainfo
 	openssh

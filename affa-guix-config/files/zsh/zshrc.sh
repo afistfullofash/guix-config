@@ -44,6 +44,16 @@ zstyle ':fzf-tab:*' use-fzf-default-opts yes
 # switch group using `<` and `>`
 zstyle ':fzf-tab:*' switch-group '<' '>'
 
+export STARSHIP_CONFIG=~/.config/starship/dracula.toml
+starship_precmd() {
+  if [[ -f ~/.cache/starship/mode ]]; then
+    MODE=$(cat ~/.cache/starship/mode)
+    export STARSHIP_CONFIG="$HOME/.config/starship/$MODE.toml"
+  fi
+}
+# Add to zsh hooks
+add-zsh-hook precmd starship_precmd
+
 export BOUNDARY_ADDR="https://boundary.liven.com.au:9200"
 alias boundary_login="boundary authenticate oidc -auth-method-id=amoidc_oQJX98VDSU -addr=https://boundary.liven.com.au:9200"
 

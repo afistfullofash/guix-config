@@ -1,4 +1,4 @@
-general.import = ["themes/dracula/dracula.toml"]
+general.import = ["themes/theme.toml"]
 
 [font.bold]
 family = "DejaVuSansM Nerd Font Mono"

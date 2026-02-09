@@ -4,6 +4,7 @@
   #:use-module (gnu packages shellutils)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages video)
+  #:use-module (gnu packages wm)
 
   #:export (terminal-packages
 	    zsh-plugin-packages))
@@ -27,7 +28,9 @@
    ;; prompt replacement
    starship
    zip
-   unzip))
+   unzip
+
+   stumpish))
 
 (define zsh-plugin-packages
   (list zsh-autosuggestions
