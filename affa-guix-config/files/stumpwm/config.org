@@ -7,6 +7,11 @@ Start slynk for debugging purposes first and then load in our required stumpwm c
     (in-package :stumpwm-user)
     (stumpwm:redirect-all-output "/tmp/stumpwm.log")
 
+    ;; CLX extensions (RandR, Render, etc.) export symbols beyond what CLX's
+    ;; DEFPACKAGE declares, causing SBCL to signal a package-variance error
+    ;; when ASDF recompiles CLX source files. Downgrade to warning only.
+    (setf sb-ext:*on-package-variance* '(:warn t :error nil))
+
     (if *initializing*
         (progn
           (asdf:load-system :slynk)
