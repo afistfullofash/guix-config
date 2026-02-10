@@ -207,9 +207,9 @@
     ("alacritty/themes/catppuccin.toml" ,(file-append alacritty-catppuccin-theme "/catppuccin-latte.toml"))
     ;; LSD
     ("lsd" ,lsd-dracula-theme)
-    ;; Startship
-    ("dracula.toml" ,(file-append starship-dracula-theme "/starship.theme.toml"))
-    ("catppuccin.toml" ,(file-append starship-catppuccin-theme "/themes/latte.toml"))
+    ;; Starship
+    ("starship/dracula.toml" ,(file-append starship-dracula-theme "/starship.theme.toml"))
+    ("starship/catppuccin.toml" ,(file-append starship-catppuccin-theme "/themes/latte.toml"))
     ;; Autorandr
     ("autorandr" ,(config-file "/autorandr"
 			      #:recursive? #t))

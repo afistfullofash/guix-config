@@ -1118,7 +1118,8 @@ So this is chucked into a function while I debug it.
     (init-root-map)
     (init-top-map)
     
-    (run-shell-command "dex -a -s $XDG_CONFIG_HOME/autostart/"))
+    (run-shell-command "dex -a -s $XDG_CONFIG_HOME/autostart/")
+    (run-shell-command "darkman set dark"))
 
   (run-all-inits)
 #+end_src
