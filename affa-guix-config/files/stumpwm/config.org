@@ -6,6 +6,9 @@ Start slynk for debugging purposes first and then load in our required stumpwm c
   #+begin_src lisp
     (in-package :stumpwm-user)
     (stumpwm:redirect-all-output "/tmp/stumpwm.log")
+    (asdf:register-immutable-system "xlib")
+    ;; CLX Re-exports cause a error on load if we don't set this
+    (setf sb-ext:*on-package-variance* '(:warn t :error nil))
 
     (if *initializing*
         (progn
