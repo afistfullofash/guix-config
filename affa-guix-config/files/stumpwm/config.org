@@ -7,13 +7,17 @@ Start slynk for debugging purposes first and then load in our required stumpwm c
     (in-package :stumpwm-user)
     (stumpwm:redirect-all-output "/tmp/stumpwm.log")
 
-    ;; CLX extensions (RandR, Render, etc.) export symbols beyond what CLX's
-    ;; DEFPACKAGE declares, causing SBCL to signal a package-variance error
-    ;; when ASDF recompiles CLX source files. Downgrade to warning only.
-    (setf sb-ext:*on-package-variance* '(:warn t :error nil))
-
     (if *initializing*
         (progn
+          ;; CLX is already compiled into the StumpWM image. When ASDF
+          ;; resolves dependencies for contrib modules (pamixer, etc.),
+          ;; it traverses stumpwm -> clx and tries to recompile CLX from
+          ;; source, which fails due to DEFPACKAGE variance with the
+          ;; already-loaded XLIB package. Mark these systems as immutable
+          ;; so ASDF skips them entirely.
+          (asdf:register-immutable-system :clx)
+          (asdf:register-immutable-system :stumpwm)
+
           (asdf:load-system :slynk)
           (slynk:create-server :port 1337
     			   :dont-close t)
