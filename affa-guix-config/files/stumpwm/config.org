@@ -18,6 +18,7 @@ Start slynk for debugging purposes first and then load in our required stumpwm c
           (asdf:load-system "alexandria")
           (asdf:load-system "local-time")
           (asdf:load-system "pamixer")
+          (asdf:load-system "cpu")
           (asdf:load-system "battery-portable")))
 
     (setf *startup-message* (format nil "Welcome Natalie!"))
@@ -368,7 +369,7 @@ This gives us some very general functions to generate and apply /themes/ with.
   		  :medium yellow
   		  :high red
   		  
-  		  :light-fg base
+  		  :light-fg mantle
   		  
      		  :custom-one mantle
      		  :custom-two crust)))
@@ -535,6 +536,18 @@ So this is chucked into a function while I debug it.
     "Set the foreground and background to a medium bar"
     (ml-fmt-colors 'fg 'custom-two msg))
 
+  (defun ml-low-priority-bar (msg)
+    "Set the foreground and background to a low bar"
+    (ml-fmt-colors 'light-fg 'low msg))
+
+  (defun ml-medium-priority-bar (msg)
+    "Set the foreground and background to a low bar"
+    (ml-fmt-colors 'light-fg 'medium msg))
+
+  (defun ml-high-priority-bar (msg)
+    "Set the foreground and background to a low bar"
+    (ml-fmt-colors 'light-fg 'high msg))
+
   ;; 
   ;; Set internal stumpwm vars
   ;; 
@@ -579,6 +592,13 @@ So this is chucked into a function while I debug it.
         (ml-fmt-colors 'black
     		     background-color
     		     message))))
+
+  (defun ml-priority-bar-by-range (message amount &optional (med 20) (hi 50) (crit 90) reverse)
+    (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
+      (cond ((past crit) (ml-high-priority-bar message))
+  	  ((past hi) (ml-medium-priority-bar message))
+  	  ((past med) (ml-low-priority-bar message))
+  	  (t (ml-high-priority-bar "Error")))))
 
   (defvar *show-mode-line-time* t)
 
@@ -762,13 +782,22 @@ So this is chucked into a function while I debug it.
     (declare (ignorable ml))
     (let ((hottest (ml-get-hottest)))
       (if (> (getf hottest :celsius) 70)
-       	(ml-fmt-medium-priority-bg
-     	 (ml-fmt-background-color-by-range
-     	  (format nil " ~,1fC ~a "
-     		  (getf hottest :celsius)
-     		  (ml-get-human-name hottest))
-     	  (getf hottest :celsius) 70 80 90))
+  	(ml-priority-bar-by-range
+  	 (format nil " ~,1fC ~a "
+  		 (getf hottest :celsius)
+  		 (ml-get-human-name hottest))
+  	 (getf hottest :celsius) 70 80 90)
     	"")))
+
+  (add-screen-mode-line-formatter #\C 'ml-cpu-percent-fmt)
+  (defun ml-cpu-percent-fmt (ml)
+    (declare (ignoreable ml))
+    (let ((cpu-percent (* (cpu::current-cpu-usage) 100)))
+      (if (> 70 cpu-percent)
+  	(ml-priority-bar-by-range
+  	 (format nil " ~,1f%% CPU " cpu-percent)
+  	 cpu-percent 70 80 90))
+      ""))
 
   (defun ml-window-list-fmt ()
     (format nil "~A%M" (mode-line-clear-changes)))
@@ -801,7 +830,7 @@ So this is chucked into a function while I debug it.
 
     (setf *screen-mode-line-format*      
        	(list
-       	 "%M^>%H%E"
+       	 "%M^>%C%H%E"
        	 '(:eval (if *show-mode-line-time* (ml-fmt-colors 'bg 'focus " %d ") ""))
        	 '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
        		     ;; This looks weird if we don't add a double space after the battery
