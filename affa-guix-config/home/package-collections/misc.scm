@@ -2,6 +2,7 @@
   #:use-module (gnu packages base)
   #:use-module (gnu packages engineering)
   #:use-module (gnu packages fonts)
+  #:use-module (gnu packages freedesktop)
   #:use-module (gnu packages gnupg)
   #:use-module (gnu packages glib)
   #:use-module (gnu packages image-processing)
@@ -41,5 +42,8 @@
 	freecad
 	glibc-locales
 	rclone
-
+	;; xdg-desktop-portals
+	xdg-desktop-portal
+	xdg-desktop-portal-gtk
+	
 	guix-reconfiguration-wrapper))

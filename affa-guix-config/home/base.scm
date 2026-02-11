@@ -220,6 +220,9 @@
     ;; Guix
     ("guix/shell-authorized-directories" ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
 					    (plain-file "shell-authorized-directories" auth-directorys)))
+    ;; xdg-desktop-portals
+    ("xdg-desktop-portal/portals.conf" ,(config-file "/xdg-desktop-portal/portals.conf"))
+
     ;; Autostarts
     ("autostart/keepassxc.desktop" ,(config-file "/autostart/keepassxc.desktop"))))
 
