@@ -754,12 +754,6 @@ It is disabled for now
     ;; for treemacs users
     ;; (doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
     :config
-    (if (equal (getenv "AFFOA_SYSTEM_THEME_TYPE") "dark")
-        (load-theme 'doom-dracula t)
-      (load-theme 'catppuccin t)
-      (setq catppuccin-flavor 'latte)
-      (catppuccin-reload))
-
     ;; Enable flashing mode-line on errors
     (doom-themes-visual-bell-config)
     ;; or for treemacs users
@@ -774,13 +768,26 @@ It is disabled for now
 #+end_src
 *** Darkman
 #+begin_src emacs-lisp
-  (defun disable-existing-themes (before no-theme-stacking activate)
+  (defun afistfullofash/disable-existing-themes (before no-theme-stacking activate)
     "Disable any activated themes before loading a new one."
     (mapc #'disable-theme custom-enabled-themes))
 
+  (defun afistfullofash/darkman-switch-catppucin-properly (mode)
+    "Configure theme-specific variables before darkman loads the theme."
+    (cond
+     ;; When switching to Light Mode
+     ((eq mode :light)
+      (message "Setting catppucin extra vars")
+      (setq catppuccin-flavor 'latte)
+      (catppuccin-reload))
+     ;; When switching to Dark Mode (The Inverse)
+     ((eq mode :dark)
+      )))
+
   (use-package darkman
     :config
-    (advice-add 'darkman-set :before #'disable-existing-themes)
+    (advice-add 'darkman-set :before #'afistfullofash/disable-existing-themes)
+    (advice-add 'darkman-set :after #'afistfullofash/darkman-switch-catppucin-properly)
     :init
     (darkman-mode)
     :custom
