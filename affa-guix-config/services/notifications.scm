@@ -17,7 +17,7 @@
   #:use-module (ice-9 match)
 
 
-  #:use-module (affa-guix-config packages runst)
+  #:use-module (afistfullofash packages rust-apps)
 
 
   

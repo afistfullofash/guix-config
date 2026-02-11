@@ -30,7 +30,6 @@
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
 
-  #:use-module (affa-guix-config packages mahogany)
   #:use-module (afistfullofash packages wm)
 
   #:use-module (srfi srfi-1)
