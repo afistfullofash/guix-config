@@ -33,8 +33,11 @@
 
 	    home-dunst-global-config
 	    home-dunst-global-config
+
+	    home-dunst-config-modification
+	    home-dunst-service-type
 	    
-	    home-runst-service))
+	    home-runst-service-type))
 
 (define-record-type* <home-dunst-configuration>
   home-dunst-configuration make-home-dunst-configuration
@@ -55,7 +58,7 @@
   (frame-width     home-dunst-global-frame-width (default #f))
   (frame-color home-dunst-global-frame-color (default #f)))
 
-(define (home-dunst-files-service configuration)
+(define (home-dunst-config-modification configuration)
   "Generates the list for home-xdg-configuration-files-service-type."
   (match-record configuration <home-dunst-configuration>
 		(base-config config)
@@ -124,7 +127,7 @@
    (extensions
     (list
      (service-extension home-xdg-configuration-files-service-type
-			home-dunst-files-service)
+			home-dunst-config-modification)
      (service-extension home-shepherd-service-type
 			(lambda (config)
                           (list (shepherd-service
@@ -144,7 +147,7 @@
                   ;; Logic to merge extensions into your record goes here
                   (config (car extensions))))))))
 
-(define runst-service
+(define runst-service-type
   (simple-service
    'runst home-shepherd-service-type
    (list

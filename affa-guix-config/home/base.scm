@@ -124,8 +124,7 @@
 (define environment-variables-service
   (simple-service 'base-environment-variables-service
 		  home-environment-variables-service-type
-		  `(("GTK_THEME" .  "Dracula")
-		    ("LIBSEAT_BACKEND" . "logind")
+		  `(("LIBSEAT_BACKEND" . "logind")
 		    ("GUILE_LOAD_PATH" . ,(environment-variable-seperated-path
 					   '("/src/guix-config"
 					     "/src/afistfullofash")))
@@ -141,7 +140,6 @@
 					      (string-append pkg "/lib"))
 					    '#$tree-sitter-grammar-packages) ;
 				       ":"))
-		    ("AFFOA_SYSTEM_THEME_TYPE" . "dark")
 		    ;; Locale
 		    ("TZ" . "Australia/Sydney")
 		    ("LC_ALL" . "en_AU.utf8")
@@ -167,7 +165,8 @@
 
 (define home-file-locations
   `((".themes/Dracula" ,(file-append gtk-dracula-theme "/Dracula"))
-    (".icons/Dracula" ,gtk-dracula-icons)
+    ;; (".themes/catppuccin-latte-mauve-standard+default/" ,(file-append gtk-catppuccin-theme "/catppuccin-latte-mauve-standard+default/"))
+    (".icons/" ,gtk-dracula-icons)
     (".Xresources" ,xresources-dracula-theme)
     ;; Setup Git for multiple emails
     ;; This gets configured based on file path
@@ -192,10 +191,15 @@
   ;; This Stats with a heap of THEMEING
   `(("assets" ,(file-append gtk-dracula-theme "/Dracula/assets"))
     ;; GTK
+    ("gtk-2.0/Dracula.gtkrc-2.0" ,(config-file "/gtk-2.0/dracula.gtkrc-2.0"))
+    ;; ("gtk-3.0/dark.settings.ini" ,(config-file "/gtk-3.0/dark.settings.ini"))
+    ;; ("gtk-3.0/light.settings.ini" ,(config-file "/gtk-3.0/light.settings.ini"))
     ("gtk-4.0/gtk.css" ,(file-append gtk-dracula-theme "/Dracula/gtk-4.0/gtk.css"))
     ("gtk-4.0/gtk-dark.css" ,(file-append gtk-dracula-theme "Dracula/gtk-4.0/gtk-dark.css"))
     ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
-    ("gtk-2.0/dracula.gtkrc-2.0" ,(config-file "/gtk-2.0/dracula.gtkrc-2.0"))
+    ;; Dunst
+    ("dunst/catppucin.theme.conf" ,(file-append dunst-catppuccin-theme "/themes/latte.conf"))
+    ("dunst/dracula.theme.conf" ,(file-append dunst-dracula-theme "/dunstrc"))
     ;; QT5
     ("qt5ct/colors" ,qt5-dracula-theme)
     ("qt5ct/qt5ct.conf" ,(config-file "/qt5ct/qt5ct.conf"))
@@ -237,16 +241,6 @@
 
 (define base-home-services
   (list
-   (service home-dunst-service-type
-	    (home-dunst-configuration
-	     (base-config dunst-dracula-theme)
-	     (config
-	      (home-dunst-extra-config
-	       (global
-		(home-dunst-global-config
-		 (frame-width 5)
-		 (frame-color "#BD93F9")))))))
-   
    autorandr-service
    environment-variables-service
    base-home-channels-service
