@@ -774,13 +774,14 @@ It is disabled for now
 #+end_src
 *** Darkman
 #+begin_src emacs-lisp
-  (defun disable-existing-themes ()
+  (defun disable-existing-themes (before no-theme-stacking activate)
     "Disable any activated themes before loading a new one."
     (mapc #'disable-theme custom-enabled-themes))
 
   (use-package darkman
+    :config
+    (advice-add 'darkman-set :before #'disable-existing-themes)
     :init
-    (advice-add #'darkman-set-theme :before #'disable-existing-themes)
     (darkman-mode)
     :custom
     (darkman-themes '(:light catppuccin :dark doom-dracula)))
