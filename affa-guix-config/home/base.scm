@@ -195,6 +195,7 @@
     ("gtk-4.0/gtk.css" ,(file-append gtk-dracula-theme "/Dracula/gtk-4.0/gtk.css"))
     ("gtk-4.0/gtk-dark.css" ,(file-append gtk-dracula-theme "Dracula/gtk-4.0/gtk-dark.css"))
     ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
+    ("gtk-2.0/dracula.gtkrc-2.0" ,(config-file "/gtk-2.0/dracula.gtkrc-2.0"))
     ;; QT5
     ("qt5ct/colors" ,qt5-dracula-theme)
     ("qt5ct/qt5ct.conf" ,(config-file "/qt5ct/qt5ct.conf"))
