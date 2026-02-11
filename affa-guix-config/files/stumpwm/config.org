@@ -283,7 +283,7 @@ This gives us some very general functions to generate and apply /themes/ with.
        			    :fg (car fg)
        			    :bg (car bg)
        			    :border (car purple)
-       			    :focus border
+       			    :focus (car purple)
        			    :unfocus (car purple)
 
   			    :mode-line-fg (car purple)
@@ -773,15 +773,6 @@ So this is chucked into a function while I debug it.
   (defun ml-window-list-fmt ()
     (format nil "~A%M" (mode-line-clear-changes)))
 
-  (defun get-mode-line-format ()
-    (list
-     (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
-         ;; This looks weird if we don't add a double space after the battery
-         " %B  ")
-     (if *show-mode-line-time* "^R %d ^r" "")
-     (ml-email-fmt nil)
-     (ml-window-list-fmt)))
-
   (defun init-window-number-fixes ()
        ;;; When windows are desroyed window numbers are not synced
        ;;; 2kays <https://github.com/2kays> posted a solution on
@@ -811,7 +802,7 @@ So this is chucked into a function while I debug it.
     (setf *screen-mode-line-format*      
        	(list
        	 "%M^>%H%E"
-       	 '(:eval (if *show-mode-line-time* "^R %d ^r" ""))
+       	 '(:eval (if *show-mode-line-time* (ml-fmt-colors 'bg 'focus " %d ") ""))
        	 '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
        		     ;; This looks weird if we don't add a double space after the battery
        		     " %B "))
