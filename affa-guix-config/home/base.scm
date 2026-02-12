@@ -32,7 +32,8 @@
   #:use-module (affa-guix-config home utils)
 
   #:use-module (afistfullofash packages themes)
-  #:use-module (afistfullofash services notifications)
+  #:use-module (afistfullofash home services notification)
+  #:use-module (afistfullofash home timers backup)
 
   #:use-module (affa-guix-config home package-collections desktop)
   #:use-module (affa-guix-config home package-collections emacs)
@@ -244,7 +245,7 @@
    autorandr-service
    environment-variables-service
    base-home-channels-service
-
+   (service home-dunst-service-type)
    (service home-dbus-service-type)
    (service home-pipewire-service-type)
    (service home-syncthing-service-type)
