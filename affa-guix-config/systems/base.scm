@@ -15,7 +15,7 @@
   #:use-module (gnu services xorg)
   #:use-module (gnu services docker)
 
-  #:use-module (affa-guix-config services firmware)
+  #:use-module (afistfullofash services firmware)
   
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages autotools)

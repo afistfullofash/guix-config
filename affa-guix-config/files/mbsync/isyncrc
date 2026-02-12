@@ -12,8 +12,8 @@ Account natalie-atkinson-proton
 MaildirStore natalie-atkinson-proton-local
 SubFolders Verbatim
 # The trailing "/" is important
-Path ~/mail/natalieatkinson95-pm/
-Inbox ~/mail/natalieatkinson95-pm/INBOX
+Path ~/mail/personal/natalieatkinson95/
+Inbox ~/mail/personal/natalieatkinson95/INBOX
 Flatten .
 
 Channel natalie-atkinson-proton

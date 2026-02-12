@@ -620,11 +620,10 @@ Capture a Journal Entry
 #+begin_src emacs-lisp
   (use-package notmuch
     :custom
-    (notmuch-saved-searches '((:name "All" :query "*")
-  			    (:name "Unread" :query "tag:unread")
-  			    (:name "Important" :query "tag:unread and not tag:work")
-  			    (:name "Work"
-  				   :query "tag:work and from:*@liven* and not from:devops@*liven* and not from:liventeam.atlassian.net and not from:notify@getguru.com"))))
+    (notmuch-saved-searches '((:name "Unread" :query "tag:unread and not tag:work")
+  			    (:name "Unread with Work" :query "tag:unread")
+  			    (:name "Work Important" :query "tag:work and tag:important and tag:unread")
+  			    (:name "Work" :query "tag:work"))))
 #+end_src
 ** Visual
 *** Expand Region

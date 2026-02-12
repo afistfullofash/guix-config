@@ -1,20 +1,15 @@
+[SpamFilter]
+[KillThreadsFilter]
+[ListMailsFilter]
+[ArchiveSentMailsFilter]
+[FolderNameFilter]
+maildir_separator = /
+
 [Filter.1]
-query = path:natalieatkinson95-pm/**
-tags = +personal;+natalieatkinson95
-
-[Filter.2]
-query = path:tnatkinson95-gmail/**
-tags = +personal;+tnatkinson95
-
-[Filter.3]
-query = path:tnatkinson95-gmail/**
-tags = +work
-
-[Filter.4]
 query = tag:work AND body:"View on Google Calendar"
 tags = +calendar
 
-[Filter.5]
+[Filter.2]
 query = tag:work AND (from:*@liven.com.au OR tag:calendar)
 tags = +important
 
