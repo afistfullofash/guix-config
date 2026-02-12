@@ -201,8 +201,12 @@
     ("guix/shell-authorized-directories"
      ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
 	(plain-file "shell-authorized-directories" auth-directorys)))
-    
-    ("gtk-2.0/dracula.gtkrc-2.0" ,(config-file "/gtk-2.0/dracula.gtkrc-2.0"))
+
+    ("gtk-2.0/light.gtkrc-2.0" ,(config-file "/gtk-2.0/light.gtkrc-2.0"))
+    ("gtk-2.0/dark.gtkrc-2.0" ,(config-file "/gtk-2.0/dark.gtkrc-2.0"))
+    ("gtk-3.0/light.settings.ini" ,(config-file "/gtk-3.0/light.settings.ini"))
+    ("gtk-3.0/dark.settings.ini" ,(config-file "/gtk-3.0/dark.settings.ini"))
+
     ("gtk-4.0/gtk-dark.css" ,(file-append gtk-dracula-theme "Dracula/gtk-4.0/gtk-dark.css"))
     ("gtk-4.0/gtk.css" ,(file-append gtk-dracula-theme "/Dracula/gtk-4.0/gtk.css"))
     ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
