@@ -165,72 +165,59 @@
 		      #$output)))))
 
 (define home-file-locations
-  `((".themes/Dracula" ,(file-append gtk-dracula-theme "/Dracula"))
-    ;; (".themes/catppuccin-latte-mauve-standard+default/" ,(file-append gtk-catppuccin-theme "/catppuccin-latte-mauve-standard+default/"))
-    (".icons/" ,gtk-dracula-icons)
-    (".Xresources" ,xresources-dracula-theme)
-    ;; Setup Git for multiple emails
-    ;; This gets configured based on file path
-    (".gitconfig" ,(config-file "/git/gitconfig"))
-    (".gitignore" ,(config-file "/git/gitignore"))
-    ("work/.gitconfig" ,(config-file "/git/work.gitconfig"))
-    ;; For some reason this does not work when we pass directories to it
-    (".stumpwm.d/init.lisp" ,stumpwm-init-lisp)
+  `((".Xresources" ,xresources-dracula-theme)
     ;; Emacs
     (".emacs.d/init.el" ,emacs-init-el)
-    ;; SSH Public Keys
-    (".ssh/work.pub" ,(config-file "/ssh/work.pub"))
-    (".ssh/nat.pub" ,(config-file "/ssh/nat.pub"))
-    ;; Email
-    ("mail/work/.gmailieer.json" ,(config-file "/gmi/work.gmailieer.json"))
+    (".gitconfig" ,(config-file "/git/gitconfig"))
+    (".gitignore" ,(config-file "/git/gitignore"))
+    (".icons/Dracula" ,gtk-dracula-icons)
     (".local/share/darkman" ,(config-file "/darkman"
 					  #:recursive? #t))
+    ;; Setup Git for multiple emails
+    (".ssh/nat.pub" ,(config-file "/ssh/nat.pub"))
+    (".ssh/work.pub" ,(config-file "/ssh/work.pub"))
+    (".stumpwm.d/init.lisp" ,stumpwm-init-lisp)
+    (".themes/Dracula" ,(file-append gtk-dracula-theme "/Dracula"))
     ;; Ensure screenshot directory exists
-    ("Pictures/Screenshots/.keep" ,(config-file "/keep"))))
+    ("Pictures/Screenshots/.keep" ,(config-file "/keep"))
+    ("mail/work/.gmailieer.json" ,(config-file "/gmi/work.gmailieer.json"))
+    ("work/.gitconfig" ,(config-file "/git/work.gitconfig"))))
 
 (define xdg-config-file-locations
   ;; This Stats with a heap of THEMEING
-  `(("assets" ,(file-append gtk-dracula-theme "/Dracula/assets"))
-    ;; GTK
-    ("gtk-2.0/Dracula.gtkrc-2.0" ,(config-file "/gtk-2.0/dracula.gtkrc-2.0"))
-    ;; ("gtk-3.0/dark.settings.ini" ,(config-file "/gtk-3.0/dark.settings.ini"))
-    ;; ("gtk-3.0/light.settings.ini" ,(config-file "/gtk-3.0/light.settings.ini"))
-    ("gtk-4.0/gtk.css" ,(file-append gtk-dracula-theme "/Dracula/gtk-4.0/gtk.css"))
-    ("gtk-4.0/gtk-dark.css" ,(file-append gtk-dracula-theme "Dracula/gtk-4.0/gtk-dark.css"))
-    ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
-    ;; Dunst
-    ("dunst/catppucin.theme.conf" ,(file-append dunst-catppuccin-theme "/themes/latte.conf"))
+  `(("afew/config" ,(config-file "/afew/config"))
+
+    ("alacritty/alacritty.toml" ,(config-file "/alacritty/alacritty.toml"))
+    ("alacritty/themes/catppuccin.toml" ,(file-append alacritty-catppuccin-theme "/catppuccin-latte.toml"))
+    ("alacritty/themes/dracula.toml" ,(file-append alacritty-dracula-theme "/dracula.toml"))
+    ("autorandr" ,(config-file "/autorandr"
+			      #:recursive? #t))	
+    ("assets" ,(file-append gtk-dracula-theme "/Dracula/assets"))
+    ("autostart/keepassxc.desktop" ,(config-file "/autostart/keepassxc.desktop"))
+
     ("dunst/dracula.theme.conf" ,(file-append dunst-dracula-theme "/dunstrc"))
-    ;; QT5
+    ("dunst/catppuccin.theme.conf" ,(file-append dunst-catppuccin-theme "/themes/latte.conf"))
+
+    ("guix/shell-authorized-directories"
+     ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
+	(plain-file "shell-authorized-directories" auth-directorys)))
+    
+    ("gtk-2.0/dracula.gtkrc-2.0" ,(config-file "/gtk-2.0/dracula.gtkrc-2.0"))
+    ("gtk-4.0/gtk-dark.css" ,(file-append gtk-dracula-theme "Dracula/gtk-4.0/gtk-dark.css"))
+    ("gtk-4.0/gtk.css" ,(file-append gtk-dracula-theme "/Dracula/gtk-4.0/gtk.css"))
+    ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
+
+    ("isyncrc" ,isyncrc)
+    ("lsd" ,lsd-dracula-theme)
+    ("mahogany/init.lisp" ,(config-file "/mahogany/init.lisp"))
+    ("notmuch/default/config" ,(config-file "/notmuch/notmuch-config"))
+
     ("qt5ct/colors" ,qt5-dracula-theme)
     ("qt5ct/qt5ct.conf" ,(config-file "/qt5ct/qt5ct.conf"))
-    ;; Specific Programs
-    ;; Mahogany
-    ("mahogany/init.lisp" ,(config-file "/mahogany/init.lisp"))
-    ;; Alacritty
-    ("alacritty/alacritty.toml" ,(config-file "/alacritty/alacritty.toml"))
-    ("alacritty/themes/dracula.toml" ,(file-append alacritty-dracula-theme "/dracula.toml"))
-    ("alacritty/themes/catppuccin.toml" ,(file-append alacritty-catppuccin-theme "/catppuccin-latte.toml"))
-    ;; LSD
-    ("lsd" ,lsd-dracula-theme)
-    ;; Starship
-    ("starship/dracula.toml" ,(file-append starship-dracula-theme "/starship.theme.toml"))
-    ("starship/catppuccin.toml" ,(file-append starship-catppuccin-theme "/themes/latte.toml"))
-    ;; Autorandr
-    ("autorandr" ,(config-file "/autorandr"
-			      #:recursive? #t))
-    ;;mbsync
-    ("isyncrc" ,isyncrc)
-    ("afew/config" ,(config-file "/afew/config"))
-    ("notmuch/default/config" ,(config-file "/notmuch/notmuch-config"))
-    ;; Guix
-    ("guix/shell-authorized-directories" ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
-					    (plain-file "shell-authorized-directories" auth-directorys)))
-    ;; xdg-desktop-portals
-    ("xdg-desktop-portal/portals.conf" ,(config-file "/xdg-desktop-portal/portals.conf"))
 
-    ;; Autostarts
-    ("autostart/keepassxc.desktop" ,(config-file "/autostart/keepassxc.desktop"))))
+    ("starship/catppuccin.toml" ,(file-append starship-catppuccin-theme "/themes/latte.toml"))
+    ("starship/dracula.toml" ,(file-append starship-dracula-theme "/starship.theme.toml"))
+    ("xdg-desktop-portal/portals.conf" ,(config-file "/xdg-desktop-portal/portals.conf"))))
 
 (define ssh-configuration
   (home-openssh-configuration
