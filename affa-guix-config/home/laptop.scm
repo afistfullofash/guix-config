@@ -12,8 +12,8 @@
   
   
   #:use-module (affa-guix-config home base)
-  #:use-module (affa-guix-config services backup)
-  #:use-module (affa-guix-config services mail)
+  #:use-module (afistfullofash services backup)
+  #:use-module (afsitfullofash services mail)
 
   #:export (laptop-home-environment))
 

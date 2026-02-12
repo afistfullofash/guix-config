@@ -32,7 +32,7 @@
   #:use-module (affa-guix-config home utils)
 
   #:use-module (afistfullofash packages themes)
-  #:use-module (affa-guix-config services notifications)
+  #:use-module (afistfullofash services notifications)
 
   #:use-module (affa-guix-config home package-collections desktop)
   #:use-module (affa-guix-config home package-collections emacs)
