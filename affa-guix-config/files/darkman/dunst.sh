@@ -4,7 +4,7 @@
 case "$1" in
     light)
         # Point to your light config
-        ln -sf ~/.config/dunst/catppucin.theme.conf ~/.config/dunst/dunstrc
+        ln -sf ~/.config/dunst/catppuccin.theme.conf ~/.config/dunst/dunstrc
         ;;
     dark)
         # Point to your dark config

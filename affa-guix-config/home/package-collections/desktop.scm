@@ -1,5 +1,8 @@
 (define-module (affa-guix-config home package-collections desktop)
 
+  #:use-module (guix channels)
+  #:use-module (guix inferior)
+  
   #:use-module (afistfullofash packages mail)
 
   #:use-module (gnu packages ebook)
@@ -17,8 +20,24 @@
 
   #:use-module (nongnu packages game-client)
   #:use-module (nongnu packages mozilla)
+
+  #:use-module (srfi srfi-1)
   
   #:export (desktop-packages))
+
+;; Calibre is a nasty little gremlin which had dependencys break the build often.
+;; Pin it to a know good build
+(define calibre-guix-channel
+  (inferior-for-channels
+   (list (channel
+          (name 'guix)
+          (url "https://codeberg.org/guix/guix.git")
+          (commit "9c8e6a9b11c72c96fbdb6d8507338bcb483dd863")
+	  (introduction
+          (make-channel-introduction
+            "9edb3f66fd807b096b48283debdcddccfea34bad"
+            (openpgp-fingerprint
+              "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA")))))))
 
 (define desktop-packages
   (list
@@ -34,7 +53,7 @@
    steam
    ;; Vlc
    vlc
-   calibre
+   (first (lookup-inferior-packages calibre-guix-channel "calibre"))
    pavucontrol
    ;; Screenshot tool
    maim

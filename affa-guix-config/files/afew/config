@@ -2,6 +2,7 @@
 [KillThreadsFilter]
 [ListMailsFilter]
 [ArchiveSentMailsFilter]
+
 [FolderNameFilter]
 maildir_separator = /
 
@@ -10,7 +11,12 @@ query = tag:work AND body:"View on Google Calendar"
 tags = +calendar
 
 [Filter.2]
-query = tag:work AND (from:*@liven.com.au OR tag:calendar)
+query = tag:work AND (from:*@liven.com.au OR tag:calendar) AND NOT tag:lists
 tags = +important
+
+[HeaderMatchingFilter.DatadogIncident]
+header = Subject
+regexp = [Datadog] Incident \#*
+tag = +datadog +incident
 
 [InboxFilter]

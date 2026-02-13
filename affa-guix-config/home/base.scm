@@ -35,6 +35,8 @@
   #:use-module (afistfullofash home services notification)
   #:use-module (afistfullofash home timers backup)
 
+  #:use-module (affa-guix-config home themes)
+  
   #:use-module (affa-guix-config home package-collections desktop)
   #:use-module (affa-guix-config home package-collections emacs)
   #:use-module (affa-guix-config home package-collections misc)
@@ -146,38 +148,19 @@
 		    ("LC_ALL" . "en_AU.utf8")
 		    ("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:$HOME/.local/share/flatpak/exports/share"))))
 
-(define stumpwm-init-lisp
-  (computed-file
-   "init.lisp"
-   (with-imported-modules '((guix build utils))
-     #~(begin
-	 (use-modules (guix build utils))
-	 (let* ((emacs-bin (string-append #$(file-append (specification->package "emacs-lucid") "/bin/emacs")))
-		(init-org-file #$(config-file "/stumpwm/config.org")))
-	   (format #t "Tangling ~a...\n" init-org-file)
-	   (invoke emacs-bin
-		   "--batch"
-		   "-q"		       ; Don't load a user init file
-		   init-org-file       ; Open the org file in a buffer
-		   "--eval" "(require 'org)"
-		   "--eval" "(org-babel-tangle)"))
-	 (rename-file (string-append (dirname #$(config-file "/stumpwm/config.org")) "/init.lisp")
-		      #$output)))))
-
 (define home-file-locations
+
   `((".Xresources" ,xresources-dracula-theme)
     ;; Emacs
     (".emacs.d/init.el" ,emacs-init-el)
     (".gitconfig" ,(config-file "/git/gitconfig"))
     (".gitignore" ,(config-file "/git/gitignore"))
-    (".icons/Dracula" ,gtk-dracula-icons)
     (".local/share/darkman" ,(config-file "/darkman"
 					  #:recursive? #t))
     ;; Setup Git for multiple emails
     (".ssh/nat.pub" ,(config-file "/ssh/nat.pub"))
     (".ssh/work.pub" ,(config-file "/ssh/work.pub"))
-    (".stumpwm.d/init.lisp" ,stumpwm-init-lisp)
-    (".themes/Dracula" ,(file-append gtk-dracula-theme "/Dracula"))
+    (".stumpwm.d/init.lisp" ,(config-file "/stumpwm/init.lisp"))
     ;; Ensure screenshot directory exists
     ("Pictures/Screenshots/.keep" ,(config-file "/keep"))
     ("mail/work/.gmailieer.json" ,(config-file "/gmi/work.gmailieer.json"))
@@ -187,16 +170,10 @@
   ;; This Stats with a heap of THEMEING
   `(("afew/config" ,(config-file "/afew/config"))
 
-    ("alacritty/alacritty.toml" ,(config-file "/alacritty/alacritty.toml"))
-    ("alacritty/themes/catppuccin.toml" ,(file-append alacritty-catppuccin-theme "/catppuccin-latte.toml"))
-    ("alacritty/themes/dracula.toml" ,(file-append alacritty-dracula-theme "/dracula.toml"))
     ("autorandr" ,(config-file "/autorandr"
-			      #:recursive? #t))	
-    ("assets" ,(file-append gtk-dracula-theme "/Dracula/assets"))
+			       #:recursive? #t))	
     ("autostart/keepassxc.desktop" ,(config-file "/autostart/keepassxc.desktop"))
 
-    ("dunst/dracula.theme.conf" ,(file-append dunst-dracula-theme "/dunstrc"))
-    ("dunst/catppuccin.theme.conf" ,(file-append dunst-catppuccin-theme "/themes/latte.conf"))
 
     ("guix/shell-authorized-directories"
      ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
@@ -207,20 +184,12 @@
     ("gtk-3.0/light.settings.ini" ,(config-file "/gtk-3.0/light.settings.ini"))
     ("gtk-3.0/dark.settings.ini" ,(config-file "/gtk-3.0/dark.settings.ini"))
 
-    ("gtk-4.0/gtk-dark.css" ,(file-append gtk-dracula-theme "Dracula/gtk-4.0/gtk-dark.css"))
-    ("gtk-4.0/gtk.css" ,(file-append gtk-dracula-theme "/Dracula/gtk-4.0/gtk.css"))
     ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
 
     ("isyncrc" ,isyncrc)
-    ("lsd" ,lsd-dracula-theme)
     ("mahogany/init.lisp" ,(config-file "/mahogany/init.lisp"))
     ("notmuch/default/config" ,(config-file "/notmuch/notmuch-config"))
 
-    ("qt5ct/colors" ,qt5-dracula-theme)
-    ("qt5ct/qt5ct.conf" ,(config-file "/qt5ct/qt5ct.conf"))
-
-    ("starship/catppuccin.toml" ,(file-append starship-catppuccin-theme "/themes/latte.toml"))
-    ("starship/dracula.toml" ,(file-append starship-dracula-theme "/starship.theme.toml"))
     ("xdg-desktop-portal/portals.conf" ,(config-file "/xdg-desktop-portal/portals.conf"))))
 
 (define ssh-configuration
@@ -249,8 +218,10 @@
              (extra-content "allow-loopback-pinentry")
              (default-cache-ttl 3600)))
    (service home-openssh-service-type ssh-configuration)
-   (service home-files-service-type home-file-locations)
-   (service home-xdg-configuration-files-service-type xdg-config-file-locations)
+   (service home-files-service-type (append home-file-locations
+					    theme-home-locations))
+   (service home-xdg-configuration-files-service-type (append xdg-config-file-locations
+							      theme-xdg-config-locations))
    (service home-zsh-service-type
 	    (home-zsh-configuration
 	     (zshrc (list
