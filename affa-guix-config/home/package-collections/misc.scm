@@ -14,6 +14,7 @@
   #:use-module (gnu packages sync)
   #:use-module (gnu packages video)
   #:use-module (gnu packages xdisorg)
+  #:use-module (gnu packages xorg)
   
   #:use-module (nongnu packages game-client)
   
@@ -45,5 +46,8 @@
 	;; xdg-desktop-portals
 	xdg-desktop-portal
 	xdg-desktop-portal-gtk
+
+	xrdb
+	xsetroot
 	
 	guix-reconfiguration-wrapper))

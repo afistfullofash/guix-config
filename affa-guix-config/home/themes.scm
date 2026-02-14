@@ -26,8 +26,9 @@
 					xresources-dracula-theme))
     
     (".icons/Dracula" ,(icon-theme-path "Dracula" gtk-dracula-icons))
+    (".icons/Dracula-cursors" ,(cursors-theme-path "Dracula-cursors" dracula-cursors))
     
-    (".themes/Dracula" ,(theme-path "Dracula" gtk-dracula-theme))
+    (".themes/Dracula" ,(theme-path "Dracula" gtk-dracula-theme-2026))
     (".themes/catppuccin-latte-mauve-standard+default"
      ,(theme-path "catppuccin-latte-mauve-standard+default" gtk-catppuccin-theme))))
 
@@ -62,7 +63,7 @@
     ("assets"
      ,(package-theme-path "Dracula"
 			  "assets"
-			  gtk-dracula-theme))
+			  gtk-dracula-theme-2026))
     
     ("starship/catppuccin.toml"
      ,(package-theme-path "catppuccin"
@@ -75,8 +76,8 @@
     ("gtk-4.0/gtk-dark.css"
      ,(package-theme-path "Dracula"
 			  "gtk-4.0/gtk-dark.css"
-			  gtk-dracula-theme))
+			  gtk-dracula-theme-2026))
     ("gtk-4.0/gtk.css"
      ,(package-theme-path "Dracula"
 			  "gtk-4.0/gtk.css"
-			  gtk-dracula-theme))))
+			  gtk-dracula-theme-2026))))

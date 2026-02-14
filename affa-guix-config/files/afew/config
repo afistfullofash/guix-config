@@ -9,12 +9,19 @@ maildir_separator = /
 [Filter.1]
 query = tag:work AND body:"View on Google Calendar"
 tags = +calendar
+message = Ensuring Calendar Invites dont get missed
 
 [Filter.2]
 query = tag:work AND (from:*@liven.com.au OR tag:calendar) AND NOT tag:lists
 tags = +important
+message = Tagging important work emails
 
-[HeaderMatchingFilter.DatadogIncident]
+[Filter.3]
+query = forwarded_for:tnatkinson95@gmail.com
+tags = +forwarded_tna
+message = Tagging mail forwarded from tnatkinson95
+
+[HeaderMatchingFilter]
 header = Subject
 regexp = [Datadog] Incident \#*
 tag = +datadog +incident

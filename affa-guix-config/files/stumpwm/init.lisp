@@ -130,16 +130,16 @@
     :type string)))
 
 (defmethod initialize-instance :after ((obj theme) &key)
-           ;; Default prioritiyes to green, yellow, organge
-           (unless (slot-boundp obj 'low)
-             (setf (slot-value obj 'low) (slot-value obj 'green)))
-           (unless (slot-boundp obj 'medium)
-             (setf (slot-value obj 'medium) (slot-value obj 'yellow)))
-           (unless (slot-boundp obj 'high)
-             (setf (slot-value obj 'high) (slot-value obj 'red)))
+  ;; Default prioritiyes to green, yellow, organge
+  (unless (slot-boundp obj 'low)
+    (setf (slot-value obj 'low) (slot-value obj 'green)))
+  (unless (slot-boundp obj 'medium)
+    (setf (slot-value obj 'medium) (slot-value obj 'yellow)))
+  (unless (slot-boundp obj 'high)
+    (setf (slot-value obj 'high) (slot-value obj 'red)))
 
-           (unless (slot-boundp obj 'light-fg)
-             (setf (slot-value obj 'light-fg) (slot-value obj 'fg))))
+  (unless (slot-boundp obj 'light-fg)
+    (setf (slot-value obj 'light-fg) (slot-value obj 'fg))))
 
 (defun get-theme (theme-name)
   (gethash theme-name *themes*))
@@ -157,8 +157,8 @@
   (set-unfocus-color (slot-value theme 'unfocus))
 
   (setf *mode-line-foreground-color* (slot-value theme 'mode-line-fg)
-      	,*mode-line-background-color* (slot-value theme 'mode-line-bg)
-      	,*mode-line-border-color* (slot-value theme 'mode-line-border))
+      	*mode-line-background-color* (slot-value theme 'mode-line-bg)
+      	*mode-line-border-color* (slot-value theme 'mode-line-border))
   
   (setf *colors* (list 
       		  (slot-value theme 'black)
@@ -264,23 +264,24 @@
   			    :custom-two error)))
 ;; *** Dracula
 (add-theme 'dracula
-       	   (let ((fg '("#F8F8F2" "#f1fa8c"))
-       		 (bg '("#282A36" "#44475a"))
-       		 (border "#8BE9FD")
-  		 (green "#50FA7B")
-  		 (yellow "#F1FA8C")
-  		 (red "#FF5555")
-       		 (purple '("#BD93F9" "#ff79c6")))
+       	   (let* ((green "#50FA7B")
+		  (yellow "#F1FA8C")
+		  (red "#FF5555")
+		  (purple '("#BD93F9" "#ff79c6"))
+
+		  (fg '("#F8F8F2" "#f1fa8c"))
+		  (bg '("#282A36" "#44475a"))
+		  (border (car purple)))
        	     (make-instance 'theme
        			    :fg (car fg)
        			    :bg (car bg)
-       			    :border (car purple)
+       			    :border border
        			    :focus (car purple)
        			    :unfocus (car purple)
 
   			    :mode-line-fg (car purple)
        			    :mode-line-bg (car bg)
-       			    :mode-line-border (car purple)
+       			    :mode-line-border border
 
        			    :black  bg
        			    :white  fg
@@ -368,30 +369,30 @@
 
 (defun set-system-themeing (theme)
   (if (trivia:match theme
-  		    ("dark" t)
-  		    ("light" t)
-  		    (_ nil))
+	("dark" t)
+	("light" t)
+	(_ nil))
       (progn
   	(setq *system-theme-type* theme)
   	(run-shell-command (format nil "darkman set ~a" theme))
   	(apply-theme (trivia:match theme
-  				   ("dark" 'dracula)
-  				   ("light" 'catppuccin-latte)))
+		       ("dark" 'dracula)
+		       ("light" 'catppuccin-latte)))
   	(set-bar-med-color)
   	(set-bar-hi-color)
   	(set-bar-crit-color)
   	(toggle-modeline-all-screens)
   	(toggle-modeline-all-screens))
-    
-    (stumpwm:message
-     (format
-      nil
-      "set-system-themeing: ~a is not either \"light\" or \"dark\"" theme))))
+      
+      (stumpwm:message
+       (format
+	nil
+	"set-system-themeing: ~a is not either \"light\" or \"dark\"" theme))))
 
 (defun toggle-system-themeing ()
   (set-system-themeing (trivia:match *system-theme-type*
-  				     ("dark" "light")
-  				     ("light" "dark"))))
+			 ("dark" "light")
+			 ("light" "dark"))))
 
 ;; ** Configuration
 ;; *** Notify
@@ -408,7 +409,7 @@
     color is a string generally a hex"
   (if (typep color 'list)
       (format nil "^(:fg \"~A\")" (car color))
-    (format nil "^(:fg \"~A\")" color)))
+      (format nil "^(:fg \"~A\")" color)))
 
 (defun ml-background-color-symb (color)
   "If we have a list the theme has bright colors.
@@ -417,7 +418,7 @@
     color is a string generally a hex"
   (if (typep color 'list)
       (format nil "^(:bg \"~A\")" (car color))
-    (format nil "^(:bg \"~A\")" color)))
+      (format nil "^(:bg \"~A\")" color)))
 
 
 (defun ml-fmt-safe-change (change)
@@ -506,16 +507,16 @@
 ;;
 ;; Complete Color Sets
 ;; 
-(defun ml-fmt-light-bar (msg)
+(defun ml-light-bar (msg)
   "Set the foreground and background to a low bar"
   (ml-fmt-colors 'low 'bg msg))
 
 
-(defun ml-fmt-medium-bar (msg)
+(defun ml-medium-bar (msg)
   "Set the foreground and background to a medium bar"
   (ml-fmt-colors 'fg 'custom-one msg))
 
-(defun ml-fmt-dark-bar (msg)
+(defun ml-dark-bar (msg)
   "Set the foreground and background to a medium bar"
   (ml-fmt-colors 'fg 'custom-two msg))
 
@@ -568,20 +569,23 @@
 
 (defun ml-fmt-background-color-by-range (message amount &optional (med 20) (hi 50) (crit 90) reverse)
   (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
-	(let ((background-color (cond ((past crit) 'red)
-  				      ((past hi) 'yellow)
-  				      ((past med) 'green)
-  				      (t 'identity))))
-          (ml-fmt-colors 'black
-    			 background-color
-    			 message))))
+    (let ((background-color (cond ((past crit) 'red)
+				  ((past hi) 'yellow)
+				  ((past med) 'green)
+				  (t 'identity))))
+      (ml-fmt-colors 'black
+		     background-color
+		     message))))
 
 (defun ml-priority-bar-by-range (message amount &optional (med 20) (hi 50) (crit 90) reverse)
   (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
-	(cond ((past crit) (ml-high-priority-bar message))
-  	      ((past hi) (ml-medium-priority-bar message))
-  	      ((past med) (ml-low-priority-bar message))
-  	      (t (ml-high-priority-bar "Error")))))
+    (cond ((past crit) (ml-high-priority-bar message))
+	  ((past hi) (ml-medium-priority-bar message))
+	  ((past med) (ml-low-priority-bar message))
+	  (t (ml-high-priority-bar "Error")))))
+
+(defun ml-space-bar (el)
+  (format nil " ~a" el))
 
 (defvar *show-mode-line-time* t)
 
@@ -597,19 +601,19 @@
   "Using *window-format*, return a 1 line list of the windows, space seperated."
   (format nil "~{~a~^~}"
        	  (let ((base-fmt
-    		 (mapcar (lambda (w)
-    			   (format-with-on-click-id 
-    			    (let ((str (format-expand *window-formatters*
-    						      ,*window-format*
-    						      w)))
-    			      (if (eq w (current-window))
-    				  (stumpwm::fmt-highlight (format nil " ~a " str))
-    				(format nil "~a|" str)))
-    			    :ml-on-click-focus-window
-    			    (stumpwm::window-id w)))
-    			 (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
-    								(stumpwm::mode-line-head ml))
-    					 #'< :key #'window-number))))
+		  (mapcar (lambda (w)
+			    (format-with-on-click-id 
+			     (let ((str (format-expand *window-formatters*
+						       *window-format*
+						       w)))
+			       (if (eq w (current-window))
+				   (stumpwm::fmt-highlight (format nil " ~a " str))
+				   (format nil "~a|" str)))
+			     :ml-on-click-focus-window
+			     (stumpwm::window-id w)))
+			  (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
+								 (stumpwm::mode-line-head ml))
+					  #'< :key #'window-number))))
        	    ;; Reparse strings and remove the | from the element before the active window
        	    (if (> (length base-fmt) 0)
        		(loop for win-fmt-el from 1 to (- (length base-fmt) 1)
@@ -622,27 +626,31 @@
        								 "\^\(\:on-click-end\)"))))))
        	    base-fmt)))
 
-(defun ml-email-data ()
-  (labels ((notmuch-count
-    	    (tags)
-    	    (let* ((raw-count (trimmed-shell-command (format nil "notmuch count ~A" tags)))
-    		   (count (if (string= raw-count "")
-    			      nil
-    			    (parse-integer raw-count))))
-    	      count)))
-	  (let* ((tnatkinson-email-count
-    		  (notmuch-count
-    		   "tag:tnatkinson95 and tag:unread and not tag:promotions"))
-    		 (natalieatkinson-email-count
-    		  (notmuch-count
-    		   "tag:natalieatkinson95 and tag:unread and not tag:promotions"))
-    		 (work-email-count (notmuch-count "tag:work and tag:unread")))
-            (list :tnatkinson tnatkinson-email-count
-    		  :natalieatkinson natalieatkinson-email-count
-    		  :work work-email-count))))
+(defvar *ml-email-accounts*
+  (list
+   (list :name "old-account-fowarding"
+	 :notmuch-search "tag:forwarded_tna and tag:unread"
+	 :display-filter nil)
+   (list :name "natalie-atkinson"
+	 :notmuch-search "tag:natalieatkinson95 and tag:unread and not tag:promotions"
+	 :display-filter nil)
+   (list :name "work"
+	 :notmuch-search "tag:work and tag:unread"
+	 :display-filter (lambda ()
+			   (in-work-hours '(:days (1 2 3 4 5)
+					    :hours (9 17)))))))
 
-(defun ml-space-bar (el)
-  (format nil " ~a" el))
+(defun ml-email-get-data ()
+  (flet ((notmuch-count (tags)
+	   (let ((raw-count (trimmed-shell-command (format nil "notmuch count ~A" tags))))
+	     (if (string= raw-count "")
+		 nil
+		 (parse-integer raw-count)))))
+    (mapcar (lambda (account)
+	      (append account
+		      (list :email-count (notmuch-count (getf account :notmuch-search)))))
+	    *ml-email-accounts*)))
+
 
 (defun ml-email-space-bar (email-count)
   (if email-count
@@ -650,7 +658,7 @@
        (get-bar-zone-color-string email-count
   				  (write-to-string email-count)
   				  5 10 15))
-    (ml-space-bar (error-message-bar "Error"))))
+      (ml-space-bar (error-message-bar "Error"))))
 
 (defun in-work-hours (work-times)
   ;; Extract relevent data
@@ -666,61 +674,57 @@
     (if (and (member day-of-week workdays)
      	     (and (>= hour-of-day start-time)
      		  (< hour-of-day end-time)))
-     	t
-      nil)))
+     	nil
+	t)))
 
 (add-screen-mode-line-formatter #\E 'ml-email-fmt)
 (defun ml-email-fmt (ml)
   (declare (ignorable ml))
-  (labels ((get-nil-as-positive-error (data)
-    				      (if data
-    					  data
-    					500)))
-	  (let* ((email-counts (ml-email-data))
-    		 (tnatkinson-count (getf email-counts :tnatkinson))
-    		 (natalie-count (getf email-counts :natalieatkinson))
-    		 (work-count (getf email-counts :work)))
-            (if (plusp (reduce #'+
-    			       (list tnatkinson-count
-    				     natalie-count
-    				     work-count)
-    			       :key #'get-nil-as-positive-error
-    			       :initial-value 0))
-    		(let ((tnatkinson-bar (ml-email-space-bar tnatkinson-count))
-    		      (natalie-bar (ml-email-space-bar natalie-count))
-    		      (work-bar (if (in-work-hours '(:days (1 2 3 4 5)
-    							   :hours (9 17)))
-    				    (ml-email-space-bar work-count)
-    				  "")))
-		  
-    		  (ml-fmt-medium-bar
-    		   (concatenate 'string
-    				tnatkinson-bar
-    				natalie-bar
-    				work-bar
-    				" Emails ")))
-    	      ""))))
+  (labels ((is-account-displayable (account)
+	     (let ((display-filter (getf account :display-filter)))
+	       (if (and display-filter (functionp display-filter))
+		   (funcall display-filter)
+		   nil)))
+	   (add-count-to-string (mode-line-string account)
+	     (concatenate 'string
+			  mode-line-string
+			  (ml-email-space-bar (getf account :email-count)))))
+    (let* ((email-account-information (ml-email-get-data))
+	   (display-accounts (remove-if
+			      #'is-account-displayable
+			      email-account-information))
+	   (account-display-string (reduce
+				    #'add-count-to-string
+				    display-accounts
+				    :initial-value "")))
+      (if (not (string= "" account-display-string))
+	  (ml-medium-bar
+	   (concatenate
+	    'string
+	    account-display-string
+	    " Emails "))
+	  ""))))
 
 
 (defun ml-read-file-as-integer (path)
   (handler-case
       (with-open-file (s path :direction :input :if-does-not-exist nil)
-  		      (when s
-  			(let ((line (read-line s nil)))
-  			  (if line
-  			      (parse-integer (string-trim '(#\Newline #\Space) line))
-  			    0))))
+	(when s
+	  (let ((line (read-line s nil)))
+	    (if line
+		(parse-integer (string-trim '(#\Newline #\Space) line))
+		0))))
     (sb-int:simple-stream-error () 0)
     (file-error () 0)))
 
 (defun ml-read-file-as-string (path)
   (handler-case
       (with-open-file (s path :direction :input :if-does-not-exist nil)
-  		      (when s
-  			(let ((line (read-line s nil)))
-  			  (if line
-  			      (string-trim '(#\Newline #\Space) line)
-  			    "unknown"))))
+	(when s
+	  (let ((line (read-line s nil)))
+	    (if line
+		(string-trim '(#\Newline #\Space) line)
+		"unknown"))))
     (sb-int:simple-stream-error () "err")
     (file-error () "err")))
 
@@ -770,11 +774,11 @@
   		 (getf hottest :celsius)
   		 (ml-get-human-name hottest))
   	 (getf hottest :celsius) 70 80 90)
-      "")))
+	"")))
 
 (add-screen-mode-line-formatter #\C 'ml-cpu-percent-fmt)
 (defun ml-cpu-percent-fmt (ml)
-  (declare (ignoreable ml))
+  (declare (ignorable ml))
   (let ((cpu-percent (* (cpu::current-cpu-usage) 100)))
     (if (> 70 cpu-percent)
   	(ml-priority-bar-by-range
@@ -875,14 +879,14 @@
   		    "Screen Brightness")))
 
 (defcommand screen-brightness-up () ()
-	    "Increase the brightness of the screen"
-	    (run-shell-command "sudo brillo -A 10")
-	    (show-screen-brightness))
+  "Increase the brightness of the screen"
+  (run-shell-command "sudo brillo -A 10")
+  (show-screen-brightness))
 
 (defcommand screen-brightness-down () ()
-	    "Decrease the brightness of the screen"
-	    (run-shell-command "sudo brillo -U 10")
-	    (show-screen-brightness))  
+  "Decrease the brightness of the screen"
+  (run-shell-command "sudo brillo -U 10")
+  (show-screen-brightness))  
 
 (defun show-keyboard-brightness ()
   (stumpwm:message (make-percent-bar
@@ -890,14 +894,14 @@
   		    "Keyboard Brightness")))
 
 (defcommand keyboard-brightness-up () ()
-	    "Increase the brightness of the keyboard"
-	    (run-shell-command "sudo brillo -kA 10")
-	    (show-keyboard-brightness))
+  "Increase the brightness of the keyboard"
+  (run-shell-command "sudo brillo -kA 10")
+  (show-keyboard-brightness))
 
 (defcommand keyboard-brightness-down () ()
-	    "Decrease the brightness of the keyboard"
-	    (run-shell-command "sudo brillo -kU 10")
-	    (show-keyboard-brightness))
+  "Decrease the brightness of the keyboard"
+  (run-shell-command "sudo brillo -kU 10")
+  (show-keyboard-brightness))
 
 ;; ** Screenshots
 (defun timestamp-string ()
@@ -912,14 +916,14 @@
 
 ;; Setup bindings for less common aplications which would be opened then closed
 (defcommand screenshot () ()
-  	    "Take a screenshot and save it to screenshot directory"
-  	    (run-shell-command (format nil "maim ~a"
-  				       (screenshot-path))))
+  "Take a screenshot and save it to screenshot directory"
+  (run-shell-command (format nil "maim ~a"
+			     (screenshot-path))))
 
 (defcommand screenshot-select () ()
-  	    "Select a area for a screenshot and save it to screenshot directory"
-  	    (run-shell-command (format nil "maim --select ~a"
-  				       (screenshot-path))))
+  "Select a area for a screenshot and save it to screenshot directory"
+  (run-shell-command (format nil "maim --select ~a"
+			     (screenshot-path))))
 ;; ** Volume
 (setf pamixer:*allow-boost* t)  
 
@@ -928,47 +932,47 @@
   (stumpwm:message (make-percent-bar (pamixer:get-volume) "Volume")))
 
 (defcommand notify-volume-up () ()
-	    (run-commands "pamixer-volume-up")
-	    (show-volume-bar))
+  (run-commands "pamixer-volume-up")
+  (show-volume-bar))
 
 (defcommand notify-volume-down () ()
-	    (run-commands "pamixer-volume-down")
-	    (show-volume-bar))
+  (run-commands "pamixer-volume-down")
+  (show-volume-bar))
 
 (defcommand volume-control () ()
-	    "Start volume control"
-	    (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
+  "Start volume control"
+  (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
 ;; ** Theme
 (defcommand toggle-theme () ()
-	    "Toggle the system theme"
-	    (toggle-system-themeing))
+  "Toggle the system theme"
+  (toggle-system-themeing))
 ;; ** System
  ;;; Shutdown and Reboot
 (defcommand shutdown (confirm) ((:y-or-n "Confirm Shutdown "))
-	    "Ask for the user to confirm before shutting down."
-	    (if confirm
-		(run-shell-command "sudo shutdown")))
+  "Ask for the user to confirm before shutting down."
+  (if confirm
+      (run-shell-command "sudo shutdown")))
 
 (defcommand reboot (confirm) ((:y-or-n "Confirm Reboot "))
-	    "Ask for the user to confirm before rebooting."
-	    (if confirm
-		(run-shell-command "sudo reboot")))
+  "Ask for the user to confirm before rebooting."
+  (if confirm
+      (run-shell-command "sudo reboot")))
 
 (defcommand reload-init (confirm) ((:y-or-n "Confirm Reloading init file "))
-	    "Ask for the user to confirm before reloading init file."
-	    (if confirm
-		(reload-init)))
+  "Ask for the user to confirm before reloading init file."
+  (if confirm
+      (reload-init t)))
 
-(defcommand reload-mode-line () ()
-	    "Runs reload-mode-line. This allows the themeing etc to be changed"
-	    (reload-mode-line))
+(defcommand reload-mode-line-cmd () ()
+  "Runs reload-mode-line. This allows the themeing etc to be changed"
+  (reload-mode-line))
 ;; ** Misc
 (defcommand user-switch-to-screen (screen-num) ((:number "Screen Number: "))
-	    "Only works when there is a currently open window on the screen"
-	    (select-window-by-number (window-number
-  				      (car (head-windows (current-group)
-  							 (nth screen-num (group-heads (current-group)))))))
-	    (group-wake-up (current-group)))
+  "Only works when there is a currently open window on the screen"
+  (select-window-by-number (window-number
+			    (car (stumpwm::head-windows (current-group)
+							(nth screen-num (stumpwm::group-heads (current-group)))))))
+  (group-wake-up (current-group)))
 ;; * Keybindings
 (defun init-keybindings ()
   (set-prefix-key (kbd "C-t")))
@@ -988,10 +992,10 @@
      (defcommand ,(intern (format nil "~a" alias)) () () (run-shell-command ,program-name))
      
      (defcommand ,(intern (format nil "run-or-raise-~a" alias)) () ()
-		 (run-or-raise ,program-name '(:class ,window-class)))
+       (run-or-raise ,program-name '(:class ,window-class)))
      
      (defcommand ,(intern (format nil "run-or-pull-~a" alias)) () ()
-		 (run-or-pull ,program-name '(:class ,window-class)))
+       (run-or-pull ,program-name '(:class ,window-class)))
      
      (stumpwm::fill-keymap ,(intern (format nil "*~a-map*" alias))
   			   (kbd "p") ,(format nil "run-or-pull-~a" alias)
@@ -1017,43 +1021,43 @@
 ;; *** System Map
  ;;; System Command Keymap
 (defparameter *screenshot-map*
-	      (let ((m (make-sparse-keymap)))
-		(define-key m (kbd "f") "screenshot")
-		(define-key m (kbd "s") "screenshot-select")
-		m))
+  (let ((m (make-sparse-keymap)))
+    (define-key m (kbd "f") "screenshot")
+    (define-key m (kbd "s") "screenshot-select")
+    m))
 
 (defparameter *theme-map*
-	      (let ((m (make-sparse-keymap)))
-		(define-key m (kbd "t") "toggle-theme")
-		(define-key m (kbd "m") "reload-mode-line")
-		m))
+  (let ((m (make-sparse-keymap)))
+    (define-key m (kbd "t") "toggle-theme")
+    (define-key m (kbd "m") "reload-mode-line-cmd")
+    m))
 
 
 (defparameter *power-map*
-	      (let ((m (make-sparse-keymap)))
-		(define-key m (kbd "p") "shutdown")
-		(define-key m (kbd "r") "reboot")
-		m)) 
+  (let ((m (make-sparse-keymap)))
+    (define-key m (kbd "p") "shutdown")
+    (define-key m (kbd "r") "reboot")
+    m)) 
 
 (defparameter *system-map*
-	      (let ((m (make-sparse-keymap)))
-		(define-key m (kbd "s") '*screenshot-map*)
-		(define-key m (kbd "t") '*theme-map*)
-		(define-key m (kbd "p") '*power-map*)
-		(define-key m (kbd "r") "reload-rc-clean")
-		(define-key m (kbd "v") "volume-control")
-		m))
+  (let ((m (make-sparse-keymap)))
+    (define-key m (kbd "s") '*screenshot-map*)
+    (define-key m (kbd "t") '*theme-map*)
+    (define-key m (kbd "p") '*power-map*)
+    (define-key m (kbd "r") "reload-rc-clean")
+    (define-key m (kbd "v") "volume-control")
+    m))
 ;; *** Program Map
 (defparameter *program-map*
-	      (let ((m (make-sparse-keymap)))
-		(define-key m (kbd "f") '|*firefox-map*|)
-		(define-key m (kbd "w") '|*firefox-work-map*|)
-		(define-key m (kbd "m") '|*firefox-media-map*|)
-		(define-key m (kbd "e") '|*emacs-map*|)
-		(define-key m (kbd "c") '|*alacritty-map*|)
-		(define-key m (kbd "p") '|*keepassxc-map*|)
-		(define-key m (kbd "s") '|*steam-map*|)
-		m))
+  (let ((m (make-sparse-keymap)))
+    (define-key m (kbd "f") '|*firefox-map*|)
+    (define-key m (kbd "w") '|*firefox-work-map*|)
+    (define-key m (kbd "m") '|*firefox-media-map*|)
+    (define-key m (kbd "e") '|*emacs-map*|)
+    (define-key m (kbd "c") '|*alacritty-map*|)
+    (define-key m (kbd "p") '|*keepassxc-map*|)
+    (define-key m (kbd "s") '|*steam-map*|)
+    m))
 ;; *** Root Map
 (defun init-root-map ()
   (define-key *root-map* (kbd "0") "remove")

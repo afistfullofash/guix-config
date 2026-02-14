@@ -15,3 +15,7 @@ exclude_tags=deleted;spam;
 
 [maildir]
 synchronize_flags=true
+
+[index]
+header.forwarded_for=X-Forwarded-For
+header.forwarded_to=X-Forwarded-To

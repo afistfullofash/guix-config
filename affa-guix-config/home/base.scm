@@ -150,8 +150,7 @@
 
 (define home-file-locations
 
-  `((".Xresources" ,xresources-dracula-theme)
-    ;; Emacs
+  `(;; Emacs
     (".emacs.d/init.el" ,emacs-init-el)
     (".gitconfig" ,(config-file "/git/gitconfig"))
     (".gitignore" ,(config-file "/git/gitignore"))
@@ -183,8 +182,9 @@
     ("gtk-2.0/dark.gtkrc-2.0" ,(config-file "/gtk-2.0/dark.gtkrc-2.0"))
     ("gtk-3.0/light.settings.ini" ,(config-file "/gtk-3.0/light.settings.ini"))
     ("gtk-3.0/dark.settings.ini" ,(config-file "/gtk-3.0/dark.settings.ini"))
+    ("gtk-4.0/light.settings.ini" ,(config-file "/gtk-4.0/light.settings.ini"))
+    ("gtk-4.0/dark.settings.ini" ,(config-file "/gtk-4.0/dark.settings.ini"))
 
-    ("gtk-4.0/settings.ini" ,(config-file "/gtk-4.0/settings.ini"))
 
     ("isyncrc" ,isyncrc)
     ("mahogany/init.lisp" ,(config-file "/mahogany/init.lisp"))
