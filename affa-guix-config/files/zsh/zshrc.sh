@@ -137,3 +137,22 @@ gitmezip() {
     REPO_DIR_NAME=${PWD##*/}
     git archive --format=zip --output ../${REPO_DIR_NAME}-${GIT_HASH}.zip HEAD
 }
+
+notify-me() {
+    "$@"
+    local status=$?
+    if [ $status -eq 0 ]; then
+        dunstify "Command Success" \
+		 "Executed: $*" \
+		 -u normal \
+		 -t 0 \
+		 -i dialog-information
+    else
+        dunstify "Command Failed" \
+		 "Exit Code: $status\nCommand: $*" \
+		 -u critical \
+		 -t 0 \
+		 -i dialog-error
+    fi
+    return $status
+}
