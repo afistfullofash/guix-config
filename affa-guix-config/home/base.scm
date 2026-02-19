@@ -206,6 +206,7 @@
    environment-variables-service
    base-home-channels-service
    (service home-dunst-service-type)
+   (service home-darkman-service-type)
    (service home-dbus-service-type)
    (service home-pipewire-service-type)
    (service home-syncthing-service-type)

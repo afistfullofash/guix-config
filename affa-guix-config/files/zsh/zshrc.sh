@@ -140,8 +140,8 @@ gitmezip() {
 
 notify-me() {
     "$@"
-    local status=$?
-    if [ $status -eq 0 ]; then
+    local ret=$?
+    if [ $ret -eq 0 ]; then
         dunstify "Command Success" \
 		 "Executed: $*" \
 		 -u normal \
@@ -149,10 +149,10 @@ notify-me() {
 		 -i dialog-information
     else
         dunstify "Command Failed" \
-		 "Exit Code: $status\nCommand: $*" \
+		 "Exit Code: $ret\nCommand: $*" \
 		 -u critical \
 		 -t 0 \
 		 -i dialog-error
     fi
-    return $status
+    return $ret
 }

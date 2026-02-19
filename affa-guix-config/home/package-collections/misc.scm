@@ -3,8 +3,8 @@
   #:use-module (gnu packages engineering)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages freedesktop)
-  #:use-module (gnu packages gnupg)
   #:use-module (gnu packages glib)
+  #:use-module (gnu packages gnupg)
   #:use-module (gnu packages image-processing)
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages linux)
@@ -13,6 +13,7 @@
   #:use-module (gnu packages suckless)
   #:use-module (gnu packages sync)
   #:use-module (gnu packages video)
+  #:use-module (gnu packages wm)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages xorg)
   
@@ -40,6 +41,8 @@
 	tabbed
 	;; Runs autorun files
 	dex
+	;; Gives us dunstify for a more powerfull notify-send replacement
+	dunst
 	freecad
 	glibc-locales
 	rclone

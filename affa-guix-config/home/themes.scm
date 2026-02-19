@@ -21,11 +21,7 @@
   (file-append theme-package (string-append "/share/themes/" theme-name "/" app-theme-name)))
 
 (define theme-home-locations
-  `((".Xresources" ,(package-theme-path "Dracula"
-					"xresources/Xresources"
-					xresources-dracula-theme))
-    
-    (".icons/Dracula" ,(icon-theme-path "Dracula" gtk-dracula-icons))
+  `((".icons/Dracula" ,(icon-theme-path "Dracula" gtk-dracula-icons))
     (".icons/Dracula-cursors" ,(cursors-theme-path "Dracula-cursors" dracula-cursors))
     
     (".themes/Dracula" ,(theme-path "Dracula" gtk-dracula-theme-2026))
@@ -80,4 +76,10 @@
     ("gtk-4.0/gtk.css"
      ,(package-theme-path "Dracula"
 			  "gtk-4.0/gtk.css"
-			  gtk-dracula-theme-2026))))
+			  gtk-dracula-theme-2026))
+    ("xresources/dark.Xresources" ,(package-theme-path "Dracula"
+					"xresources/Xresources"
+					xresources-dracula-theme))
+    ("xresource/light.Xresources" ,(package-theme-path "catppuccin"
+					"Xresources/latte.Xresources"
+					xresources-catppuccin-theme))))

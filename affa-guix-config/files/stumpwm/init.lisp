@@ -929,7 +929,9 @@
 
 (defun show-volume-bar ()
   "Display a stumpwm:message of the current volume"
-  (stumpwm:message (make-percent-bar (pamixer:get-volume) "Volume")))
+  (if (not (pamixer:get-mute))
+      (stumpwm:message (make-percent-bar (pamixer:get-volume) "Volume"))
+    (stumpwm:message (make-percent-bar 0 "Volume: Muted"))))
 
 (defcommand notify-volume-up () ()
   (run-commands "pamixer-volume-up")

@@ -6,10 +6,11 @@
   
   #:use-module (gnu services)
 
-  #:use-module (gnu home services guix)
   #:use-module (gnu home services desktop)
-  #:use-module (guix channels)
-  
+  #:use-module (gnu home services guix)
+  #:use-module (gnu home services pm)
+
+  #:use-module (guix channels)  
   
   #:use-module (affa-guix-config home base)
   #:use-module (afistfullofash home services mail)
@@ -56,7 +57,14 @@
   (list laptop-environment-variables-service
 	home-hydroxide-service
         laptop-home-timers
-	(service home-darkman-service-type)))
+	(service home-batsignal-service-type
+		 (home-batsignal-configuration
+		  (warning-level 20)
+		  (critical-level 10)
+		  (danger-level 2)
+		  ;; optional: do something before it faceplants
+		  (danger-command "sudo shutdown")
+		  (poll-delay 60)))))
 
 (define laptop-home-environment
   (home-environment
