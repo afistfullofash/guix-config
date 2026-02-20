@@ -32,12 +32,14 @@
 	emacs-dired-hacks
 	emacs-diredfl
 	emacs-dirvish
+	emacs-envrc
 	emacs-expand-region
 	emacs-format-all-the-code
 	emacs-geiser-guile
 	emacs-guix
 	emacs-indent-bars
 	emacs-jinx
+	emacs-just-mode
 	emacs-lsp-mode
 	emacs-lsp-ui
 	emacs-magit

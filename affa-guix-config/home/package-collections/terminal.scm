@@ -29,7 +29,7 @@
    starship
    zip
    unzip
-
+   direnv
    stumpish))
 
 (define zsh-plugin-packages

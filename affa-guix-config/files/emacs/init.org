@@ -41,6 +41,15 @@ Turn off mouse interface early in startup to avoid momentary display
             (tooltip-mode    -1)
             (setq custom-safe-themes t))
         #+end_src
+*** Disable Arrow Keys
+These have become a bad default habit when the C-a, C-e etc bindings are actually more ergonomic
+#+begin_src emacs-lisp
+  (use-package emacs
+    :config
+    (dolist (k '("<left>" "<right>" "<up>" "<down>"
+                 "<kp-left>" "<kp-right>" "<kp-up>" "<kp-down>"))
+      (global-set-key (kbd k) #'ignore)))
+    #+end_src
 *** Backup Directorys
 We set the backup and autosave file directorys to .tmp folders. Otherwise they juse pollute the filesystem like nothing else. We check that they exist and create them if they dont as well.
         #+begin_src emacs-lisp
@@ -108,6 +117,7 @@ Set Font to Deja Vu Sans Mono Bold
                   :weight bold
                   :height 120)))))
 #+end_src
+
 ** User functions
 Convert scheme modules from using
 #+begin_src scheme :tangle no
@@ -399,7 +409,11 @@ to using
       ))
 
 #+end_src
-
+*** Env Loading
+#+begin_src emacs-lisp
+  (use-package envrc
+    :hook (after-init . envrc-global-mode))
+#+end_src
 ** Programming Languages
 *** Lisp
 **** Common Lisp
@@ -481,6 +495,14 @@ We have a slynk connection running on StumpWM at port 1337 so that we can test c
       :mode (".go$"))
 
 #+end_src
+** MarkUp Formats
+*** Just
+#+begin_src emacs-lisp
+  (use-package just-mode
+    :mode ("\\.?justfile\\'" . just-mode)
+    :config
+    (setq just-indent-offset 2))
+#+end_src
 ** Language Server Protocol
 #+begin_src emacs-lisp
   ;;; Lsp-mode
@@ -488,8 +510,16 @@ We have a slynk connection running on StumpWM at port 1337 so that we can test c
     :init
     ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
     (setq lsp-keymap-prefix "C-c l")
-    :hook ((terraform-mode . lsp)
+    :hook ((terraform-mode . lsp-deferred)
   	 (tsx-ts-mode . lsp))
+    :config
+    (lsp-register-client
+     (make-lsp-client :new-connection (lsp-stdio-connection '("tofu-ls" "serve"))
+                      :major-modes '(terraform-mode)
+                      :server-id 'tofu-ls
+                      ;; This priority flag is the magic bullet. It forces lsp-mode 
+                      ;; to choose tofu-ls over the built-in terraform-ls.
+                      :priority 1))
     :magic (".svelte$" . lsp)
     :commands lsp)
 

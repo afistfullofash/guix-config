@@ -67,6 +67,29 @@ alias ll='ls -l'
 alias la='ls -a'
 alias lla='ls -la'
 
+sys_color_scheme_is_dark() {
+    condition=$(gsettings get org.gnome.desktop.interface color-scheme)
+    condition=$(echo "$condition" | tr -d "[:space:]'")
+    if [ $condition == "prefer-dark" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+bat_alias_wrapper() {
+    #get color scheme
+    sys_color_scheme_is_dark
+    if [[ $? -eq 0 ]]; then
+        # bat command with dark color scheme
+        bat --theme=Dracula "$@"
+    else
+        # bat command with light color scheme
+        bat --theme="Catppuccin Latte" "$@"
+    fi
+}
+
+alias bat="bat_alias_wrapper"
 alias cat='bat --style=plain --paging=never'
 alias grep='rg'
 alias ps='procs'

@@ -173,11 +173,6 @@
 			       #:recursive? #t))	
     ("autostart/keepassxc.desktop" ,(config-file "/autostart/keepassxc.desktop"))
 
-
-    ("guix/shell-authorized-directories"
-     ,(let ((auth-directorys (string-append (home-file-path "/work") "\n")))
-	(plain-file "shell-authorized-directories" auth-directorys)))
-
     ("gtk-2.0/light.gtkrc-2.0" ,(config-file "/gtk-2.0/light.gtkrc-2.0"))
     ("gtk-2.0/dark.gtkrc-2.0" ,(config-file "/gtk-2.0/dark.gtkrc-2.0"))
     ("gtk-3.0/light.settings.ini" ,(config-file "/gtk-3.0/light.settings.ini"))
@@ -215,8 +210,8 @@
    (service home-gpg-agent-service-type
             (home-gpg-agent-configuration
              (pinentry-program
-              (file-append pinentry "/bin/pinentry"))
-             (extra-content "allow-loopback-pinentry")
+              (file-append pinentry "/bin/pinentry-gtk-2"))
+             (extra-content "allow-loopback-pinentry\nallow-emacs-pinentry")
              (default-cache-ttl 3600)))
    (service home-openssh-service-type ssh-configuration)
    (service home-files-service-type (append home-file-locations

@@ -28,7 +28,7 @@
     (".themes/catppuccin-latte-mauve-standard+default"
      ,(theme-path "catppuccin-latte-mauve-standard+default" gtk-catppuccin-theme))))
 
-(define theme-xdg-config-locations
+(define alacritty-theme-files
   `(("alacritty/themes/catppuccin.toml"
      ,(package-theme-path "catppuccin"
 			  "alacritty/catppuccin-latte.toml"
@@ -36,50 +36,75 @@
     ("alacritty/themes/dracula.toml"
      ,(package-theme-path "Dracula"
 			  "alacritty/dracula.toml"
-			  alacritty-dracula-theme))
-    
-    ("dunst/dracula.theme.conf"
-     ,(package-theme-path "Dracula"
-			  "dunst/dunstrc"
-			  dunst-dracula-theme))
-    ("dunst/catppuccin.theme.conf"
-     ,(package-theme-path "catppuccin"
-			  "dunst/latte.conf"
-			  dunst-catppuccin-theme))
-    
-    ("lsd"
+			  alacritty-dracula-theme))))
+
+(define bat-theme-files
+  `(("bat/themes" ,(package-theme-path "catppuccin"
+				       "bat"
+				       bat-catppuccin-theme))))
+
+(define dunst-theme-files
+  `(("dunst/dracula.theme.conf"
+       ,(package-theme-path "Dracula"
+			    "dunst/dunstrc"
+			    dunst-dracula-theme))
+      ("dunst/catppuccin.theme.conf"
+       ,(package-theme-path "catppuccin"
+			    "dunst/latte.conf"
+			    dunst-catppuccin-theme))))
+
+(define lsd-theme-files
+  `(("lsd"
      ,(package-theme-path "Dracula"
 			  "lsd/"
-			  lsd-dracula-theme))
+			  lsd-dracula-theme))))
 
-    ("qt5ct/colors"
-     ,(qt-theme-path "Dracula"
-		     qt5-dracula-theme))
-
-    ("assets"
-     ,(package-theme-path "Dracula"
-			  "assets"
-			  gtk-dracula-theme-2026))
-    
-    ("starship/catppuccin.toml"
+(define starship-theme-files
+  `(("starship/catppuccin.toml"
      ,(package-theme-path "catppuccin"
 			  "starship/latte.toml"
 			  starship-catppuccin-theme))
     ("starship/dracula.toml"
      ,(package-theme-path "Dracula"
 			  "starship/starship.theme.toml"
-			  starship-dracula-theme))
-    ("gtk-4.0/gtk-dark.css"
+			  starship-dracula-theme))))
+
+(define gtk-theme-files
+  `(("gtk-4.0/gtk-dark.css"
      ,(package-theme-path "Dracula"
 			  "gtk-4.0/gtk-dark.css"
 			  gtk-dracula-theme-2026))
     ("gtk-4.0/gtk.css"
      ,(package-theme-path "Dracula"
 			  "gtk-4.0/gtk.css"
-			  gtk-dracula-theme-2026))
-    ("xresources/dark.Xresources" ,(package-theme-path "Dracula"
-					"xresources/Xresources"
-					xresources-dracula-theme))
-    ("xresource/light.Xresources" ,(package-theme-path "catppuccin"
-					"Xresources/latte.Xresources"
-					xresources-catppuccin-theme))))
+			  gtk-dracula-theme-2026))))
+
+(define xresources-theme-files
+  `(("xresources/dark.Xresources" ,(package-theme-path "Dracula"
+						       "xresources/Xresources"
+						       xresources-dracula-theme))
+    ("xresources/light.Xresources" ,(package-theme-path "catppuccin"
+							"Xresources/latte.Xresources"
+							xresources-catppuccin-theme))))
+
+(define qt-theme-files
+  `(("qt5ct/colors"
+     ,(qt-theme-path "Dracula"
+		     qt5-dracula-theme))))
+
+(define assets-theme-files
+  `(("assets"
+     ,(package-theme-path "Dracula"
+			  "assets"
+			  gtk-dracula-theme-2026))))
+
+(define theme-xdg-config-locations
+  (append alacritty-theme-files
+	  bat-theme-files
+	  dunst-theme-files
+	  lsd-theme-files
+	  starship-theme-files
+	  gtk-theme-files
+	  xresources-theme-files
+	  qt-theme-files
+	  assets-theme-files))
