@@ -84,20 +84,6 @@
 		    "isyncrc.tmp")
 	    (copy-file "isyncrc.tmp" #$output))))))
 
-(define autorandr-service
-  (simple-service
-   'autorandr home-shepherd-service-type
-   (list
-    (shepherd-service
-     (documentation "Run autorandr to set screens")
-     (requirement '(x11-display))
-     (auto-start? #t)
-     (one-shot? #t)
-     (provision '(autorandr))
-     (start #~(make-forkexec-constructor
-               (list #$(file-append autorandr "/bin/autorandr") "--change")))
-     (stop #~(make-kill-destructor))))))
-
 (define base-home-channels-service
   (service home-channels-service-type
 		  (list
@@ -168,9 +154,6 @@
 (define xdg-config-file-locations
   ;; This Stats with a heap of THEMEING
   `(("afew/config" ,(config-file "/afew/config"))
-
-    ("autorandr" ,(config-file "/autorandr"
-			       #:recursive? #t))	
     ("autostart/keepassxc.desktop" ,(config-file "/autostart/keepassxc.desktop"))
 
     ("gtk-2.0/light.gtkrc-2.0" ,(config-file "/gtk-2.0/light.gtkrc-2.0"))
@@ -197,7 +180,6 @@
 
 (define base-home-services
   (list
-   autorandr-service
    environment-variables-service
    base-home-channels-service
    (service home-dunst-service-type)
