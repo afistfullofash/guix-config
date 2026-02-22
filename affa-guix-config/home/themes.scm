@@ -22,6 +22,7 @@
 
 (define theme-home-locations
   `((".icons/Dracula" ,(icon-theme-path "Dracula" gtk-dracula-icons))
+    (".icons/cat-latte-pink-Papirus" ,(icon-theme-path "cat-latte-pink-Papirus" catppuccin-papirus-folders-icons))
     (".icons/Dracula-cursors" ,(cursors-theme-path "Dracula-cursors" dracula-cursors))
     
     (".themes/Dracula" ,(theme-path "Dracula" gtk-dracula-theme-2026))
