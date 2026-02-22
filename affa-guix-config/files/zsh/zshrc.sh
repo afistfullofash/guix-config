@@ -70,7 +70,7 @@ alias lla='ls -la'
 sys_color_scheme_is_dark() {
     condition=$(gsettings get org.gnome.desktop.interface color-scheme)
     condition=$(echo "$condition" | tr -d "[:space:]'")
-    if [ $condition == "prefer-dark" ]; then
+    if [[ $condition == "prefer-dark" ]]; then
         return 0
     else
         return 1
