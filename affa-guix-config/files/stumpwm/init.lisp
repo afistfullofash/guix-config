@@ -844,6 +844,7 @@
 (defun init-system-themeing ()
   (set-system-themeing "dark")
   (set-font (nth 0 *fonts*))
+  (which-key-mode)
 
   (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
   
