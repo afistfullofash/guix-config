@@ -797,27 +797,17 @@ It is disabled for now
 #+end_src
 *** Darkman
 #+begin_src emacs-lisp
-  (defun afistfullofash/disable-existing-themes (before no-theme-stacking activate)
-    "Disable any activated themes before loading a new one."
-    (mapc #'disable-theme custom-enabled-themes))
-
-  (defun afistfullofash/darkman-switch-catppucin-properly (mode)
-    "Configure theme-specific variables before darkman loads the theme."
-    (cond
-     ;; When switching to Light Mode
-     ((eq mode :light)
-      (message "Setting catppucin extra vars")
-      (setq catppuccin-flavor 'latte)
-      (catppuccin-reload))
-     ;; When switching to Dark Mode (The Inverse)
-     ((eq mode :dark)
-      )))
+  (defun afistfullofash/darkman-pre-load-theme (theme &rest _)
+    "Run right before Darkman loads THEME."
+    (message "[darkman] loading theme %S" theme)
+    (mapc #'disable-theme custom-enabled-themes)
+    (when (eq theme 'catppuccin)
+      ;; Catppuccin recommends setting flavor before loading the theme.
+      (setq catppuccin-flavor 'latte)))
 
   (use-package darkman
-    :config
-    (advice-add 'darkman-set :before #'afistfullofash/disable-existing-themes)
-    (advice-add 'darkman-set :after #'afistfullofash/darkman-switch-catppucin-properly)
     :init
+    (advice-add #'darkman--load-theme :before #'afistfullofash/darkman-pre-load-theme)
     (darkman-mode)
     :custom
     (darkman-themes '(:light catppuccin :dark doom-dracula)))
