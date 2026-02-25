@@ -14,6 +14,7 @@
   
   #:use-module (affa-guix-config home base)
   #:use-module (afistfullofash home services mail)
+  #:use-module (afistfullofash home services compositor)
   #:use-module (afistfullofash home timers backup)
   #:use-module (afistfullofash home timers mail)
 
@@ -57,6 +58,7 @@
   (list laptop-environment-variables-service
 	home-hydroxide-service
         laptop-home-timers
+	(service home-picom-service-type)
 	(service home-batsignal-service-type
 		 (home-batsignal-configuration
 		  (warning-level 20)

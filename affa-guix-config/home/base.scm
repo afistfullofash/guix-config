@@ -36,7 +36,8 @@
   #:use-module (afistfullofash home timers backup)
 
   #:use-module (affa-guix-config home themes)
-  
+
+  #:use-module (affa-guix-config home package-collections art)
   #:use-module (affa-guix-config home package-collections desktop)
   #:use-module (affa-guix-config home package-collections emacs)
   #:use-module (affa-guix-config home package-collections misc)
@@ -118,8 +119,8 @@
 					   '("/src/guix-config"
 					     "/src/afistfullofash")))
 		    ("GUIX_HOME_PATH" . ,(home-file-path "/.guix-home/profile"))
-		    ("PATH" . ,(string-join (list (home-file-path "/src/shell-scripts/") ; Custom Shell Scripts
-						  "${PATH}") ; Original Value
+		    ("PATH" . ,(string-join (list (home-file-path "/.scripts/")
+						  "${PATH}")
 					    ":"))
 		    ("BOUNDARY_KEYRING_TYPE" . "secret-service")
 		    ("BROWSER" . ,(specification->package "firefox"))
@@ -142,6 +143,9 @@
     (".gitignore" ,(config-file "/git/gitignore"))
     (".local/share/darkman" ,(config-file "/darkman"
 					  #:recursive? #t))
+    ;; Setup global script directory
+    (".scripts" ,(module-file "/scripts"
+			      #:recursive? #t))
     ;; Setup Git for multiple emails
     (".ssh/nat.pub" ,(config-file "/ssh/nat.pub"))
     (".ssh/work.pub" ,(config-file "/ssh/work.pub"))
@@ -207,14 +211,15 @@
 
 (define base-home-environment
   (home-environment
-   (packages (append 
-	      terminal-packages
-	      spellcheck-packages
-	      development-packages
-	      desktop-packages
-	      emacs-packages
-	      language-server-packages
-	      zsh-plugin-packages
-	      misc-packages
-	      tree-sitter-grammar-packages))
+   (packages
+    (append art-packages
+	    desktop-packages
+	    development-packages
+	    emacs-packages
+	    language-server-packages
+	    misc-packages
+	    spellcheck-packages
+	    terminal-packages
+	    tree-sitter-grammar-packages
+	    zsh-plugin-packages))
    (services base-home-services)))

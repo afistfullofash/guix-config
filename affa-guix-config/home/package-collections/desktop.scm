@@ -40,10 +40,6 @@
    maim
    ;; Image Viewer
    sxiv
-   ;; Photo Management
-   darktable
-   digikam
-   rawtherapee
    ;; Document Viewer
    zathura
    ;; Main browser

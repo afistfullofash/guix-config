@@ -135,7 +135,7 @@ to using
     
 #+begin_src emacs-lisp
   (setq afistfullofash/convert-scheme-modules-to-package
-        (kmacro "C-M-s ) <return> <return> # : u s e - m o d u l e C-M-s u s e - m o d u l e s <return> C-M-s ( <return> <left> C-SPC C-M-s ) <return> C-w C-r # : u s e - m o d u l e <return> M-f M-f SPC C-y <return>"))
+        (kmacro "C-r d e f i n e - m o d u l e <return> ) C-b <return> # : u s e - m o d u l e C-s u s e - m o d u l e <return> C-s ( <return> C-b C-SPC C-s ) <return> C-w C-r # : u s e - m o d <return> M-f M-f SPC C-y"))
 #+end_src
 ** Spell Check
 #+begin_src emacs-lisp

@@ -10,6 +10,8 @@
 ;; CLX Re-exports cause a error on load if we don't set this
 (setf sb-ext:*on-package-variance* '(:warn t :error nil))
 
+(run-shell-command "darkman set dark")
+
 (if *initializing*
     (progn
       (asdf:load-system :slynk)
@@ -367,6 +369,13 @@
 ;; *** General Functions
 (defvar *system-theme-type* "dark")
 
+(defun set-key-seq-color (color)
+  (setf stumpwm:*key-seq-color* color)
+  (setf *which-key-format* (concat stumpwm:*key-seq-color* "~5a^n ~a")))
+
+(defun set-keyseq-color-for-theme ()
+  (set-key-seq-color (ml-foreground-color-opener 'focus)))
+
 (defun set-system-themeing (theme)
   (if (trivia:match theme
 	("dark" t)
@@ -381,6 +390,7 @@
   	(set-bar-med-color)
   	(set-bar-hi-color)
   	(set-bar-crit-color)
+	(set-keyseq-color-for-theme)
   	(toggle-modeline-all-screens)
   	(toggle-modeline-all-screens))
       
@@ -1103,3 +1113,73 @@
   (run-shell-command "darkman set dark"))
 
 (run-all-inits)
+
+
+;; Compositor
+;; Things like window transarency
+(in-package :stumpwm-user)
+(in-package :stumpwm)
+
+(defparameter *affoa-message-dim-opacity* 20)   ; 1–100
+(defparameter *affoa-message-dim-buffer* 0.25)  ; seconds
+
+(defvar *affoa-message-dim-timer* nil)
+(defvar *affoa-dimmed-window-xids* '()) ; list of XIDs dimmed during the current “message burst”
+
+(defun affoa-current-window-xid ()
+  (let ((w (current-window)))
+    (when w
+      (xlib:window-id (window-xwin w)))))
+
+(defun affoa-window-xid->arg (xid)
+  (format nil "0x~X" xid))
+
+(defun affoa-dim-window (xid)
+  (run-shell-command
+   (format nil "picom-trans -w ~a ~d" (affoa-window-xid->arg xid) *affoa-message-dim-opacity*)))
+
+(defun affoa-undim-window (xid)
+  (run-shell-command
+   (format nil "picom-trans -w ~a --delete" (affoa-window-xid->arg xid))))
+
+(defun affoa-undim-all-windows ()
+  (dolist (xid *affoa-dimmed-window-xids*)
+    (affoa-undim-window xid))
+  (setf *affoa-dimmed-window-xids* '()))
+
+(defun affoa-dim-window-on-stumpwm-message (&rest _lines)
+  (declare (ignorable _lines))
+  (let ((xid (affoa-current-window-xid)))
+    (when xid
+      ;; “set semantics” using a list
+      (unless (member xid *affoa-dimmed-window-xids* :test #'eql)
+	;; Dim the window then undim all the other windows
+	;; We then push the newly dimming window to the list
+	;; Theoretically this should only ever hold one window
+        (affoa-dim-window xid)
+	(affoa-undim-all-windows)
+        (push xid *affoa-dimmed-window-xids*))
+
+      ;; debounce restore: each new message extends the “burst”
+      (when *affoa-message-dim-timer*
+        (cancel-timer *affoa-message-dim-timer*)
+	(setf *affoa-message-dim-timer* nil))
+      
+      (setf *affoa-message-dim-timer*
+	    (run-with-timer (+ *timeout-wait* *affoa-message-dim-buffer*) nil
+			    (lambda ()
+			      (affoa-undim-all-windows)
+			      (setf *affoa-message-dim-timer* nil)))))))
+
+(defun affoa-toggle-window-dimming ()
+  (if (find #'affoa-dim-window-on-stumpwm-message *message-hook*)
+      (progn
+	(affoa-undim-all-windows)
+	(remove-hook *message-hook* #'affoa-dim-window-on-stumpwm-message))
+      (add-hook *message-hook* #'affoa-dim-window-on-stumpwm-message)))
+
+(defun affoa-fix-message-hook ()
+  (setf *message-hook* '())
+  (add-hook *message-hook* #'affoa-dim-on-stumpwm-message))
+
+(affoa-toggle-window-dimming)

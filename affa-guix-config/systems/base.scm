@@ -65,20 +65,21 @@
     (service kernel-module-loader-service-type
 	     '("i2c-dev" "i2c-piix4"))
     (udev-rules-service 'openrgb openrgb)
+        (simple-service
+	 'resolvconf etc-service-type
+	 (list `("resolvconf.conf" ,(mixed-text-file
+				     "resolv.conf"
+				     "name_servers=127.0.0.1"))))
     (service unbound-service-type)
-    (simple-service
-     'resolvconf etc-service-type
-     (list `("resolvconf.conf" ,(mixed-text-file
-				 "resolv.conf"
-				 "name_servers=127.0.0.1"))))
     (service iwd-service-type
 	     (iwd-configuration
-	      (shepherd-provision '(iwd networking wireless-daemon))
+	      (shepherd-provision '(iwd wireless-daemon))
 	      (config
 	       (iwd-settings
 		(network
 		 (iwd-network-settings
 		  (name-resolving-service 'resolvconf)))
+
 		(general
 		 (iwd-general-settings
 		  (enable-network-configuration? #t)
@@ -100,7 +101,13 @@
 			   #:options '("ctrl:nocaps"))))))
    (modify-services %desktop-services
      (delete wpa-supplicant-service-type)
-     (delete network-manager-service-type)
+     (network-manager-service-type config =>
+       (network-manager-configuration
+         (inherit config)
+	 (dns "none")
+	 (extra-configuration-files
+	  `(("wifi_backend.conf" ,(plain-file "wifi_backend.conf"
+					      "[device]\nwifi.backend=iwd"))))))
      (guix-service-type config => (guix-configuration
 				   (inherit config)
 				   (substitute-urls

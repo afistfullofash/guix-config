@@ -25,7 +25,7 @@ case "$1" in
 	;;
     light)
 	gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
-	gsettings set org.gnome.desktop.interface icon-theme Adwaita
+	gsettings set org.gnome.desktop.interface icon-theme "Papirus"
 	gsettings set org.gnome.desktop.interface cursor-theme "Adwaita"
 	;;
 esac

@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# set_aws_profile
+# Given a profile name set the current aws profile
+#
+aws sts get-caller-identity --profile $1

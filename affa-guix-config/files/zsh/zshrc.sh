@@ -98,28 +98,6 @@ alias ps='procs'
 alias find='fd'
 alias less='bat'
 
-kill_steam() {
-    kill -9 $(procs steam | awk '{ print $1 }' | tail -n +3)
-}
-
-ssh_ping() {
-  while ! ssh $1 true; do
-    sleep 5
-  done; echo "Host is back up at $(date)!"
-}
-
-ssh_repeat() {
-  until ssh $1; do
-    sleep 5
-  done
-}
-
-ssh_network() {
-  until ssh home-proxmox -f 'cat /etc/network/interfaces'; do
-    sleep 5
-  done
-}
-
 # Guix Home Reconfigure
 ghr() {
     SYSTEM=${1}
@@ -153,29 +131,4 @@ gfrq() {
 gfr() {
     SYSTEM=${1}
     gsr ${SYSTEM} && ghr ${SYSTEM} && sudo reboot
-}
-
-gitmezip() {
-    GIT_HASH=$(git rev-parse HEAD)
-    REPO_DIR_NAME=${PWD##*/}
-    git archive --format=zip --output ../${REPO_DIR_NAME}-${GIT_HASH}.zip HEAD
-}
-
-notify-me() {
-    "$@"
-    local ret=$?
-    if [ $ret -eq 0 ]; then
-        dunstify "Command Success" \
-		 "Executed: $*" \
-		 -u normal \
-		 -t 0 \
-		 -i dialog-information
-    else
-        dunstify "Command Failed" \
-		 "Exit Code: $ret\nCommand: $*" \
-		 -u critical \
-		 -t 0 \
-		 -i dialog-error
-    fi
-    return $ret
 }
