@@ -182,7 +182,7 @@
 		  ;; For setting the screenshot time
 		  "sbcl-local-time"
 		  "waybar"))
-	       (list stumpwm-with-user-extensions
+	       (list stumpwm-with-message-hide-hook-with-user-extensions
 		     mahogany)
 	       %base-packages))
 

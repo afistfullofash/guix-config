@@ -160,6 +160,10 @@
   `(("afew/config" ,(config-file "/afew/config"))
     ("autostart/keepassxc.desktop" ,(config-file "/autostart/keepassxc.desktop"))
 
+    ("alacritty/base.toml" ,(config-file "/alacritty/base.toml"))
+    ("alacritty/light.toml" ,(config-file "/alacritty/light.toml"))
+    ("alacritty/dark.toml" ,(config-file "/alacritty/dark.toml"))
+
     ("gtk-2.0/light.gtkrc-2.0" ,(config-file "/gtk-2.0/light.gtkrc-2.0"))
     ("gtk-2.0/dark.gtkrc-2.0" ,(config-file "/gtk-2.0/dark.gtkrc-2.0"))
     ("gtk-3.0/light.settings.ini" ,(config-file "/gtk-3.0/light.settings.ini"))

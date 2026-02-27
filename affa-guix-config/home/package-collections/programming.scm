@@ -12,6 +12,7 @@
   #:use-module (gnu packages lisp-xyz)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages rust)
+  #:use-module (gnu packages sqlite)
   #:use-module (gnu packages version-control)
   
   #:export (development-packages
@@ -39,10 +40,14 @@
 	git-lfs
 	pre-commit))
 
+(define misc-development-packages
+  (list sqlite))
+
 (define development-packages
   (append common-lisp-packages
 	  rust-packages
-	  git-packages))
+	  git-packages
+	  misc-development-packages))
 
 (define language-server-packages
   (list rust-analyzer

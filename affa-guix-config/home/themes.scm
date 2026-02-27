@@ -51,8 +51,8 @@
 			    dunst-dracula-theme))
       ("dunst/catppuccin.theme.conf"
        ,(package-theme-path "catppuccin"
-			    "dunst/latte.conf"
-			    dunst-catppuccin-theme))))
+			    "dunst/latte-pink.conf"
+			    dunst-catppuccin-theme-with-accents))))
 
 (define lsd-theme-files
   `(("lsd"

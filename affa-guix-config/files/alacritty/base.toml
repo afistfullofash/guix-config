@@ -1,5 +1,3 @@
-general.import = ["themes/theme.toml"]
-
 [font.bold]
 family = "DejaVuSansM Nerd Font Mono"
 style = "Bold"
@@ -17,4 +15,4 @@ family = "DejaVuSansM Nerd Font Mono"
 style = "Regular"
 
 [window]
-opacity = 0.8
+opacity = 0.6
