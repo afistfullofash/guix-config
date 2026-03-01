@@ -63,11 +63,14 @@ chmod 0555 /var/empty
 for i in $(seq -w 1 10); do
   id "guixbuilder$i" >/dev/null 2>&1 || \
     useradd -r \
-      -g guixbuild \
+      -g nogroup \
+      -G guixbuild \
       -d /var/empty \
       -s /usr/sbin/nologin \
       -c "Guix build user $i" \
       "guixbuilder$i"
+
+    usermod -a -G guixbuild "guixbuilder$i"
 done
 
 print_log "Starting Guix Deamon"
