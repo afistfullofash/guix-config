@@ -10,6 +10,7 @@
   #:use-module (guix build-system pyproject)
 
   #:use-module (gnu packages python)
+  #:use-module (gnu packages python-build)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages version-control)
   
@@ -27,7 +28,8 @@
     (propagated-inputs (list python-rich
 			     python-dotenv
 			     python-gitpython))
-    (native-inputs (list python-toolchain))
+    (native-inputs (list python-setuptools
+			 git))
     (home-page "https://github.com/afistfullofash/guix-config/")
     (synopsis
      "A wrapper for guix home and system reconfiguration")
