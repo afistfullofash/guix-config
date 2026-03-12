@@ -43,8 +43,7 @@
 	dex
 	;; Gives us dunstify for a more powerfull notify-send replacement
 	dunst
-	freecad
-	glibc-locales
+        glibc-locales
 	rclone
 	;; xdg-desktop-portals
 	xdg-desktop-portal
