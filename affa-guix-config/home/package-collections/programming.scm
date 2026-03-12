@@ -18,21 +18,12 @@
   #:export (development-packages
 	    git-packages
 	    language-server-packages
-	    rust-packages
 	    common-lisp-packages))
 
 (define common-lisp-packages
   (list sbcl
 	sbcl-slynk
 	sbcl-legit))
-
-(define rust-packages
-  ;; Unfortunantly it seems I need to pollute these
-  ;; I currently dont know how to make emacs open a guix shell environment
-  ;; when it is inside a relevant project
-  (list rust
-	`(,rust "cargo")
-	`(,rust "tools")))
 
 (define git-packages
   (list git
@@ -45,7 +36,6 @@
 
 (define development-packages
   (append common-lisp-packages
-	  rust-packages
 	  git-packages
 	  misc-development-packages))
 
