@@ -27,10 +27,14 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages hardware)
 
+  
+
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
 
   #:use-module (afistfullofash packages wm)
+  
+  #:use-module (affa-guix-config systems package-collections base)
 
   #:use-module (srfi srfi-1)
 
@@ -148,40 +152,7 @@
     (sudoers-file etc-sudoers-config)
     
     (packages (append
-	       (specifications->packages
-		'("blueman"
-		  "bluez"
-		  "bluez-alsa"
-		  ;; Backlight and LED Control
-		  "brillo"
-		  "glibc-locales"
-		  "alsa-plugins"
-		  "xdg-utils"
-		  "firefox"
-		  "zsh"
-		  "font-google-noto"
-		  "font-liberation"
-		  "hicolor-icon-theme"
-		  "i2c-tools"
-		  "openrgb"
-		  "flatpak"
-		  "gzip"
-		  "bzip2"
-		  "unzip"
-		  "simple-scan"
-		  "pamixer"
-		  ;; lm-sensors and extras
-		  "lm-sensors"
-		  "dmidecode"
-		  ;; sbcl-stumpwm-notify wanted these
-		  "pkg-config"
-		  "libfixposix"
-		  ;; sbcl-stumpwm-ttf-fonts
-		  "freetype"
-		  "fontconfig"
-		  ;; For setting the screenshot time
-		  "sbcl-local-time"
-		  "waybar"))
+	       base-operating-system-packages
 	       (list stumpwm-with-message-hide-hook-with-user-extensions
 		     mahogany)
 	       %base-packages))
