@@ -1,6 +1,7 @@
 (define-module (affa-guix-config home package-collections desktop)
 
   #:use-module (afistfullofash packages mail)
+  #:use-module (afistfullofash packages rust-apps)
 
   #:use-module (gnu packages ebook)
   #:use-module (gnu packages image-viewers)
@@ -43,5 +44,7 @@
    ;; Document Viewer
    zathura
    ;; Main browser
-   firefox))
+   firefox
+   ;; Wallpaper Setter
+   digikam-wallpaper))
 
