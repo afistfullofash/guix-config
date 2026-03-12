@@ -3,9 +3,7 @@
 ;; In general we are not allowing any variable setting or function calls outside of a defun. The only exected exception to this is the inital load underneath this and the finishing actions section which runs all the init-* defuns.
 ;; * Initial Config
 ;; Start slynk for debugging purposes first and then load in our required stumpwm contrib modules
-
 (in-package :stumpwm-user)
-(stumpwm:redirect-all-output "/tmp/stumpwm.log")
 (asdf:register-immutable-system "xlib")
 ;; CLX Re-exports cause a error on load if we don't set this
 (setf sb-ext:*on-package-variance* '(:warn t :error nil))
@@ -643,12 +641,7 @@
 	 :display-filter nil)
    (list :name "natalie-atkinson"
 	 :notmuch-search "tag:natalieatkinson95 and tag:unread and not tag:promotions"
-	 :display-filter nil)
-   (list :name "work"
-	 :notmuch-search "tag:work and tag:unread and tag:important"
-	 :display-filter (lambda ()
-			   (in-work-hours '(:days (1 2 3 4 5)
-						  :hours (9 17)))))))
+	 :display-filter nil)))
 
 (defun ml-email-get-data ()
   (flet ((notmuch-count (tags)
@@ -1070,7 +1063,6 @@
 (defparameter *program-map*
 	      (let ((m (make-sparse-keymap)))
 		(define-key m (kbd "f") '|*firefox-map*|)
-		(define-key m (kbd "w") '|*firefox-work-map*|)
 		(define-key m (kbd "m") '|*firefox-media-map*|)
 		(define-key m (kbd "e") '|*emacs-map*|)
 		(define-key m (kbd "c") '|*alacritty-map*|)
@@ -1114,9 +1106,11 @@
   (init-program-binding)
   (init-root-map)
   (init-top-map)
-  
-  (run-shell-command "dex -a -s $XDG_CONFIG_HOME/autostart/")
-  (run-shell-command "darkman set dark"))
+
+  (run-shell-command "brillo -S 100")
+  (run-shell-command "darkman set dark")
+  (run-shell-command "dex -a -s $XDG_CONFIG_HOME/autostart/"))
+
 
 (run-all-inits)
 
@@ -1125,6 +1119,46 @@
 ;; Things like window transarency
 (in-package :stumpwm-user)
 (in-package :stumpwm)
+
+(setf *debug-level* 3)
+
+(defun %xdg-state-home ()
+  "Return XDG_STATE_HOME or ~/.local/state/"
+  (let ((x (ignore-errors (uiop:getenv "XDG_STATE_HOME"))))
+    (if (and x (> (length x) 0))
+        (pathname (concatenate 'string x "/"))
+        (merge-pathnames ".local/state/" (user-homedir-pathname)))))
+
+(defparameter *stumpwm-debug-dir*
+  (merge-pathnames "stumpwm/" (%xdg-state-home)))
+
+(defun %ensure-dir (p)
+  (ensure-directories-exist p)
+  p)
+
+(defparameter *stumpwm-log-file*
+  (merge-pathnames "stumpwm.log" (%ensure-dir *stumpwm-debug-dir*)))
+
+(defparameter *stumpwm-oplog-file*
+  (merge-pathnames "stumpwm-events.log" (%ensure-dir *stumpwm-debug-dir*)))
+
+;; Redirect *everything* to a file (stdout/stderr included).
+(redirect-all-output *stumpwm-log-file*)
+
+(defun log-op (fmt &rest args)
+  (with-open-file (s *stumpwm-oplog-file*
+                     :direction :output :if-does-not-exist :create :if-exists :append)
+    (format s "~&~A  " (local-time:format-timestring nil (local-time:now)))
+    (apply #'format s fmt args)
+    (finish-output s)))
+
+(defparameter *affoa-window-dim-opacity* 20)   ; 1–100
+
+(defvar *affoa-window-undim-timer* nil)
+(defvar *affoa-window-undim-timer-length* 1)
+
+(defvar *affoa-window-dimming-lock* nil)
+(defvar *affoa-window-undimming-lock* nil)
 
 (defconstant +net-wm-window-opacity-max+ #xffffffff
   "Maximum _NET_WM_WINDOW_OPACITY value as defined by EWMH.")
@@ -1138,27 +1172,23 @@
   "Set WINDOW opacity percentage to OPACITY using _NET_WM_WINDOW_OPACITY.
 Requires a compositor that honors this EWMH property."
   (check-type window window)
-  (xlib:change-property (window-xwin window)
-                        :_NET_WM_WINDOW_OPACITY
-                        (list (opacity-percent->cardinal opacity))
-                        :cardinal
-                        32)
+  (handler-case
+      (progn
+	(log-op "set-window-opacity:~%    opacity: ~a~%    window: ~A~%" opacity window)
+	(xlib:change-property (window-xwin window)
+			      :_NET_WM_WINDOW_OPACITY
+			      (list (opacity-percent->cardinal opacity))
+			      :cardinal 32))
+    (condition (c)
+      (log-op "~%~%~%set-window-opacity: handler-case-condition:~%~A~%~%~%" c)))
   window)
 
 (defun clear-window-opacity (window)
   "Remove WINDOW's _NET_WM_WINDOW_OPACITY property."
   (check-type window window)
+  (log-op "clear-window-opaticy: ~A~%" window)
   (xlib:delete-property (window-xwin window) :_NET_WM_WINDOW_OPACITY)
   window)
-
-(defparameter *affoa-message-dim-opacity* 20)   ; 1–100
-(defparameter *affoa-message-dim-buffer* 0.25)  ; seconds
-
-(defvar *affoa-message-undim-timer* nil)
-(defvar *affoa-dimmed-window-xids* '()) ; list of XIDs dimmed during the current “message burst”
-
-(defvar *affoa-window-dimming-lock* nil)
-(defvar *affoa-window-undimming-lock* nil)
 
 (defun map-all-windows (fn &key (screen (current-screen)))
   "Call FN on each window across all groups on SCREEN."
@@ -1166,57 +1196,109 @@ Requires a compositor that honors this EWMH property."
     (dolist (w (group-windows g))
       (funcall fn w))))
 
+(defun affoa-get-all-visible-windows (&key (screen (current-screen)))
+  (reduce
+   'cons
+   (mapcar
+    (lambda (group)
+      (remove-if-not
+       (lambda (window)
+	 (log-op "affoa-get-all-visible-windows: checking: ~A~%" window)
+	 (if (window-visible-p window)
+	     (progn
+	       (log-op "affoa-get-visible-windows: visible~%~%")
+	       t)
+	     (progn
+	       (log-op "affoa-get-visible-windows: invisible~%~%")
+	       nil)))
+       (group-windows group)))
+    (screen-groups screen))))
+
 (defun affoa-dim-window (window)
-  (set-window-opacity window *affoa-message-dim-opacity*))
+  (set-window-opacity window *affoa-window-dim-opacity*)
+  (xlib:display-finish-output *display*))
 
 (defun affoa-dim-all-windows ()
- (map-all-windows
-  (lambda (window)
-    (if (window-visible-p window)
-	(affoa-dim-window window)))))
+  (let ((visible-windows (affoa-get-all-visible-windows)))
+    (mapcar (lambda (window)
+	      (log-op "affoa-dim-all-windows: window: ~A~%~%" window)
+	      (affoa-dim-window window))
+	    visible-windows)))
 
 (defun affoa-undim-window (window)
-  (clear-window-opacity window))
+  (clear-window-opacity window)
+  (xlib:display-finish-output *display*))
 
 (defun affoa-undim-all-windows ()
-  (map-all-windows
-   (lambda (window)
-     (affoa-undim-window window))))
+  (let ((visible-windows (affoa-get-all-visible-windows)))
+    (mapcar
+     (lambda (window)
+       (log-op "affoa-undim-all-windows: window: ~A~%~%" window)
+       (affoa-undim-window window))
+     visible-windows)))
+
+(defun all-locks-held-p ()
+  (or *affoa-window-dimming-lock* *affoa-window-undimming-lock*))
+
+(defmacro with-lock ((lock-var) &body body)
+  `(if ,lock-var
+       (progn (log-op "with-lock: ~A already held~%" ',lock-var) nil)
+       (unwind-protect
+            (progn (setf ,lock-var t)
+                   ,@body)
+         (setf ,lock-var nil))))
 
 (defun affoa-dim-window-on-stumpwm-message (&rest _lines)
   (declare (ignorable _lines))
-  (if (not (and *affoa-window-dimming-lock* *affoa-window-undimming-lock*))
-      (progn
-	(setf *affoa-window-dimming-lock* t)
-	(affoa-dim-all-windows)
-	(setf *affoa-window-dimming-lock* nil))))
+  (log-op "affoa-dim-window-on-stumpwm-message: begin~%")
+  (if (not (all-locks-held-p))
+      (with-lock (*affoa-window-dimming-lock*)
+		 (log-op "affoa-dim-window-on-stumpwm-message: alowed to dim~%~%")
+		 (affoa-dim-all-windows))
+      (log-op "affoa-dim-window-on-stumpwm-message: unable to dim lock held~%~%")))
 
 (declaim (ftype function affoa-set-undimming-timer))
 
 (defun affoa-undimming-timer ()
-  (cond
-   ;; Undimm the windows if no locks are held
-   ((not (and *affoa-window-dimming-lock* *affoa-window-undimming-lock*))
-    (progn (setf *affoa-window-undimming-lock* t)
-	   (affoa-undim-all-windows)
-	   (setf *affoa-window-undimming-lock* nil)))
-   ;; If the dimming lock is set we want to wait
-   ;; Then run undimming once the dimming is done
-   (*affoa-window-dimming-lock*
-    (affoa-set-undimming-timer))))
+  (log-op "affoa-undimming-timer: begin~%")
+  (setf *affoa-window-undim-timer* nil)
+  (handler-case 
+      (cond
+       ;; Undimm the windows if no locks are held
+       ((not (all-locks-held-p))
+	(with-lock (*affoa-window-undimming-lock*)
+		   (log-op "affoa-undimming-timer: allowed to undim~%")
+		   (affoa-undim-all-windows)))
+       ;; If the dimming lock is set we want to wait
+       ;; Then run undimming once the dimming is done
+       (*affoa-window-dimming-lock*
+	(progn
+	  (log-op "affoa-undimming-timer: resetting dimming timer~%")
+	  (affoa-set-undimming-timer)))
+       (t
+	(progn
+	  (log-op "affoa-undimming-timer: resetting dimming timer~%")
+	  (affoa-set-undimming-timer))))
+    (condition (c)
+	       (log-op "affoa-undimmg-timer:~%affoa-undimmg-timer:~%affoa-undimmg-timer: ERROR~%affoa-undimmg-timer:~%~A~%" c))))
 
 (defun affoa-set-undimming-timer ()
-  (setf *affoa-message-undim-timer*
-	(run-with-timer *affoa-message-dim-buffer* nil
-			'affoa-undimming-timer)))
+  (when *affoa-window-undim-timer*
+    (log-op "affoa-set-undimming-timer: clearing dimming timer~%")
+    (ignore-errors (cancel-timer *affoa-window-undim-timer*))
+    (setf *affoa-window-undim-timer* nil))
+
+  (log-op "affoa-set-undimming-timer: setting new timer~%")
+  (let ((timer-to-run (run-with-timer *affoa-window-undim-timer-length*
+				      nil
+				      'affoa-undimming-timer)))
+    (log-op "affoa-set-undimming-timer: timer: ~A~%" timer-to-run)
+    (setf *affoa-window-undim-timer*
+	  timer-to-run)))
 
 (defun affoa-undim-all-windows-on-stumpwm-message-removal (&rest args)
   (declare (ignorable args))
-  (when *affoa-message-undim-timer*
-        (cancel-timer *affoa-message-undim-timer*)
-	(setf *affoa-message-undim-timer* nil))
-  
-  (affoa-set-undimming-timer))
+  (affoa-undimming-timer))
 
 (defun affoa-toggle-window-dimming ()
   (if (find #'affoa-dim-window-on-stumpwm-message *message-hook*)
@@ -1224,6 +1306,8 @@ Requires a compositor that honors this EWMH property."
 	(affoa-undim-all-windows)
 	(remove-hook *message-hook* #'affoa-dim-window-on-stumpwm-message)
 	(remove-hook *message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))
-    (progn
-      (add-hook *message-hook* #'affoa-dim-window-on-stumpwm-message)
-      (add-hook *message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))))
+      (progn
+	(add-hook *message-hook* #'affoa-dim-window-on-stumpwm-message)
+	(add-hook *message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))))
+
+(affoa-toggle-window-dimming)
