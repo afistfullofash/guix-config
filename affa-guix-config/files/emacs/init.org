@@ -134,8 +134,10 @@ to using
 #+end_src
     
 #+begin_src emacs-lisp
-  (setq afistfullofash/convert-scheme-modules-to-package
-        (kmacro "C-r d e f i n e - m o d u l e <return> ) C-b <return> # : u s e - m o d u l e C-s u s e - m o d u l e <return> C-s ( <return> C-b C-SPC C-s ) <return> C-w C-r # : u s e - m o d <return> M-f M-f SPC C-y"))
+  (defun afistfullofash/convert-scheme-modules-to-package ()
+    (interactive)
+    (let ((macro-steps (kbd "C-r d e f i n e - m o d u l e <return> ) C-b <return> # : u s e - m o d u l e C-s u s e - m o d u l e <return> C-s ( <return> C-b C-SPC C-s ) <return> C-w C-r # : u s e - m o d <return> M-f M-f SPC C-y")))
+      (execute-kbd-macro macro-steps)))
 #+end_src
 ** Spell Check
 #+begin_src emacs-lisp

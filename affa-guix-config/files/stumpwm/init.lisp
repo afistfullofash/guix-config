@@ -10,793 +10,95 @@
 
 (run-shell-command "darkman set dark")
 
+(defvar *init-system-root-dir* "/home/natalie/src/guix-config/affa-guix-config/files/stumpwm/")
+
+(defun init-system-dir (path)
+  (concatenate 'string *init-system-root-dir* path))
+
+(defvar *asd-paths*
+  (list
+   (init-system-dir "utils/stumpwm-utils.asd")
+   (init-system-dir "themeing/stumpwm-themeing.asd")
+   (init-system-dir "mode-line/stumpwm-mode-line.asd")
+
+   (init-system-dir "mode-line-pills/cpu/stumpwm-pill-cpu.asd")
+   (init-system-dir "mode-line-pills/email/stumpwm-pill-email.asd")
+   (init-system-dir "mode-line-pills/temperature/stumpwm-pill-temperature.asd")
+   (init-system-dir "mode-line-pills/window-list/stumpwm-pill-window-list.asd")
+
+   (init-system-dir "minor-modes/dark-light/stumpwm-dark-light.asd")
+   (init-system-dir "minor-modes/logging/stumpwm-logging.asd")))
+
+
+(defvar *init-systems*
+  (list
+   "stumpwm-utils" 
+   "stumpwm-themeing" 
+   "stumpwm-mode-line" 
+	
+   "stumpwm-pill-cpu" 
+   "stumpwm-pill-email" 
+   "stumpwm-pill-temperature" 
+   "stumpwm-pill-window-list"
+
+   "stumpwm-dark-light"
+   "stumpwm-logging"))
+
+(defvar *dependency-systems* (list "alexandria"
+				   "local-time"
+				   "pamixer"
+				   "cpu"
+				   "battery-portable"))
+
+(defun load-asds (systems)
+  (loop for system in systems
+	do (load system))
+  systems)
+
+(defun debug-asdf-system (system)
+  (let ((compile-verbose *compile-verbose*)
+	(compile-print *compile-print*)
+	(load-verbose *load-verbose*)
+	(warning-behavior asdf:*compile-file-warnings-behaviour*)
+	(failure-behavior asdf:*compile-file-failure-behaviour*)
+
+	(*compile-verbose* t)
+	(*compile-print* t)
+	(*load-verbose* t)
+	(asdf:*compile-file-warnings-behaviour* :warn)
+	(asdf:*compile-file-failure-behaviour* :error))
+    (asdf:load-system system)
+    (setf 	*compile-verbose* compile-verbose
+		*compile-print* compile-print
+		*load-verbose* load-verbose
+		asdf:*compile-file-warnings-behaviour* warning-behavior
+		asdf:*compile-file-failure-behaviour* failure-behavior)))
+
+(defun load-systems (systems)
+  (loop for system in systems
+	do (if (not (or (string= system "pamixer")
+			(string= system "cpu")
+			(string= system "battery-portable")))
+	       (debug-asdf-system system)))
+  systems)
+
+(load-asds *asd-paths*)
+(load-systems (append *init-systems* *dependency-systems*))
+
 (if *initializing*
     (progn
       (asdf:load-system :slynk)
       (slynk:create-server :port 1337
     			   :dont-close t)
-      (asdf:load-system "alexandria")
-      (asdf:load-system "local-time")
-      (asdf:load-system "pamixer")
-      (asdf:load-system "cpu")
-      (asdf:load-system "battery-portable")))
+      (loop for system in *systems-to-load*
+	    do (asdf:load-system system))))
  
 (setf *startup-message* (format nil "Welcome Natalie!"))
 
 
-;; * Visual
-;; ** Themeing
-;; This is a quick themeing system for stumpwm with a couple of theme options.
-
-;; *** Basic StumpWM Themeing Sytem 
-;; This gives us some very general functions to generate and apply /themes/ with.
-      ;;; Visual
-(defvar *themes* (make-hash-table))
-(defvar *current-theme* 'default)
-
-(defun add-theme (name theme)
-  (setf (gethash name *themes*) theme))
-
-      ;;; Colors based off spacemacs-dark-theme for emacs
-(defclass theme ()
-  ((fg
-    :initarg :fg
-    :initform "White"
-    :type string)
-   (bg
-    :initarg :bg
-    :initform "Black"
-    :type string)
-
-   (border
-    :initarg :border
-    :initform "White"
-    :type string)
-
-   (focus
-    :initarg :focus
-    :initform "White"
-    :type string)
-   (unfocus
-    :initarg :unfocus
-    :initform "Black"
-    :type string)
-
-   (mode-line-fg
-    :initarg :mode-line-fg
-    :initform *mode-line-foreground-color*
-    :type string)
-   (mode-line-bg
-    :initarg :mode-line-bg
-    :initform *mode-line-background-color*
-    :type string)
-   (mode-line-border
-    :initarg :mode-line-border
-    :initform *mode-line-border-color*
-    :type string)
-   
-   ;; These are the default colors of *colors* in order
-   (black
-    :initarg :black
-    :initform "black"
-    :type string)
-   (red
-    :initarg :red
-    :initform "red"
-    :type string)
-   (green
-    :initarg :green
-    :initform "green"
-    :type string)
-   (yellow
-    :initarg :yellow
-    :initform "yellow"
-    :type string)
-   (blue
-    :initarg :blue
-    :initform "blue"
-    :type string)
-   (magenta
-    :initarg :magenta
-    :initform "magenta"
-    :type string)
-   (cyan
-    :initarg :cyan
-    :initform "cyan"
-    :type string)
-   (white
-    :initarg :white
-    :initform "white"
-    :type string)
-   (custom-one
-    :initarg :custom-one
-    :initform "black"
-    :type string)
-   (custom-two
-    :initarg :custom-two
-    :initform "white"
-    :type string)
-   (low
-    :initarg :low
-    :type string)
-   (medium
-    :initarg :medium
-    :type string)
-   (high
-    :initarg :high
-    :type string)
-   (light-fg
-    :initarg :light-fg
-    :type string)))
-
-(defmethod initialize-instance :after ((obj theme) &key)
-	   ;; Default prioritiyes to green, yellow, organge
-	   (unless (slot-boundp obj 'low)
-	     (setf (slot-value obj 'low) (slot-value obj 'green)))
-	   (unless (slot-boundp obj 'medium)
-	     (setf (slot-value obj 'medium) (slot-value obj 'yellow)))
-	   (unless (slot-boundp obj 'high)
-	     (setf (slot-value obj 'high) (slot-value obj 'red)))
-
-	   (unless (slot-boundp obj 'light-fg)
-	     (setf (slot-value obj 'light-fg) (slot-value obj 'fg))))
-
-(defun get-theme (theme-name)
-  (gethash theme-name *themes*))
-
-
-(defun with-current-theme ()
-  (get-theme *current-theme*))
-
-
-(defun apply-theme-raw (theme)
-  (set-fg-color (slot-value theme 'fg))
-  (set-bg-color (slot-value theme 'bg))
-  (set-border-color (slot-value theme 'border))
-  (set-focus-color (slot-value theme 'focus))
-  (set-unfocus-color (slot-value theme 'unfocus))
-
-  (setf *mode-line-foreground-color* (slot-value theme 'mode-line-fg)
-      	*mode-line-background-color* (slot-value theme 'mode-line-bg)
-      	*mode-line-border-color* (slot-value theme 'mode-line-border))
-  
-  (setf *colors* (list 
-      		  (slot-value theme 'black)
-      		  (slot-value theme 'red)
-      		  (slot-value theme 'green)
-      		  (slot-value theme 'yellow)
-      		  (slot-value theme 'blue)
-      		  (slot-value theme 'magenta)
-      		  (slot-value theme 'cyan)
-      		  (slot-value theme 'white)
-      		  (slot-value theme 'custom-one)
-      		  (slot-value theme 'custom-two)))
-  (update-color-map (current-screen)))
-
-(defun apply-theme (theme)
-  (apply-theme-raw (get-theme 'default))
-  (setf *current-theme* 'default)
-  (apply-theme-raw (get-theme theme))
-  (setf *current-theme* theme))
-
-;; *** Default
-(add-theme 'default
-  	   (make-instance 'theme))
-;; *** Spacemacs
-(add-theme 'spacemacs
-  	   (let ((grey "#292b2e")
-  		 (purple "#5d4d7a"))
-  	     (make-instance 'theme
-  			    :fg purple
-  			    :bg grey
-  			    :border purple
-  			    :focus purple
-  			    :unfocus grey
-  			    
-  			    :mode-line-fg purple
-  			    :mode-line-bg grey
-  			    :mode-line-border purple
-  			    
-  			    :black grey
-  			    :white purple)))
-
-;; *** Gruvbox
-(add-theme 'gruvbox
-  	   (let ((fg "#ebdbb2")
-  		 (bg "#282828")
-  		 (border "#665c54"))
-      	     (make-instance 'theme
-      			    :fg fg
-      			    :bg bg
-      			    :border border
-      			    :focus fg
-      			    :unfocus bg
-      			    :mode-line-fg fg
-      			    :mode-line-bg bg
-      			    :mode-line-border border
-      			    :black bg
-  			    :white fg)))
-
-(add-theme 'gruvbox-light
-  	   (let* ((fg "#3c3836")
-  		  (fg4 "#7c6f64")
-  		  (bg "#fbf1c7")
-  		  ;; 124
-  		  (red '("#cc241d" "#9d0006"))
-  		  ;; 106
-  		  (green '("#98971a" "#79740e"))
-  		  ;; 172
-  		  (yellow '("#d79921" "#b57614"))
-  		  ;; 66
-  		  (blue '("#458588" "#076678"))
-  		  ;; 132
-  		  (purple '("#b16286" "#8f3f71"))
-  		  ;; 72
-  		  (aqua '("#689d6a" "#427b58"))
-  		  (orange '("#d65d0e" "#af3a03"))
-  		  ;; 243
-  		  (gray '("#7c6f64" "#928374"))
-  		  ;; Bright is bg1
-  		  (warning yellow)
-  		  ;; Bright is bg3
-  		  (error orange))
-      	     (make-instance 'theme
-      			    :fg fg
-      			    :bg bg
-      			    :border (car orange)
-      			    :focus fg
-      			    :unfocus bg
-
-      			    :mode-line-fg fg
-      			    :mode-line-bg bg
-      			    :mode-line-border (car orange)
-  			    
-  			    :black gray
-  			    :red red
-  			    :green green
-  			    :yellow yellow
-  			    :blue blue
-  			    :magenta purple
-  			    :cyan aqua
-  			    :white (list fg fg4)
-  			    
-  			    :custom-one warning
-  			    :custom-two error)))
-;; *** Dracula
-(add-theme 'dracula
-       	   (let* ((green "#50FA7B")
-		  (yellow "#F1FA8C")
-		  (red "#FF5555")
-		  (purple '("#BD93F9" "#ff79c6"))
-
-		  (fg '("#F8F8F2" "#f1fa8c"))
-		  (bg '("#282A36" "#44475a"))
-		  (border (car purple)))
-       	     (make-instance 'theme
-       			    :fg (car fg)
-       			    :bg (car bg)
-       			    :border border
-       			    :focus (car purple)
-       			    :unfocus (car purple)
-
-  			    :mode-line-fg (car purple)
-       			    :mode-line-bg (car bg)
-       			    :mode-line-border border
-
-       			    :black  bg
-       			    :white  fg
-  			    :red red
-       			    :green green
-       			    :yellow yellow 
-       			    :blue "#8BE9FD"
-  			    :magenta purple
-       			    :cyan "#FF79C6"
-
-  			    :low green
-  			    :medium yellow
-  			    :high red
-  			    :light-fg fg
-       			    :custom-one "#44475A"
-       			    :custom-two "#6272A4")))
-;; *** Catppuccin
-(let ((rosewater "#dc8a78")
-      (flamingo "#dd7878")
-      (pink "#ea76cb")
-      (mauve "#8839ef")
-      (red "#d20f39")
-      (maroon "#e64553")
-      (peach "#fe640b")
-      (yellow "#df8e1d")
-      (green "#40a02b")
-      (teal "#179299")
-      (sky "#04a5e5")
-      (saphire "#209fb5")
-      (blue "#1e66f5")
-      (lavender "#7287fd")
-
-      ;; Items
-      (text "#4c4f69")
-
-      (subtext-1 "#5c5f77")
-      (subtext-0 "#6c6f85")
-
-      (overlay-2 "#7c7f93")
-      (overlay-1 "#8c8fa1")
-      (overlay-0 "#9ca0b0")
-
-      (surface-2 "#acb0be")
-      (surface-1 "#bcc0cc")
-      (surface-0 "#ccd0da")
-
-      (base "#eff1f5")
-      (mantle "#e6e9ef")
-      (crust "#dce0e8"))	   
-  (add-theme
-   'catppuccin-latte
-   ;; Latte Pallette
-   (make-instance 'theme
-
-  		  :fg text
-     		  :bg base
-     		  :border pink
-     		  :focus pink
-     		  :unfocus pink
-  		  
-  		  :mode-line-fg text
-     		  :mode-line-bg base
-     		  :mode-line-border pink
-  		  
-     		  :black  overlay-2
-  		  :red red
-     		  :green green
-  		  :yellow yellow
-     		  :blue blue
-  		  :magenta mauve
-     		  :cyan teal
-  		  :white  base
-  		  
-  		  :low green
-  		  :medium yellow
-  		  :high red
-  		  
-  		  :light-fg mantle
-  		  
-     		  :custom-one mantle
-     		  :custom-two crust)))
-
-;; *** General Functions
-(defvar *system-theme-type* "dark")
-
-(defun set-key-seq-color (color)
-  (setf stumpwm:*key-seq-color* color)
-  (setf *which-key-format* (concat stumpwm:*key-seq-color* "~5a^n ~a")))
-
-(defun set-keyseq-color-for-theme ()
-  (set-key-seq-color (ml-foreground-color-opener 'focus)))
-
-(defun set-system-themeing (theme)
-  (if (trivia:match theme
-		    ("dark" t)
-		    ("light" t)
-		    (_ nil))
-      (progn
-  	(setq *system-theme-type* theme)
-  	(run-shell-command (format nil "darkman set ~a" theme))
-  	(apply-theme (trivia:match theme
-				   ("dark" 'dracula)
-				   ("light" 'catppuccin-latte)))
-  	(set-bar-med-color)
-  	(set-bar-hi-color)
-  	(set-bar-crit-color)
-	(set-keyseq-color-for-theme)
-  	(toggle-modeline-all-screens)
-  	(toggle-modeline-all-screens))
-    
-    (stumpwm:message
-     (format
-      nil
-      "set-system-themeing: ~a is not either \"light\" or \"dark\"" theme))))
-
-(defun toggle-system-themeing ()
-  (set-system-themeing (trivia:match *system-theme-type*
-				     ("dark" "light")
-				     ("light" "dark"))))
-
 ;; ** Configuration
-;; *** Notify
-;; Currently the stumpwm package built from systems/base.scm cannot load the notify package.
-;; So this is chucked into a function while I debug it.
-(defun start-notify ()
-  (asdf:load-system "notify")
-  (notify:notify-server-toggle))
-;; *** Mode Line
-(defun ml-foreground-color-symb (color)
-  "If we have a list the theme has bright colors.
-    They are a bit of a headache so ignore for now
-
-    color is a string generally a hex"
-  (if (typep color 'list)
-      (format nil "^(:fg \"~A\")" (car color))
-    (format nil "^(:fg \"~A\")" color)))
-
-(defun ml-background-color-symb (color)
-  "If we have a list the theme has bright colors.
-    They are a bit of a headache so ignore for now
-
-    color is a string generally a hex"
-  (if (typep color 'list)
-      (format nil "^(:bg \"~A\")" (car color))
-    (format nil "^(:bg \"~A\")" color)))
-
-
-(defun ml-fmt-safe-change (change)
-  "For a given mode line msg wrap it in push and pops so we can reset changes"
-  (format nil "^(:push)~A^(:pop)" change))
-
-;;
-;; Background color
-;; 
-(defun ml-background-color-opener (color)
-  "Given color get a string which sets the background color to the one selected"
-  (ml-background-color-symb (slot-value (with-current-theme) color)))
-
-(defun ml-background-color (color msg)
-  "Set the background color to color for the duration of msg"
-  (ml-fmt-safe-change
-   (concatenate 'string (ml-background-color-opener color) msg)))
-
-;;
-;; Foreground Colors
-;; 
-(defun ml-foreground-color-opener (color)
-  "Given color get a string which sets the foreground color to the one selected"
-  (ml-foreground-color-symb (slot-value (with-current-theme) color)))
-
-(defun ml-foreground-color (color msg)
-  "Set the foreground color to color for the duration of msg"
-  (ml-fmt-safe-change
-   (concatenate 'string (ml-foreground-color-opener color) msg)))
-
-;;
-;; Set Both
-;; 
-(defun ml-fmt-colors (foreground background message)
-  (ml-fmt-safe-change (concatenate 'string
-    				   (ml-foreground-color-opener foreground)
-    				   (ml-background-color-opener background)
-    				   message)))
-
-;;
-;; Preset Backgrounds
-;; 
-;; These are used for splitting the bar sections
-;; They should follow becoming shades of the normal backgrounds
-;; They do not correct the foreground
-(defun ml-fmt-light-bg (msg)
-  "Gets the current brightest background shade"
-  (ml-background-color 'red msg))
-
-(defun ml-fmt-medium-bg (msg)
-  "Gets the current medium background shade"
-  (ml-background-color 'custom-one msg))
-
-(defun ml-fmt-dark-bg (msg)
-  "Gets the current darkest background shade"
-  (ml-background-color 'custom-two msg))
-
-;; These are for colored prioity needing colors
-(defun ml-fmt-low-priority-bg (msg)
-  "Gets a Ok Background Shade (normally green)"
-  (ml-background-color 'low msg))
-
-(defun ml-fmt-medium-priority-bg (msg)
-  "Gets a Warning background shade"
-  (ml-background-color 'medium msg))
-
-(defun ml-fmt-high-priority-bg (msg)
-  "Gets a Alert background shade"
-  (ml-background-color 'high msg))
-
-;;
-;; Preset foregrounds
-;; 
-(defun ml-fmt-low-priority-foreground (msg)
-  "Set the foreground to a low priority message"
-  (ml-foreground-color 'low msg))
-
-(defun ml-fmt-medium-priority-foreground (msg)
-  "Set the foreground to a medium priority message"
-  (ml-foreground-color 'medium msg))
-
-(defun ml-fmt-high-priority-foreground (msg)
-  "Sets the foreground to a high priority message"
-  (ml-foreground-color 'high msg))
-
-;;
-;; Complete Color Sets
-;; 
-(defun ml-light-bar (msg)
-  "Set the foreground and background to a low bar"
-  (ml-fmt-colors 'low 'bg msg))
-
-
-(defun ml-medium-bar (msg)
-  "Set the foreground and background to a medium bar"
-  (ml-fmt-colors 'fg 'custom-one msg))
-
-(defun ml-dark-bar (msg)
-  "Set the foreground and background to a medium bar"
-  (ml-fmt-colors 'fg 'custom-two msg))
-
-(defun ml-low-priority-bar (msg)
-  "Set the foreground and background to a low bar"
-  (ml-fmt-colors 'light-fg 'low msg))
-
-(defun ml-medium-priority-bar (msg)
-  "Set the foreground and background to a low bar"
-  (ml-fmt-colors 'light-fg 'medium msg))
-
-(defun ml-high-priority-bar (msg)
-  "Set the foreground and background to a low bar"
-  (ml-fmt-colors 'light-fg 'high msg))
-
-;; 
-;; Set internal stumpwm vars
-;; 
-(defun set-bar-med-color ()
-  (setf stumpwm::*bar-med-color*
-        (ml-foreground-color-opener 'low)))
-
-(defun set-bar-hi-color ()
-  (setf stumpwm::*bar-hi-color*
-        (ml-foreground-color-opener 'medium)))
-
-(defun set-bar-crit-color ()
-  (setf stumpwm::*bar-crit-color*
-        (ml-foreground-color-opener 'high)))
-
-;;
-;; Clear
-;; 
-(defun mode-line-clear-foreground ()
-  (ml-foreground-color-opener 'mode-line-fg))
-
-(defun mode-line-clear-background ()
-  (ml-background-color-opener 'mode-line-bg))
-
-(defun mode-line-clear-changes ()
-  (concatenate 'string
-  	       (mode-line-clear-foreground)
-  	       (mode-line-clear-background)))
-
-(defun get-bar-zone-color-string (amount message &optional (med 20) (hi 50) (crit 90) reverse)
-  (ml-fmt-safe-change
-   (concatenate 'string
-    		(stumpwm:bar-zone-color amount med hi crit reverse)
-    		message)))
-
-(defun ml-fmt-background-color-by-range (message amount &optional (med 20) (hi 50) (crit 90) reverse)
-  (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
-	(let ((background-color (cond ((past crit) 'red)
-				      ((past hi) 'yellow)
-				      ((past med) 'green)
-				      (t 'identity))))
-	  (ml-fmt-colors 'black
-			 background-color
-			 message))))
-
-(defun ml-priority-bar-by-range (message amount &optional (med 20) (hi 50) (crit 90) reverse)
-  (flet ((past (n) (funcall (if reverse #'<= #'>=) amount n)))
-	(cond ((past crit) (ml-high-priority-bar message))
-	      ((past hi) (ml-medium-priority-bar message))
-	      ((past med) (ml-low-priority-bar message))
-	      (t (ml-high-priority-bar "Error")))))
-
-(defun ml-space-bar (el)
-  (format nil " ~a" el))
 
 (defvar *show-mode-line-time* t)
-
-(defun trimmed-shell-command (command)
-  (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
-       	       (run-shell-command command t)))
-
-(defun error-message-bar (msg)
-  (ml-foreground-color 'red msg))
-
-(add-screen-mode-line-formatter #\M 'fmt-pretty-head-window-list)
-(defun fmt-pretty-head-window-list (ml)
-  "Using *window-format*, return a 1 line list of the windows, space seperated."
-  (format nil "~{~a~^~}"
-       	  (let ((base-fmt
-		 (mapcar (lambda (w)
-			   (format-with-on-click-id 
-			    (let ((str (format-expand *window-formatters*
-						      *window-format*
-						      w)))
-			      (if (eq w (current-window))
-				  (stumpwm::fmt-highlight (format nil " ~a " str))
-				(format nil "~a|" str)))
-			    :ml-on-click-focus-window
-			    (stumpwm::window-id w)))
-			 (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
-								(stumpwm::mode-line-head ml))
-					 #'< :key #'window-number))))
-       	    ;; Reparse strings and remove the | from the element before the active window
-       	    (if (> (length base-fmt) 0)
-       		(loop for win-fmt-el from 1 to (- (length base-fmt) 1)
-       		      do (if (search "^r^(:on-click-end)" (nth win-fmt-el base-fmt))
-       			     (let* ((pos (- win-fmt-el 1))
-       				    (pos-str (nth pos base-fmt)))
-       			       (setf (nth pos base-fmt)
-       				     (cl-ppcre:regex-replace-all "\\|\\^\\(:on-click-end\\)"
-       								 pos-str
-       								 "\^\(\:on-click-end\)"))))))
-       	    base-fmt)))
-
-(defvar *ml-email-accounts*
-  (list
-   (list :name "old-account-fowarding"
-	 :notmuch-search "tag:forwarded_tna and tag:unread"
-	 :display-filter nil)
-   (list :name "natalie-atkinson"
-	 :notmuch-search "tag:natalieatkinson95 and tag:unread and not tag:promotions"
-	 :display-filter nil)))
-
-(defun ml-email-get-data ()
-  (flet ((notmuch-count (tags)
-			(let ((raw-count (trimmed-shell-command (format nil "notmuch count ~A" tags))))
-			  (if (string= raw-count "")
-			      nil
-			    (parse-integer raw-count)))))
-	(mapcar (lambda (account)
-		  (append account
-			  (list :email-count (notmuch-count (getf account :notmuch-search)))))
-		*ml-email-accounts*)))
-
-
-(defun ml-email-space-bar (email-count)
-  (if email-count
-      (ml-space-bar 
-       (get-bar-zone-color-string email-count
-  				  (write-to-string email-count)
-  				  5 10 15))
-    (ml-space-bar (error-message-bar "Error"))))
-
-(defun in-work-hours (work-times)
-  ;; Extract relevent data
-  (let* ((workdays (getf work-times :days))
-     	 (workhours (getf work-times :hours))
-     	 ;; Make this clearer
-     	 (start-time (car workhours))
-     	 (end-time (cadr workhours))
-    	 ;; Make the current day and hour nicer  		  
-     	 (current-time (local-time:now))
-     	 (day-of-week (local-time:timestamp-day-of-week current-time))
-     	 (hour-of-day (local-time:timestamp-hour current-time)))
-    (if (and (member day-of-week workdays)
-     	     (and (>= hour-of-day start-time)
-     		  (< hour-of-day end-time)))
-     	nil
-      t)))
-
-(add-screen-mode-line-formatter #\E 'ml-email-fmt)
-(defun ml-email-fmt (ml)
-  (declare (ignorable ml))
-  (labels ((is-account-displayable (account)
-				   (let ((display-filter (getf account :display-filter)))
-				     (if (and display-filter (functionp display-filter))
-					 (funcall display-filter)
-				       nil)))
-	   (add-count-to-string (mode-line-string account)
-				(concatenate 'string
-					     mode-line-string
-					     (ml-email-space-bar (getf account :email-count)))))
-	  (let* ((email-account-information (ml-email-get-data))
-		 (display-accounts (remove-if
-				    #'is-account-displayable
-				    email-account-information))
-		 (account-display-string (reduce
-					  #'add-count-to-string
-					  display-accounts
-					  :initial-value "")))
-	    (if (and
-		 (> (reduce (lambda (count account)
-			      (+ count (getf account :email-count)))
-			    display-accounts
-			    :initial-value 0)
-		    0)
-		 (not (string= "" account-display-string)))
-		(ml-medium-bar
-		 (concatenate
-		  'string
-		  account-display-string
-		  " Emails "))
-	      ""))))
-
-
-(defun ml-read-file-as-integer (path)
-  (handler-case
-      (with-open-file (s path :direction :input :if-does-not-exist nil)
-		      (when s
-			(let ((line (read-line s nil)))
-			  (if line
-			      (parse-integer (string-trim '(#\Newline #\Space) line))
-			    0))))
-    (sb-int:simple-stream-error () 0)
-    (file-error () 0)))
-
-(defun ml-read-file-as-string (path)
-  (handler-case
-      (with-open-file (s path :direction :input :if-does-not-exist nil)
-		      (when s
-			(let ((line (read-line s nil)))
-			  (if line
-			      (string-trim '(#\Newline #\Space) line)
-			    "unknown"))))
-    (sb-int:simple-stream-error () "err")
-    (file-error () "err")))
-
-(defun ml-hwmon-directories ()
-  (directory "/sys/class/hwmon/hwmon*"))
-
-(defun ml-temperature-files (hwmon-dir)
-  (directory (merge-pathnames "temp*_input" hwmon-dir)))
-
-(defun ml-read-temperatures ()
-  (loop for hwmon in (ml-hwmon-directories)
-  	for name-path = (merge-pathnames "name" hwmon)
-  	for chip-name = (when (probe-file name-path)
-  			  (ml-read-file-as-string name-path))
-  	append
-  	(loop for temp-file in (ml-temperature-files hwmon)
-  	      for milli-c = (ml-read-file-as-integer temp-file)
-  	      collect
-  	      (list :chip chip-name
-  		    :sensor (pathname-name temp-file)
-  		    :celsius (/ milli-c 1000.0)))))
-
-(defun ml-get-hottest ()
-  (let ((hottest (list :celsius 0)))
-    (dolist (entry (ml-read-temperatures))
-      (if (> (getf entry :celsius) (getf hottest :celsius))
-       	  (setf hottest entry)))
-    hottest))
-
-(defun ml-get-human-name (sensors)
-  (let ((chip-name (getf sensors :chip)))
-    (cond ((equal chip-name "mt7921_phy0") "Wi-Fi")
-       	  ((equal chip-name "amdgpu") "GPU")
-       	  ((equal chip-name "nvme") "SSD")
-       	  ((equal chip-name "k10temp") "CPU")
-  	  ((equal chip-name "coretemp") "CPU")
-       	  ((equal chip-name "acpitz") "ACPI")
-       	  (t chip-name))))
-
-(add-screen-mode-line-formatter #\H 'ml-tempreture-fmt)
-(defun ml-tempreture-fmt (ml)
-  (declare (ignorable ml))
-  (let ((hottest (ml-get-hottest)))
-    (if (> (getf hottest :celsius) 70)
-  	(ml-priority-bar-by-range
-  	 (format nil " ~,1fC ~a "
-  		 (getf hottest :celsius)
-  		 (ml-get-human-name hottest))
-  	 (getf hottest :celsius) 70 80 90)
-      "")))
-
-(add-screen-mode-line-formatter #\C 'ml-cpu-percent-fmt)
-(defun ml-cpu-percent-fmt (ml)
-  (declare (ignorable ml))
-  (let ((cpu-percent (* (cpu::current-cpu-usage) 100)))
-    (if (> 70 cpu-percent)
-  	(ml-priority-bar-by-range
-  	 (format nil " ~,1f%% CPU " cpu-percent)
-  	 cpu-percent 70 80 90))
-    ""))
-
-(defun ml-window-list-fmt ()
-  (format nil "~A%M" (mode-line-clear-changes)))
 
 (defun init-window-number-fixes ()
        ;;; When windows are desroyed window numbers are not synced
@@ -817,13 +119,10 @@
   (toggle-modeline-all-screens)
   (toggle-modeline-all-screens))
 
-(defun init-mode-line ()
-  (setf *window-format* " %n %10c ")  
-  
-  (set-bar-med-color)
-  (set-bar-hi-color)
-  (set-bar-crit-color)
 
+(defun init-mode-line ()
+
+  (setf *window-format* " %n %10c ")  
   (setf *screen-mode-line-format*      
        	(list
        	 "%M^>%C%H%E"
@@ -855,109 +154,12 @@
   (set-font (nth 0 *fonts*))
   (which-key-mode)
 
-  (run-shell-command "feh --bg-fill --no-xinerama ~/.background.jpg")
-  
   (setf stumpwm:*input-window-gravity* :center
   	stumpwm:*message-window-gravity* :center
         
   	stumpwm:*message-window-padding* 10
   	stumpwm:*message-window-y-padding* 10))
 
-
-
-;; * User functions
-(defun make-percent-bar (percent &optional title)
-  "Return a string that represents a percent bar"
-  (format nil "~a~%^B~3d%^b [^[^7*~a^]]"
-          title
-    	  percent
-    	  (stumpwm::bar (min 100 percent) 50 #\# #\:)))
-
-(defun reload-rc-clean ()
-  "Restart Slynk and reload source.
-     This is needed if Sly updates while StumpWM is running"
-  (slynk:stop-server 1337)
-  (loadrc)
-  (toggle-modeline-all-screens)
-  (toggle-modeline-all-screens))
-
-;; * Commands
-;; ** Brightness
-(defun show-screen-brightness ()
-  (stumpwm:message (make-percent-bar
-  		    (parse-integer (run-shell-command "sudo brillo -G" t) :junk-allowed t)	    
-  		    "Screen Brightness")))
-
-(defcommand screen-brightness-up () ()
-	    "Increase the brightness of the screen"
-	    (run-shell-command "sudo brillo -A 10")
-	    (show-screen-brightness))
-
-(defcommand screen-brightness-down () ()
-	    "Decrease the brightness of the screen"
-	    (run-shell-command "sudo brillo -U 10")
-	    (show-screen-brightness))  
-
-(defun show-keyboard-brightness ()
-  (stumpwm:message (make-percent-bar
-  		    (parse-integer (run-shell-command "sudo brillo -Gk" t) :junk-allowed t)
-  		    "Keyboard Brightness")))
-
-(defcommand keyboard-brightness-up () ()
-	    "Increase the brightness of the keyboard"
-	    (run-shell-command "sudo brillo -kA 10")
-	    (show-keyboard-brightness))
-
-(defcommand keyboard-brightness-down () ()
-	    "Decrease the brightness of the keyboard"
-	    (run-shell-command "sudo brillo -kU 10")
-	    (show-keyboard-brightness))
-
-;; ** Screenshots
-(defun timestamp-string ()
-  (local-time:format-timestring
-   nil (local-time:now)
-   :format '(:YEAR "-" (:MONTH 2) "-" :DAY "-" :SHORT-WEEKDAY "-" :HOUR12 "_" :MIN "_" :SEC "_" :AMPM)))
-
-(defun screenshot-path ()
-  (format nil "~a/Pictures/Screenshots/~a.png"
-  	  (getenv "HOME")
-  	  (timestamp-string)))
-
-;; Setup bindings for less common aplications which would be opened then closed
-(defcommand screenshot () ()
-	    "Take a screenshot and save it to screenshot directory"
-	    (run-shell-command (format nil "maim ~a"
-				       (screenshot-path))))
-
-(defcommand screenshot-select () ()
-	    "Select a area for a screenshot and save it to screenshot directory"
-	    (run-shell-command (format nil "maim --select ~a"
-				       (screenshot-path))))
-;; ** Volume
-(setf pamixer:*allow-boost* t)  
-
-(defun show-volume-bar ()
-  "Display a stumpwm:message of the current volume"
-  (if (not (pamixer:get-mute))
-      (stumpwm:message (make-percent-bar (pamixer:get-volume) "Volume"))
-    (stumpwm:message (make-percent-bar 0 "Volume: Muted"))))
-
-(defcommand notify-volume-up () ()
-	    (run-commands "pamixer-volume-up")
-	    (show-volume-bar))
-
-(defcommand notify-volume-down () ()
-	    (run-commands "pamixer-volume-down")
-	    (show-volume-bar))
-
-(defcommand volume-control () ()
-	    "Start volume control"
-	    (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
-;; ** Theme
-(defcommand toggle-theme () ()
-	    "Toggle the system theme"
-	    (toggle-system-themeing))
 ;; ** System
  ;;; Shutdown and Reboot
 (defcommand shutdown (confirm) ((:y-or-n "Confirm Shutdown "))
@@ -985,34 +187,10 @@
 				      (car (stumpwm::head-windows (current-group)
 								  (nth screen-num (stumpwm::group-heads (current-group)))))))
 	    (group-wake-up (current-group)))
+
 ;; * Keybindings
 (defun init-keybindings ()
   (set-prefix-key (kbd "C-t")))
-;; ** Keybinding Macros
-(defmacro make-program-binding (program-name window-class &optional alias)
-  "Create run-or-raise and run-or-pull commands for program-name
-  window-class is the windows-class
-  Also add keybinding to the commands. 
-  C-keybinding r calls run-or-raise
-  C-keybinding p calls run-or-pull
-  C-keybinding n creates a new instance of the program"
-  (if (not alias)
-      (setf alias program-name))
-  `(progn
-     (defvar ,(intern (format nil "*~a-map*" alias)) nil)
-
-     (defcommand ,(intern (format nil "~a" alias)) () () (run-shell-command ,program-name))
-     
-     (defcommand ,(intern (format nil "run-or-raise-~a" alias)) () ()
-		 (run-or-raise ,program-name '(:class ,window-class)))
-     
-     (defcommand ,(intern (format nil "run-or-pull-~a" alias)) () ()
-		 (run-or-pull ,program-name '(:class ,window-class)))
-     
-     (stumpwm::fill-keymap ,(intern (format nil "*~a-map*" alias))
-  			   (kbd "p") ,(format nil "run-or-pull-~a" alias)
-  			   (kbd "r") ,(format nil "run-or-raise-~a" alias)
-  			   (kbd "n") ,(format nil "~a" alias))))
 ;; ** Program Bindings
 (defun init-program-binding ()
   (make-program-binding "firefox" "Firefox")
@@ -1037,13 +215,6 @@
 		(define-key m (kbd "f") "screenshot")
 		(define-key m (kbd "s") "screenshot-select")
 		m))
-
-(defparameter *theme-map*
-	      (let ((m (make-sparse-keymap)))
-		(define-key m (kbd "t") "toggle-theme")
-		(define-key m (kbd "m") "reload-mode-line-cmd")
-		m))
-
 
 (defparameter *power-map*
 	      (let ((m (make-sparse-keymap)))
@@ -1084,16 +255,19 @@
   (define-key *root-map* (kbd "p") '*program-map*)
   (define-key *root-map* (kbd "s") '*system-map*))
 ;; *** Top Map
+;; Handle Fn keys for systems like laptops etc
 (defun init-top-map ()
   (define-key *top-map* (kbd "XF86AudioRaiseVolume") "notify-volume-up")
   (define-key *top-map* (kbd "XF86AudioLowerVolume") "notify-volume-down")
-  (define-key *top-map* (kbd "XF86AudioMute") "pamixer-toggle-mute")
+  (define-key *top-map* (kbd "XF86AudioMute") "notify-volume-mute")
 
   (define-key *top-map* (kbd "XF86MonBrightnessUp") "screen-brightness-up")
   (define-key *top-map* (kbd "XF86MonBrightnessDown") "screen-brightness-down")
 
   (define-key *top-map* (kbd "XF86KbdBrightnessUp") "keyboard-brightness-up")
-  (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down"))
+  (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down")
+
+  (define-key *top-map* (kbd "Print") "screenshot"))
 
 ;; * Final Actions
 (defun run-all-inits ()
@@ -1113,201 +287,3 @@
 
 
 (run-all-inits)
-
-
-;; Compositor
-;; Things like window transarency
-(in-package :stumpwm-user)
-(in-package :stumpwm)
-
-(setf *debug-level* 3)
-
-(defun %xdg-state-home ()
-  "Return XDG_STATE_HOME or ~/.local/state/"
-  (let ((x (ignore-errors (uiop:getenv "XDG_STATE_HOME"))))
-    (if (and x (> (length x) 0))
-        (pathname (concatenate 'string x "/"))
-        (merge-pathnames ".local/state/" (user-homedir-pathname)))))
-
-(defparameter *stumpwm-debug-dir*
-  (merge-pathnames "stumpwm/" (%xdg-state-home)))
-
-(defun %ensure-dir (p)
-  (ensure-directories-exist p)
-  p)
-
-(defparameter *stumpwm-log-file*
-  (merge-pathnames "stumpwm.log" (%ensure-dir *stumpwm-debug-dir*)))
-
-(defparameter *stumpwm-oplog-file*
-  (merge-pathnames "stumpwm-events.log" (%ensure-dir *stumpwm-debug-dir*)))
-
-;; Redirect *everything* to a file (stdout/stderr included).
-(redirect-all-output *stumpwm-log-file*)
-
-(defun log-op (fmt &rest args)
-  (with-open-file (s *stumpwm-oplog-file*
-                     :direction :output :if-does-not-exist :create :if-exists :append)
-    (format s "~&~A  " (local-time:format-timestring nil (local-time:now)))
-    (apply #'format s fmt args)
-    (finish-output s)))
-
-(defparameter *affoa-window-dim-opacity* 20)   ; 1–100
-
-(defvar *affoa-window-undim-timer* nil)
-(defvar *affoa-window-undim-timer-length* 1)
-
-(defvar *affoa-window-dimming-lock* nil)
-(defvar *affoa-window-undimming-lock* nil)
-
-(defconstant +net-wm-window-opacity-max+ #xffffffff
-  "Maximum _NET_WM_WINDOW_OPACITY value as defined by EWMH.")
-
-(defun opacity-percent->cardinal (opacity)
-  "Convert OPACITY percentage in [0, 100] to a _NET_WM_WINDOW_OPACITY CARDINAL/32 value."
-  (check-type opacity (real 0 100))
-  (round (* +net-wm-window-opacity-max+ (/ opacity 100.0))))
-
-(defun set-window-opacity (window opacity)
-  "Set WINDOW opacity percentage to OPACITY using _NET_WM_WINDOW_OPACITY.
-Requires a compositor that honors this EWMH property."
-  (check-type window window)
-  (handler-case
-      (progn
-	(log-op "set-window-opacity:~%    opacity: ~a~%    window: ~A~%" opacity window)
-	(xlib:change-property (window-xwin window)
-			      :_NET_WM_WINDOW_OPACITY
-			      (list (opacity-percent->cardinal opacity))
-			      :cardinal 32))
-    (condition (c)
-      (log-op "~%~%~%set-window-opacity: handler-case-condition:~%~A~%~%~%" c)))
-  window)
-
-(defun clear-window-opacity (window)
-  "Remove WINDOW's _NET_WM_WINDOW_OPACITY property."
-  (check-type window window)
-  (log-op "clear-window-opaticy: ~A~%" window)
-  (xlib:delete-property (window-xwin window) :_NET_WM_WINDOW_OPACITY)
-  window)
-
-(defun map-all-windows (fn &key (screen (current-screen)))
-  "Call FN on each window across all groups on SCREEN."
-  (dolist (g (screen-groups screen))
-    (dolist (w (group-windows g))
-      (funcall fn w))))
-
-(defun affoa-get-all-visible-windows (&key (screen (current-screen)))
-  (reduce
-   'cons
-   (mapcar
-    (lambda (group)
-      (remove-if-not
-       (lambda (window)
-	 (log-op "affoa-get-all-visible-windows: checking: ~A~%" window)
-	 (if (window-visible-p window)
-	     (progn
-	       (log-op "affoa-get-visible-windows: visible~%~%")
-	       t)
-	     (progn
-	       (log-op "affoa-get-visible-windows: invisible~%~%")
-	       nil)))
-       (group-windows group)))
-    (screen-groups screen))))
-
-(defun affoa-dim-window (window)
-  (set-window-opacity window *affoa-window-dim-opacity*)
-  (xlib:display-finish-output *display*))
-
-(defun affoa-dim-all-windows ()
-  (let ((visible-windows (affoa-get-all-visible-windows)))
-    (mapcar (lambda (window)
-	      (log-op "affoa-dim-all-windows: window: ~A~%~%" window)
-	      (affoa-dim-window window))
-	    visible-windows)))
-
-(defun affoa-undim-window (window)
-  (clear-window-opacity window)
-  (xlib:display-finish-output *display*))
-
-(defun affoa-undim-all-windows ()
-  (let ((visible-windows (affoa-get-all-visible-windows)))
-    (mapcar
-     (lambda (window)
-       (log-op "affoa-undim-all-windows: window: ~A~%~%" window)
-       (affoa-undim-window window))
-     visible-windows)))
-
-(defun all-locks-held-p ()
-  (or *affoa-window-dimming-lock* *affoa-window-undimming-lock*))
-
-(defmacro with-lock ((lock-var) &body body)
-  `(if ,lock-var
-       (progn (log-op "with-lock: ~A already held~%" ',lock-var) nil)
-       (unwind-protect
-            (progn (setf ,lock-var t)
-                   ,@body)
-         (setf ,lock-var nil))))
-
-(defun affoa-dim-window-on-stumpwm-message (&rest _lines)
-  (declare (ignorable _lines))
-  (log-op "affoa-dim-window-on-stumpwm-message: begin~%")
-  (if (not (all-locks-held-p))
-      (with-lock (*affoa-window-dimming-lock*)
-		 (log-op "affoa-dim-window-on-stumpwm-message: alowed to dim~%~%")
-		 (affoa-dim-all-windows))
-      (log-op "affoa-dim-window-on-stumpwm-message: unable to dim lock held~%~%")))
-
-(declaim (ftype function affoa-set-undimming-timer))
-
-(defun affoa-undimming-timer ()
-  (log-op "affoa-undimming-timer: begin~%")
-  (setf *affoa-window-undim-timer* nil)
-  (handler-case 
-      (cond
-       ;; Undimm the windows if no locks are held
-       ((not (all-locks-held-p))
-	(with-lock (*affoa-window-undimming-lock*)
-		   (log-op "affoa-undimming-timer: allowed to undim~%")
-		   (affoa-undim-all-windows)))
-       ;; If the dimming lock is set we want to wait
-       ;; Then run undimming once the dimming is done
-       (*affoa-window-dimming-lock*
-	(progn
-	  (log-op "affoa-undimming-timer: resetting dimming timer~%")
-	  (affoa-set-undimming-timer)))
-       (t
-	(progn
-	  (log-op "affoa-undimming-timer: resetting dimming timer~%")
-	  (affoa-set-undimming-timer))))
-    (condition (c)
-	       (log-op "affoa-undimmg-timer:~%affoa-undimmg-timer:~%affoa-undimmg-timer: ERROR~%affoa-undimmg-timer:~%~A~%" c))))
-
-(defun affoa-set-undimming-timer ()
-  (when *affoa-window-undim-timer*
-    (log-op "affoa-set-undimming-timer: clearing dimming timer~%")
-    (ignore-errors (cancel-timer *affoa-window-undim-timer*))
-    (setf *affoa-window-undim-timer* nil))
-
-  (log-op "affoa-set-undimming-timer: setting new timer~%")
-  (let ((timer-to-run (run-with-timer *affoa-window-undim-timer-length*
-				      nil
-				      'affoa-undimming-timer)))
-    (log-op "affoa-set-undimming-timer: timer: ~A~%" timer-to-run)
-    (setf *affoa-window-undim-timer*
-	  timer-to-run)))
-
-(defun affoa-undim-all-windows-on-stumpwm-message-removal (&rest args)
-  (declare (ignorable args))
-  (affoa-undimming-timer))
-
-(defun affoa-toggle-window-dimming ()
-  (if (find #'affoa-dim-window-on-stumpwm-message *message-hook*)
-      (progn
-	(affoa-undim-all-windows)
-	(remove-hook *message-hook* #'affoa-dim-window-on-stumpwm-message)
-	(remove-hook *message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))
-      (progn
-	(add-hook *message-hook* #'affoa-dim-window-on-stumpwm-message)
-	(add-hook *message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))))
-
-(affoa-toggle-window-dimming)
