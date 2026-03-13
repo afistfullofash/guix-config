@@ -927,33 +927,47 @@
 ;; Setup bindings for less common aplications which would be opened then closed
 (defcommand screenshot () ()
 	    "Take a screenshot and save it to screenshot directory"
-	    (run-shell-command (format nil "maim ~a"
-				       (screenshot-path))))
+	    (let ((save-path (screenshot-path)))
+	      (run-shell-command (format nil "maim ~a" save-path))
+	      (message (format #f "Saved Screenshot to: ~a" save-path))))
 
 (defcommand screenshot-select () ()
 	    "Select a area for a screenshot and save it to screenshot directory"
-	    (run-shell-command (format nil "maim --select ~a"
-				       (screenshot-path))))
+	    (let ((save-path (screenshot-path)))
+	      (run-shell-command (format nil "maim --select ~a" save-path))
+	      (message (format #f "Saved Screenshot to: ~a" save-path))))
 ;; ** Volume
 (setf pamixer:*allow-boost* t)  
 
-(defun show-volume-bar ()
-  "Display a stumpwm:message of the current volume"
-  (if (not (pamixer:get-mute))
-      (stumpwm:message (make-percent-bar (pamixer:get-volume) "Volume"))
-    (stumpwm:message (make-percent-bar 0 "Volume: Muted"))))
+(defun run-volume-command (command)
+  "Run a command to modify the volume and show a message of the current volume setting"
+  (let ((muted-message (make-percent-bar 0 "Volume: Muted"))
+	(volume-message (make-percent-bar (pamixer:get-volume) "Volume")))
+    (cond
+      ;; Check if we are toggling muting
+      ((equal command "pamixer-toggle-mute")
+       (run-commands command))
+      ;; If we are not mute
+      ((not (pamixer:get-mute))
+       (run-commands command))
+      (t nil))
+    (stumpwm:message (if (not (pamixer:get-mute))
+			 volume-message
+			 muted-message))))
 
 (defcommand notify-volume-up () ()
-	    (run-commands "pamixer-volume-up")
-	    (show-volume-bar))
+  (run-volume-command "pamixer-volume-up"))
 
 (defcommand notify-volume-down () ()
-	    (run-commands "pamixer-volume-down")
-	    (show-volume-bar))
+  (run-volume-command "pamixer-volume-down"))
+
+(defcommand notify-volume-mute () ()
+  (run-volume-command "pamixer-toggle-mute"))
 
 (defcommand volume-control () ()
 	    "Start volume control"
 	    (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
+
 ;; ** Theme
 (defcommand toggle-theme () ()
 	    "Toggle the system theme"
@@ -1084,16 +1098,19 @@
   (define-key *root-map* (kbd "p") '*program-map*)
   (define-key *root-map* (kbd "s") '*system-map*))
 ;; *** Top Map
+;; Handle Fn keys for systems like laptops etc
 (defun init-top-map ()
   (define-key *top-map* (kbd "XF86AudioRaiseVolume") "notify-volume-up")
   (define-key *top-map* (kbd "XF86AudioLowerVolume") "notify-volume-down")
-  (define-key *top-map* (kbd "XF86AudioMute") "pamixer-toggle-mute")
+  (define-key *top-map* (kbd "XF86AudioMute") "notify-volume-mute")
 
   (define-key *top-map* (kbd "XF86MonBrightnessUp") "screen-brightness-up")
   (define-key *top-map* (kbd "XF86MonBrightnessDown") "screen-brightness-down")
 
   (define-key *top-map* (kbd "XF86KbdBrightnessUp") "keyboard-brightness-up")
-  (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down"))
+  (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down")
+
+  (define-key *top-map* (kbd "Print") "screenshot"))
 
 ;; * Final Actions
 (defun run-all-inits ()
