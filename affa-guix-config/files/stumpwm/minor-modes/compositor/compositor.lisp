@@ -24,19 +24,19 @@ Requires a compositor that honors this EWMH property."
   (check-type window window)
   (handler-case
       (progn
-	(log "info" "set-window-opacity:~%    opacity: ~a~%    window: ~A~%" opacity window)
+	(log-message "info" "set-window-opacity:~%    opacity: ~a~%    window: ~A~%" opacity window)
 	(xlib:change-property (window-xwin window)
 			      :_NET_WM_WINDOW_OPACITY
 			      (list (opacity-percent->cardinal opacity))
 			      :cardinal 32))
     (condition (c)
-      (log "info" "~%~%~%set-window-opacity: handler-case-condition:~%~A~%~%~%" c)))
+      (log-message "info" "~%~%~%set-window-opacity: handler-case-condition:~%~A~%~%~%" c)))
   window)
 
 (defun clear-window-opacity (window)
   "Remove WINDOW's _NET_WM_WINDOW_OPACITY property."
   (check-type window window)
-  (log "info" "clear-window-opacity: ~A~%" window)
+  (log-message "info" "clear-window-opacity: ~A~%" window)
   (xlib:delete-property (window-xwin window) :_NET_WM_WINDOW_OPACITY)
   window)
 
@@ -53,13 +53,13 @@ Requires a compositor that honors this EWMH property."
     (lambda (group)
       (remove-if-not
        (lambda (window)
-	 (log "affoa-get-all-visible-windows: checking: ~A~%" window)
+	 (log-message "affoa-get-all-visible-windows: checking: ~A~%" window)
 	 (if (window-visible-p window)
 	     (progn
-	       (log "affoa-get-visible-windows: visible~%~%")
+	       (log-message "affoa-get-visible-windows: visible~%~%")
 	       t)
 	     (progn
-	       (log "affoa-get-visible-windows: invisible~%~%")
+	       (log-message "affoa-get-visible-windows: invisible~%~%")
 	       nil)))
        (group-windows group)))
     (screen-groups screen))))
@@ -151,13 +151,13 @@ Requires a compositor that honors this EWMH property."
   (affoa-undimming-timer))
 
 (defun affoa-toggle-window-dimming ()
-  (if (find #'affoa-dim-window-on-stumpwm-message *message-hook*)
+  (if (find #'affoa-dim-window-on-stumpwm-message stumpwm:*message-hook*)
       (progn
 	(affoa-undim-all-windows)
-	(remove-hook *message-hook* #'affoa-dim-window-on-stumpwm-message)
-	(remove-hook *message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))
+	(stumpwm:remove-hook stumpwm:*message-hook* #'affoa-dim-window-on-stumpwm-message)
+	(stumpwm:remove-hook stumpwm:*message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))
       (progn
-	(add-hook *message-hook* #'affoa-dim-window-on-stumpwm-message)
-	(add-hook *message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))))
+	(stumpwm:add-hook stumpwm:*message-hook* #'affoa-dim-window-on-stumpwm-message)
+	(stumpwm:add-hook stumpwm:*message-hide-hook* #'affoa-undim-all-windows-on-stumpwm-message-removal))))
 
 (affoa-toggle-window-dimming)

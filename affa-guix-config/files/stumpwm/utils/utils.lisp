@@ -1,27 +1,13 @@
 (in-package :stumpwm-utils)
 
-(export '(trimmed-shell-command
-	  make-percent-bar
-	  make-program-binding
+(export '(make-program-binding
+	  trimmed-shell-command
 
-	  mkdir-p))
+	  define-minor-mode-safe))
 
 (defun trimmed-shell-command (command)
   (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
        	       (stumpwm:run-shell-command command t)))
-
-;; * User functions
-(defun make-percent-bar (percent &optional title)
-  "Return a string that represents a percent bar"
-  (format nil "~a~%^B~3d%^b [^[^7*~a^]]"
-          title
-    	  percent
-    	  (stumpwm::bar (min 100 percent) 50 #\# #\:)))
-
-(defun mkdir-p (p)
-  "Creates a directory and then returns its path"
-  (ensure-directories-exist p)
-  p)
 
 
 ;; ** Keybinding Macros
@@ -50,3 +36,23 @@
   			   (kbd "r") ,(format nil "run-or-raise-~a" alias)
   			   (kbd "n") ,(format nil "~a" alias))))
 
+
+(defmacro define-minor-mode-safe (form)
+  "When compiling within a guix environment we don't have a live system.
+This causes the call to stumpwm:define-minor-mode to fail due to a call to stumpwm:sync-keys
+This macro suppresses the compiling error"
+  `(progn
+     (eval-when (:compile-toplevel :load-toplevel :execute)
+       (let ((old (and (fboundp 'stumpwm::sync-keys)
+                       (symbol-function 'stumpwm::sync-keys))))
+         (unwind-protect
+             (progn
+               (when old
+                 (setf (symbol-function 'stumpwm::sync-keys)
+                       (lambda ()
+                         (when (and stumpwm::*display*
+                                    stumpwm::*screen-list*)
+                           (funcall old)))))
+               ,form)
+           (when old
+             (setf (symbol-function 'stumpwm::sync-keys) old)))))))

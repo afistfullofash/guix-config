@@ -9,8 +9,10 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "A pill which displays email status"
-  ;; :depends-on (#:stumpwm
-  ;; 	       #:stumpwm-themeing)
+  :depends-on (#:stumpwm
+	       #:stumpwm-utils
+	       #:stumpwm-mode-line
+	       #:local-time)
   :serial t
   :components ((:file "package")
 	       (:file "email")))

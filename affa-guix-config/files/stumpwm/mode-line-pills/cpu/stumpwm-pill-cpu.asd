@@ -9,9 +9,9 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "A pill which displays the cpu useage percentage"
-  ;; :depends-on (#:stumpwm
-  ;; #:cpu
-  ;; 	       #:stumpwm-themeing)
+  :depends-on (#:stumpwm
+	       #:cpu
+	       #:stumpwm-mode-line)
   :serial t
   :components ((:file "package")
 	       (:file "pill")))

@@ -31,30 +31,30 @@
 				   ("dark" 'dracula)
 				   ("light" 'catppuccin-latte)))
 
-  	(stumpwm-utils:toggle-modeline-all-screens)
-  	(stumpwm-utils:toggle-modeline-all-screens))))
+  	(stumpwm-utils:toggle-mode-line-all-screens)
+  	(stumpwm-utils:toggle-mode-line-all-screens))))
 
 (defun toggle-mode ()
-  (set-system-themeing (trivia:match (get-mode)
+  (set-mode (trivia:match (get-mode)
 			 ("dark" "light")
 			 ("light" "dark"))))
 
 (stumpwm:defcommand dark-light-toggle-mode () ()
   (toggle-mode))
 
-(stumpwm:define-minor-mode dark-light-minor-mode () ()
-  (:scope :screen)
-  (:interactive t)
-  (:make-hooks t))
+(stumpwm-utils:define-minor-mode-safe
+ (stumpwm:define-minor-mode dark-light-minor-mode () ()
+			    (:scope :screen)
+			    (:interactive nil)
+			    (:make-hooks t)))
 
-(stumpwm:add-hook *dark-light-minor-mode-hook*
-		  (lambda (args)
-		    (declare (ignorable args))
-	    (set-mode (get-mode))))
+(defmethod update-instance-for-different-class :after
+	   (prev (obj dark-light-minor-mode) &rest rest)
+  (declare (ignore prev rest))  
+  (set-mode (get-mode)))
+
 
 (defvar *dark-light-map*
   (let ((m (stumpwm:make-sparse-keymap)))
     (stumpwm:define-key m (stumpwm:kbd "t") "dark-light-toggle-mode")
     m))
-
-

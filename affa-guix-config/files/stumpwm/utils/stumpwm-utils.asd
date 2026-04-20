@@ -5,8 +5,9 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "Utility functions for the rest of this config"
-  ;; :depends-on (#:stumpwm
-  ;; 	       #:stumpwm-themeing)
+  :depends-on (#:stumpwm)
   :serial t
   :components ((:file "package")
-	       (:file "utils")))
+	       (:file "utils")
+	       (:file "ui")
+	       (:file "filesystem")))

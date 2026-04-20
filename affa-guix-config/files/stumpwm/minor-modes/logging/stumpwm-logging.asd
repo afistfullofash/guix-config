@@ -11,6 +11,10 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "A logging subsystem"
+  :depends-on (#:stumpwm
+	       #:stumpwm-utils
+	       #:local-time)
+
   :serial t
   :components ((:file "package")
                (:file "logging")))

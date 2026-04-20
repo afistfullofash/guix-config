@@ -9,9 +9,10 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "A minor mode which sets the stumpwm theme based on the System Dark-Light mode setting using Darkman"
-  ;; :depends-on (#:stumpwm
-  ;; #:trivia
-  ;; 	       #:stumpwm-themeing)
+  :depends-on (#:stumpwm
+	       #:trivia
+	       #:stumpwm-utils
+	       #:stumpwm-themeing)
   :serial t
   :components ((:file "package")
 	       (:file "dark-light")))

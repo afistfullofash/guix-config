@@ -9,8 +9,8 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "A pill which displays system temperature"
-  ;; :depends-on (#:stumpwm
-  ;; 	       #:stumpwm-themeing)
+  :depends-on (#:stumpwm
+	       #:stumpwm-mode-line)
   :serial t
   :components ((:file "package")
 	       (:file "pill")))

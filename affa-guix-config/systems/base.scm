@@ -16,6 +16,8 @@
   #:use-module (gnu services docker)
 
   #:use-module (afistfullofash services firmware)
+
+  #:use-module (affa-guix-config packages stumpwm)
   
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages autotools)
@@ -40,7 +42,7 @@
 
   #:export (base-system-operating-system
 	    base-system-services
-	    stumpwm-with-extensions))
+	    affoa-stumpwm))
 
 (define %user
   '((short "natalie")

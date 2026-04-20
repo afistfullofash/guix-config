@@ -9,8 +9,8 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "A pill which displays the window list with formatting applied between windows"
-  ;; :depends-on (#:stumpwm
-  ;; 	       #:stumpwm-themeing)
+  :depends-on (#:stumpwm
+	       #:cl-ppcre)
   :serial t
   :components ((:file "package")
 	       (:file "pill")))

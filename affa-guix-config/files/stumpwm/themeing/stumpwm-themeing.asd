@@ -11,7 +11,7 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "A simple themeing system for StumpWM"
-  :depends-on (;; #:stumpwm
+  :depends-on (#:stumpwm
 	       #:trivia)
   :serial t
   :components ((:file "package")

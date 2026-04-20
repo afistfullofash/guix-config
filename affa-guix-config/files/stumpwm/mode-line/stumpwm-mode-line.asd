@@ -9,8 +9,8 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "A set of mode line extensions for StumpWM"
-  ;; :depends-on (#:stumpwm
-  ;; 	       #:stumpwm-themeing)
+  :depends-on (#:stumpwm
+	       #:stumpwm-themeing)
   :serial t
   :components ((:file "package")
 	       (:file "internal")

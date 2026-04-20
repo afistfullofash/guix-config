@@ -4,100 +4,18 @@
 ;; * Initial Config
 ;; Start slynk for debugging purposes first and then load in our required stumpwm contrib modules
 (in-package :stumpwm-user)
-(asdf:register-immutable-system "xlib")
-;; CLX Re-exports cause a error on load if we don't set this
-(setf sb-ext:*on-package-variance* '(:warn t :error nil))
-
-(run-shell-command "darkman set dark")
-
-(defvar *init-system-root-dir* "/home/natalie/src/guix-config/affa-guix-config/files/stumpwm/")
-
-(defun init-system-dir (path)
-  (concatenate 'string *init-system-root-dir* path))
-
-(defvar *asd-paths*
-  (list
-   (init-system-dir "utils/stumpwm-utils.asd")
-   (init-system-dir "themeing/stumpwm-themeing.asd")
-   (init-system-dir "mode-line/stumpwm-mode-line.asd")
-
-   (init-system-dir "mode-line-pills/cpu/stumpwm-pill-cpu.asd")
-   (init-system-dir "mode-line-pills/email/stumpwm-pill-email.asd")
-   (init-system-dir "mode-line-pills/temperature/stumpwm-pill-temperature.asd")
-   (init-system-dir "mode-line-pills/window-list/stumpwm-pill-window-list.asd")
-
-   (init-system-dir "minor-modes/dark-light/stumpwm-dark-light.asd")
-   (init-system-dir "minor-modes/logging/stumpwm-logging.asd")))
-
-
-(defvar *init-systems*
-  (list
-   "stumpwm-utils" 
-   "stumpwm-themeing" 
-   "stumpwm-mode-line" 
-	
-   "stumpwm-pill-cpu" 
-   "stumpwm-pill-email" 
-   "stumpwm-pill-temperature" 
-   "stumpwm-pill-window-list"
-
-   "stumpwm-dark-light"
-   "stumpwm-logging"))
-
-(defvar *dependency-systems* (list "alexandria"
-				   "local-time"
-				   "pamixer"
-				   "cpu"
-				   "battery-portable"))
-
-(defun load-asds (systems)
-  (loop for system in systems
-	do (load system))
-  systems)
-
-(defun debug-asdf-system (system)
-  (let ((compile-verbose *compile-verbose*)
-	(compile-print *compile-print*)
-	(load-verbose *load-verbose*)
-	(warning-behavior asdf:*compile-file-warnings-behaviour*)
-	(failure-behavior asdf:*compile-file-failure-behaviour*)
-
-	(*compile-verbose* t)
-	(*compile-print* t)
-	(*load-verbose* t)
-	(asdf:*compile-file-warnings-behaviour* :warn)
-	(asdf:*compile-file-failure-behaviour* :error))
-    (asdf:load-system system)
-    (setf 	*compile-verbose* compile-verbose
-		*compile-print* compile-print
-		*load-verbose* load-verbose
-		asdf:*compile-file-warnings-behaviour* warning-behavior
-		asdf:*compile-file-failure-behaviour* failure-behavior)))
-
-(defun load-systems (systems)
-  (loop for system in systems
-	do (if (not (or (string= system "pamixer")
-			(string= system "cpu")
-			(string= system "battery-portable")))
-	       (debug-asdf-system system)))
-  systems)
-
-(load-asds *asd-paths*)
-(load-systems (append *init-systems* *dependency-systems*))
 
 (if *initializing*
     (progn
+      (setf *startup-message* (format nil "Welcome Natalie!"))
       (asdf:load-system :slynk)
       (slynk:create-server :port 1337
-    			   :dont-close t)
-      (loop for system in *systems-to-load*
-	    do (asdf:load-system system))))
- 
-(setf *startup-message* (format nil "Welcome Natalie!"))
+    			   :dont-close t)))
+
+(run-shell-command "darkman set dark")
 
 
 ;; ** Configuration
-
 (defvar *show-mode-line-time* t)
 
 (defun init-window-number-fixes ()
@@ -108,20 +26,7 @@
   (stumpwm:add-hook stumpwm:*destroy-window-hook*
   		    #'(lambda (win) (declare (ignorable win))(stumpwm:repack-window-numbers))))
 
-(defun toggle-modeline-all-screens ()
-  "We almost allways want to interact with the modeline on all screens"
-  (mapcar (lambda (head)
-       	    (toggle-mode-line (current-screen) head))
-       	  (screen-heads (current-screen))))
-
-(defun reload-mode-line ()
-  "This runs toggle-modeline-all-screens twice so that we get the settings refreshed"
-  (toggle-modeline-all-screens)
-  (toggle-modeline-all-screens))
-
-
 (defun init-mode-line ()
-
   (setf *window-format* " %n %10c ")  
   (setf *screen-mode-line-format*      
        	(list
@@ -193,19 +98,19 @@
   (set-prefix-key (kbd "C-t")))
 ;; ** Program Bindings
 (defun init-program-binding ()
-  (make-program-binding "firefox" "Firefox")
+  (stumpwm-utils:make-program-binding "firefox" "Firefox")
 
-  (make-program-binding "alacritty" "Alacritty")
+  (stumpwm-utils:make-program-binding "alacritty" "Alacritty")
 
-  (make-program-binding "emacs" "Emacs" "emacs")
+  (stumpwm-utils:make-program-binding "emacs" "Emacs" "emacs")
 
-  (make-program-binding "keepassxc" "keepassxc")
+  (stumpwm-utils:make-program-binding "keepassxc" "keepassxc")
 
-  (make-program-binding "steam" "steam")
+  (stumpwm-utils:make-program-binding "steam" "steam")
 
-  (make-program-binding "firefox -P work --class firefox-work" "firefox-work" "firefox-work")
+  (stumpwm-utils:make-program-binding "firefox -P work --class firefox-work" "firefox-work" "firefox-work")
 
-  (make-program-binding "firefox -P media --class firefox-media" "firefox-media" "firefox-media"))
+  (stumpwm-utils:make-program-binding "firefox -P media --class firefox-media" "firefox-media" "firefox-media"))
 
 ;; ** Keymaps
 ;; *** System Map

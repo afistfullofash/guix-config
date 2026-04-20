@@ -28,7 +28,7 @@
 (defvar *log-formatter* 'file-logger)
 
 (defparameter *stumpwm-debug-dir*
-  (merge-pathnames "stumpwm/" (xdg-state-home)))
+  (merge-pathnames "stumpwm/" (stumpwm-utils:xdg-state-home)))
 
 (defparameter *stumpwm-log-file*
   (merge-pathnames "stumpwm.log" (stumpwm-utils:mkdir-p *stumpwm-debug-dir*)))
@@ -93,13 +93,6 @@ This will output in the form:
 				 args)))
     (stumpwm:message message-string)))
 
-(defun xdg-state-home ()
-  "Return XDG_STATE_HOME or ~/.local/state/"
-  (let ((x (ignore-errors (uiop:getenv "XDG_STATE_HOME"))))
-    (if (and x (> (length x) 0))
-        (pathname (concatenate 'string x "/"))
-        (merge-pathnames ".local/state/" (user-homedir-pathname)))))
-
 (defun log-message (level fmt &rest args)
   (when (can-log level)
     (with-open-file (s *stumpwm-oplog-file*
@@ -127,9 +120,10 @@ This will output in the form:
 	stumpwm::*trace-output* (getf *original-logging-streams* :trace)
 	stumpwm::*debug-stream* (getf *original-logging-streams* :debug)))
 
-(stumpwm:define-minor-mode logging-minor-mode () ()
-  (:scope :unscoped)
-  (:make-hooks t))
+(stumpwm-utils:define-minor-mode-safe
+    (stumpwm:define-minor-mode logging-minor-mode () ()
+      (:scope :unscoped)
+      (:make-hooks t)))
 
 (stumpwm:add-hook *logging-minor-mode-hook*
 		  (lambda (args)

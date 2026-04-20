@@ -1,5 +1,5 @@
 (defpackage :stumpwm-compositor
-	    (:use :cl :stumpwm-logging)
+	    (:use :cl)
 	    (:export enable-compositor
 		     disable-compositor
 		     toggle-compositor))
