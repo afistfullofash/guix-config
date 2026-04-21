@@ -1,2 +1,3 @@
 (defpackage :stumpwm-pill-temperature
-  (:use :cl))
+	    (:use :cl)
+	    (:export #:temperature-pill))

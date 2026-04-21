@@ -7,7 +7,8 @@
   ;; :license "GNU General Public License"
   :description "A Minor Mode for interacting with the compositor"
   :depends-on (#:stumpwm
-	       #:clx)
+	       #:clx
+	       #:stumpwm-logging)
     
   :serial t
   :components ((:file "package")

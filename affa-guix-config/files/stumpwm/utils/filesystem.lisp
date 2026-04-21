@@ -1,8 +1,5 @@
 (in-package :stumpwm-utils)
 
-(export '(mkdir-p
-	  xdg-state-home))
-
 (defun mkdir-p (p)
   "Creates a directory and then returns its path"
   (ensure-directories-exist p)

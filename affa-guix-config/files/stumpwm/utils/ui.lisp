@@ -1,9 +1,4 @@
 (in-package :stumpwm-utils)
-(export '(make-percent-bar
-	  
-	  toggle-mode-line-all-screens
-	  reload-mode-line))
-
 
 ;; * User functions
 (defun make-percent-bar (percent &optional title)
@@ -19,7 +14,7 @@
        	    (stumpwm:toggle-mode-line (stumpwm:current-screen) head))
        	  (stumpwm:screen-heads (stumpwm:current-screen))))
 
-(defun reload-mode-line ()
+(defun reload-modeline ()
   "This runs toggle-modeline-all-screens twice so that we get the settings refreshed without dissapearing the mode-line"
   (toggle-modeline-all-screens)
   (toggle-modeline-all-screens))

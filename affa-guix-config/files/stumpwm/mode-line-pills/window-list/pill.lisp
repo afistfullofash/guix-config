@@ -1,5 +1,4 @@
 (in-package :stumpwm-pill-window-list)
-(export '(window-list-pill))
 
 (stumpwm:add-screen-mode-line-formatter #\M 'window-list-pill)
 (defun window-list-pill (ml)

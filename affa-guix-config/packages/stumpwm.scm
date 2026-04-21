@@ -47,6 +47,7 @@
     (source (local-file "../files/stumpwm/themeing" "stumpwm-themeing"
                         #:recursive? #t))
     (inputs (list stumpwm
+		  stumpwm-utils
 		  sbcl-trivia))	
     (build-system asdf-build-system/sbcl)
     (home-page "https://github.com/afistfullofash/guix-config/")
@@ -179,16 +180,17 @@
     (source (local-file "../files/stumpwm/minor-modes/compositor" "stumpwm-compositor"
                         #:recursive? #t))
     (inputs (list stumpwm
-		  sbcl-clx))
+		  sbcl-clx
+		  stumpwm-logging))
     (build-system asdf-build-system/sbcl)
     (home-page "https://github.com/afistfullofash/guix-config/")
     (synopsis "StumpWM Compositor Minor Mode")
     (description
-     "StumpWM Minor Mode for configuring compositior options such as opactity")
+     "StumpWM Minor Mode for configuring compositor options such as opactity")
     (license license:gpl3)))
 
 (define affoa-stumpwm
-  (stumpwm-extension-builder stumpwm "affoa-stumpwm"
+  (stumpwm-extension-builder stumpwm-with-message-hide-hook "affoa-stumpwm"
 			     `((,stumpwm-themeing . "stumpwm-themeing")
 			       (,stumpwm-pill-cpu . "stumpwm-pill-cpu")
 			       (,stumpwm-pill-temperature . "stumpwm-pill-temperature")
@@ -196,4 +198,7 @@
 			       (,stumpwm-pill-window-list . "stumpwm-pill-window-list")
 			       (,stumpwm-dark-light . "stumpwm-dark-light")
 			       (,stumpwm-logging . "stumpwm-logging")
-			       (,stumpwm-compositor . "stumpwm-compositor"))))
+			       (,stumpwm-compositor . "stumpwm-compositor")
+
+			       (,sbcl-stumpwm-battery-portable . "battery-portable")
+			       (,sbcl-slynk . "slynk"))))

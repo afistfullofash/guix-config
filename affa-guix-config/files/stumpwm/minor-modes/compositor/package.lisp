@@ -1,5 +1,13 @@
 (defpackage :stumpwm-compositor
 	    (:use :cl)
-	    (:export enable-compositor
-		     disable-compositor
-		     toggle-compositor))
+	    (:import-from :stumpwm-logging
+			  :log-message)
+	    (:export
+	     #:toggle-window-dimming
+	     #:undim-all-windows-on-stumpwm-message-removal
+	     #:dim-window-on-stumpwm-message
+	     
+	     ;; #:enable-compositor
+	     ;; #:disable-compositor
+	     ;; #:toggle-compositor
+	     ))

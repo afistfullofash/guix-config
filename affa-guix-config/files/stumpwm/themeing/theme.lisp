@@ -5,18 +5,6 @@
 ;; This gives us some very general functions to generate and apply /themes/ with.
 (in-package :stumpwm-themeing)
 
-(export '(*themes*
-	  
-	  add-theme
-	  apply-theme
-	  
-	  set-system-themeing
-	  toggle-system-themeing
-
-	  set-key-seq-color
-
-	  with-current-theme
-	  get-color))
 ;; Visual
 (defvar *themes* (make-hash-table))
 (defvar *current-theme* 'default)

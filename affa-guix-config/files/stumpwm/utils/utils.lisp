@@ -1,10 +1,5 @@
 (in-package :stumpwm-utils)
 
-(export '(make-program-binding
-	  trimmed-shell-command
-
-	  define-minor-mode-safe))
-
 (defun trimmed-shell-command (command)
   (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
        	       (stumpwm:run-shell-command command t)))

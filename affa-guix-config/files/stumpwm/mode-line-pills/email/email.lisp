@@ -1,7 +1,5 @@
 (in-package :stumpwm-pill-email)
 
-(export '(email-pill))
-
 (defvar *ml-email-accounts*
   (list
    (list :name "old-account-fowarding"
@@ -26,11 +24,11 @@
 
 (defun email-space-pill (email-count)
   (if email-count
-      (space-pill
-       (text-by-range-pill email-count
+      (stumpwm-mode-line:space-pill
+       (stumpwm-mode-line:text-by-range-pill email-count
   				  (write-to-string email-count)
   				  5 10 15))
-      (space-pill (error-message-pill "Error"))))
+      (stumpwm-mode-line:space-pill (error-message-pill "Error"))))
 
 (defun in-work-hours (work-times)
   ;; Extract relevent data
@@ -60,7 +58,7 @@
 	   (add-count-to-string (mode-line-string account)
 	     (concatenate 'string
 			  mode-line-string
-			  (space-pill (getf account :email-count)))))
+			  (stumpwm-mode-line:space-pill (getf account :email-count)))))
     (let* ((email-account-information (ml-email-get-data))
 	   (display-accounts (remove-if
 			      #'is-account-displayable
@@ -76,7 +74,7 @@
 		      :initial-value 0)
 	      0)
 	   (not (string= "" account-display-string)))
-	  (medium-pill
+	  (stumpwm-mode-line:medium-pill
 	   (concatenate
 	    'string
 	    account-display-string

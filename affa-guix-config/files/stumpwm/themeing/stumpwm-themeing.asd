@@ -12,6 +12,7 @@
   ;; :license "GNU General Public License"
   :description "A simple themeing system for StumpWM"
   :depends-on (#:stumpwm
+	       #:stumpwm-utils
 	       #:trivia)
   :serial t
   :components ((:file "package")

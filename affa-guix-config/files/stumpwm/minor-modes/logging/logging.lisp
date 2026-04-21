@@ -1,16 +1,5 @@
 (in-package :stumpwm-logging)
 
-(export '(*log-formatter*
-
-	  file-logger
-	  message-logger
-
-	  *logging-levels*
-
-	  log-message
-	  
-	  logging-minor-mode))
-
 (defvar *logging-levels*
   (list "fatal"
 	"error"
@@ -28,13 +17,18 @@
 (defvar *log-formatter* 'file-logger)
 
 (defparameter *stumpwm-debug-dir*
-  (merge-pathnames "stumpwm/" (stumpwm-utils:xdg-state-home)))
+	      (let ((dir (merge-pathnames (stumpwm-utils:xdg-state-home) "stumpwm/")))
+		(if (stumpwm-utils:mkdir-p dir)
+		    dir
+		  (progn
+		    (stumpwm:message (format nil "Logging: Failed to use logging directory~%~a" dir)
+				     dir)))))
 
 (defparameter *stumpwm-log-file*
-  (merge-pathnames "stumpwm.log" (stumpwm-utils:mkdir-p *stumpwm-debug-dir*)))
+  (merge-pathnames *stumpwm-debug-dir* "stumpwm.log"))
 
 (defparameter *stumpwm-oplog-file*
-  (merge-pathnames "stumpwm-events.log" (stumpwm-utils:mkdir-p *stumpwm-debug-dir*)))
+  (merge-pathnames *stumpwm-debug-dir* "stumpwm-events.log"))
 
 (defun logging-to-debug-mapping (level)
   (cond ((string= level "fatal") 1)

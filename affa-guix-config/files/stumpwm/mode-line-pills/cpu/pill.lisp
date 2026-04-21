@@ -1,5 +1,4 @@
 (in-package :stumpwm-pill-cpu)
-(export '(cpu-pill))
 
 (stumpwm:add-screen-mode-line-formatter #\C 'cpu-pill)
 (defun cpu-pill (ml)

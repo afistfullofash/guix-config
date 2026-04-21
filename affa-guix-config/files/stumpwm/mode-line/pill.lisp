@@ -1,19 +1,5 @@
 (in-package :stumpwm-mode-line)
 
-(export '(light-pill
-	  medium-pill
-	  dark-pill
-	  
-	  low-priority-pill
-	  medium-priority-pill
-	  high-priority-pill
-
-	  text-by-range-pill
-	  priority-by-range-pill
-
-	  space-pill
-
-	  error-message-pill))
 ;;
 ;; Complete Color Sets
 ;; 
@@ -41,6 +27,9 @@
 (defun high-priority-pill (msg)
   "Set the foreground and background to a low bar"
   (ml-fmt-colors :light-fg :high msg))
+
+(defun focus-pill (msg)
+  (ml-fmt-colors :bg :focus msg))
 
 (defun text-by-range-pill (amount message &optional (med 20) (hi 50) (crit 90) reverse)
   (ml-fmt-safe-change

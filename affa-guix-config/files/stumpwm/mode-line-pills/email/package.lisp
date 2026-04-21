@@ -1,2 +1,3 @@
 (defpackage :stumpwm-pill-email
-  (:use :cl))
+	    (:use :cl)
+	    (:export #:email-pill))

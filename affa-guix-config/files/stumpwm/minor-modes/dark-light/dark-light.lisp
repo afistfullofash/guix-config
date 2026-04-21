@@ -1,14 +1,6 @@
 ;; TODO: Add functionality to listen for dark-light mode settings instead of triggering only
 (in-package :stumpwm-dark-light)
 
-(export '(*dark-light-map*
-
-	  get-mode
-	  set-mode
-	  toggle-mode
-
-	  dark-light-minor-mode))
-
 (defun get-mode ()
   "Gets the dark-light mode from darkman"
   (stumpwm-utils:trimmed-shell-command "darkman get"))
@@ -31,8 +23,8 @@
 				   ("dark" 'dracula)
 				   ("light" 'catppuccin-latte)))
 
-  	(stumpwm-utils:toggle-mode-line-all-screens)
-  	(stumpwm-utils:toggle-mode-line-all-screens))))
+  	(stumpwm-utils:toggle-modeline-all-screens)
+  	(stumpwm-utils:toggle-modeline-all-screens))))
 
 (defun toggle-mode ()
   (set-mode (trivia:match (get-mode)
