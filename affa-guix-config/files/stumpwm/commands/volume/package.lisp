@@ -1,3 +1,6 @@
 (defpackage :stumpwm-command-volume
-  (:use :cl :stumpwm-utils)
-  (:export :email-pill))
+	    (:use :cl)
+	    (:export #:volume-up
+		     #:volume-down
+		     #:volume-mute
+		     #:volume-control))

@@ -34,10 +34,10 @@
       (mantle "#e6e9ef")
       (crust "#dce0e8"))	   
   (add-theme
-   'catppuccin-latte
+   :catppuccin-latte
    ;; Latte Pallette
    (make-instance 'theme
-
+		  :name "Catppuccin Latte"
   		  :fg text
      		  :bg base
      		  :border pink

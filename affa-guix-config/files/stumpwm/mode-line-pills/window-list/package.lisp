@@ -1,2 +1,3 @@
 (defpackage :stumpwm-pill-window-list
-  (:use :cl))
+	    (:use :cl)
+	    (:export #:window-list-pill))

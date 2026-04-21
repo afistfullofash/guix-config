@@ -1,7 +1,5 @@
 (in-package :stumpwm-pill-temperature)
 
-(export '(temperature-pill))
-
 (defun ml-read-file-as-integer (path)
   (handler-case
       (with-open-file (s path :direction :input :if-does-not-exist nil)

@@ -1,5 +1,4 @@
 (in-package :stumpwm-pill-window-list)
-(export '(window-list-pill))
 
 (stumpwm:add-screen-mode-line-formatter #\M 'window-list-pill)
 (defun window-list-pill (ml)
@@ -16,8 +15,9 @@
 				(format nil "~a|" str)))
 			    :ml-on-click-focus-window
 			    (stumpwm::window-id w)))
-			 (stumpwm::sort1 (stumpwm::head-windows (stumpwm::mode-line-current-group ml)
-								(stumpwm::mode-line-head ml))
+			 (stumpwm::sort1 (stumpwm::head-windows
+					  (stumpwm::mode-line-current-group ml)
+					  (stumpwm::mode-line-head ml))
 					 #'< :key #'stumpwm:window-number))))
        	    ;; Reparse strings and remove the | from the element before the active window
        	    (if (> (length base-fmt) 0)

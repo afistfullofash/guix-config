@@ -1,2 +1,3 @@
 (defpackage :stumpwm-pill-cpu
-	    (:use :cl))
+	    (:use :cl)
+	    (:export #:cpu-pill))

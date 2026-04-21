@@ -1,40 +1,45 @@
 (in-package :stumpwm-utils)
 
-(export '(make-program-binding
-	  trimmed-shell-command
-
-	  define-minor-mode-safe))
-
 (defun trimmed-shell-command (command)
   (string-trim '(#\Space #\Newline #\Tab #\Linefeed #\Return)
        	       (stumpwm:run-shell-command command t)))
 
 
+
 ;; ** Keybinding Macros
-(defmacro make-program-binding (program-name window-class &optional alias)
+(defmacro make-program-binding (program-name window-class &optional program-alias)
   "Create run-or-raise and run-or-pull commands for program-name
   window-class is the windows-class
   Also add keybinding to the commands. 
   C-keybinding r calls run-or-raise
   C-keybinding p calls run-or-pull
   C-keybinding n creates a new instance of the program"
-  (if (not alias)
-      (setf alias program-name))
-  `(progn
-     (defvar ,(intern (format nil "*~a-map*" alias)) nil)
+  (let* ((alias (or program-alias program-name))
+	 
+	 (run-name (format nil "~a" alias))
+	 (run-cmd (intern run-name))
 
-     (defcommand ,(intern (format nil "~a" alias)) () () (run-shell-command ,program-name))
-     
-     (defcommand ,(intern (format nil "run-or-raise-~a" alias)) () ()
-		 (run-or-raise ,program-name '(:class ,window-class)))
-     
-     (defcommand ,(intern (format nil "run-or-pull-~a" alias)) () ()
-		 (run-or-pull ,program-name '(:class ,window-class)))
-     
-     (stumpwm::fill-keymap ,(intern (format nil "*~a-map*" alias))
-  			   (kbd "p") ,(format nil "run-or-pull-~a" alias)
-  			   (kbd "r") ,(format nil "run-or-raise-~a" alias)
-  			   (kbd "n") ,(format nil "~a" alias))))
+	 (raise-name (format nil "run-or-raise-~a" alias))
+	 (raise-cmd (intern raise-name))
+
+	 (pull-name (format nil "run-or-pull-~a" alias))
+	 (pull-cmd (intern pull-name)))
+    `(let ((keymap (stumpwm:make-sparse-keymap)))
+
+       (stumpwm:defcommand ,run-cmd () ()
+	 (stumpwm:run-shell-command ,program-name))
+       
+       (stumpwm:defcommand ,raise-cmd () ()
+	 (stumpwm:run-or-raise ,program-name '(:class ,window-class)))
+       
+       (stumpwm:defcommand ,pull-cmd () ()
+	 (stumpwm:run-or-pull ,program-name '(:class ,window-class)))
+
+       (stumpwm:define-key keymap (stumpwm:kbd "p") ,pull-name)
+       (stumpwm:define-key keymap (stumpwm:kbd "r") ,raise-name)
+       (stumpwm:define-key keymap (stumpwm:kbd "n") ,run-name)
+
+       keymap)))
 
 
 (defmacro define-minor-mode-safe (form)

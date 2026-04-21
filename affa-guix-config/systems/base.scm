@@ -41,12 +41,11 @@
   #:use-module (srfi srfi-1)
 
   #:export (base-system-operating-system
-	    base-system-services
-	    affoa-stumpwm))
+	    base-system-services))
 
 (define %user
   '((short "natalie")
-    (full "Natalie Akinson")))
+    (full "Natalie Hekate")))
 
 (define sudo-user-programs
   (string-join
@@ -155,8 +154,7 @@
     
     (packages (append
 	       base-operating-system-packages
-	       (list stumpwm-with-message-hide-hook-with-user-extensions
-		     mahogany)
+	       (list affoa-stumpwm)
 	       %base-packages))
 
     (services base-system-services)

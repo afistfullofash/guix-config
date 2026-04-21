@@ -1,7 +1,7 @@
 (in-package :stumpwm-themeing)
 
-;; *** Dracula
-(add-theme 'dracula
+;; *** Draculao
+(add-theme :dracula
        	   (let* ((green "#50FA7B")
 		  (yellow "#F1FA8C")
 		  (red "#FF5555")
@@ -11,6 +11,7 @@
 		  (bg '("#282A36" "#44475a"))
 		  (border (car purple)))
        	     (make-instance 'theme
+			    :name "Dracula"
        			    :fg (car fg)
        			    :bg (car bg)
        			    :border border

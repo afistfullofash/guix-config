@@ -29,7 +29,8 @@
 
 (define audio-packages
   (list alsa-plugins
-	pamixer))
+	pamixer
+	pipewire))
 
 (define hardware-packages
   (list brillo

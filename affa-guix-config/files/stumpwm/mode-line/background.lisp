@@ -1,20 +1,14 @@
 (in-package :stumpwm-mode-line)
 
-(defun ml-background-color-symb (color)
-  "If we have a list the theme has bright colors.
-    They are a bit of a headache so ignore for now
-
-    color is a string generally a hex"
-  (if (typep color 'list)
-      (format nil "^(:bg \"~A\")" (car color))
-    (format nil "^(:bg \"~A\")" color)))
-
 ;;
 ;; Background color
 ;; 
 (defun ml-background-color-opener (color)
   "Given color get a string which sets the background color to the one selected"
-  (ml-background-color-symb (stumpwm-themeing:get-color (stumpwm-themeing:with-current-theme) color)))
+  (stumpwm-themeing:background-color
+   (stumpwm-themeing:get-color
+    (stumpwm-themeing:with-current-theme)
+    color)))
 
 (defun ml-background-color (color msg)
   "Set the background color to color for the duration of msg"

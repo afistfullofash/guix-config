@@ -9,9 +9,8 @@
   :maintainer "Natalie Atkinson <natalie.atkinson95@pm.me>"
   ;; :license "GNU General Public License"
   :description "Commands for controlling the brightness with Brillo"
-  ;; :depends-on (#:stumpwm
-  ;; #:stumpwm-utils
-  ;; 	       #:stumpwm-themeing)
+  :depends-on (#:stumpwm
+	       #:stumpwm-utils)
   :serial t
   :components ((:file "package")
 	       (:file "brightness")))

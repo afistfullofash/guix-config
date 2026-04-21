@@ -1,3 +1,7 @@
 (defpackage :stumpwm-command-brightness
   (:use :cl)
-  (:export :email-pill))
+  (:export :keyboard-brightness-up
+	   :keyboard-brightness-down
+
+	   :screen-brightness-up
+	   :screen-brightness-down))

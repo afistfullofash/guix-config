@@ -6,6 +6,9 @@
   #:use-module (guix gexp)
   #:use-module (guix hash)
 
+  #:use-module (gnu packages hardware)
+  #:use-module (gnu packages xdisorg)
+  #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages lisp-xyz)
 
@@ -47,6 +50,7 @@
     (source (local-file "../files/stumpwm/themeing" "stumpwm-themeing"
                         #:recursive? #t))
     (inputs (list stumpwm
+		  stumpwm-utils
 		  sbcl-trivia))	
     (build-system asdf-build-system/sbcl)
     (home-page "https://github.com/afistfullofash/guix-config/")
@@ -179,16 +183,66 @@
     (source (local-file "../files/stumpwm/minor-modes/compositor" "stumpwm-compositor"
                         #:recursive? #t))
     (inputs (list stumpwm
-		  sbcl-clx))
+		  sbcl-clx
+		  stumpwm-logging))
     (build-system asdf-build-system/sbcl)
     (home-page "https://github.com/afistfullofash/guix-config/")
     (synopsis "StumpWM Compositor Minor Mode")
     (description
-     "StumpWM Minor Mode for configuring compositior options such as opactity")
+     "StumpWM Minor Mode for configuring compositor options such as opactity")
+    (license license:gpl3)))
+
+(define stumpwm-volume
+  (package
+    (name "stumpwm-command-volume")
+    (version "0.0.1")
+    (source (local-file "../files/stumpwm/commands/volume" "stumpwm-command-volume"
+                        #:recursive? #t))
+    (inputs (list stumpwm
+		  stumpwm-utils
+		  sbcl-stumpwm-pamixer
+		  pamixer))
+    (build-system asdf-build-system/sbcl)
+    (home-page "https://github.com/afistfullofash/guix-config/")
+    (synopsis "StumpWM Volume Control Commands")
+    (description
+     "StumpWM Volume Control Commands extending @code{sbcl-stumpwm-pamixer} adding a volume message on change")
+    (license license:gpl3)))
+
+(define stumpwm-screenshot
+  (package
+    (name "stumpwm-command-screenshot")
+    (version "0.0.1")
+    (source (local-file "../files/stumpwm/commands/screenshot" "stumpwm-command-screenshot"
+                        #:recursive? #t))
+    (inputs (list stumpwm
+		  sbcl-local-time
+		  maim))
+    (build-system asdf-build-system/sbcl)
+    (home-page "https://github.com/afistfullofash/guix-config/")
+    (synopsis "StumpWM Screenshot Commands")
+    (description
+     "StumpWM Screenshot Commands using maim")
+    (license license:gpl3)))
+
+(define stumpwm-brightness
+  (package
+    (name "stumpwm-command-brightness")
+    (version "0.0.1")
+    (source (local-file "../files/stumpwm/commands/brightness" "stumpwm-command-brightness"
+                        #:recursive? #t))
+    (inputs (list stumpwm
+		  stumpwm-utils
+		  brillo))
+    (build-system asdf-build-system/sbcl)
+    (home-page "https://github.com/afistfullofash/guix-config/")
+    (synopsis "StumpWM Brightness Control Commands")
+    (description
+     "StumpWM Brightness Commands for controlling screen and keyboard brightness using brillo ")
     (license license:gpl3)))
 
 (define affoa-stumpwm
-  (stumpwm-extension-builder stumpwm "affoa-stumpwm"
+  (stumpwm-extension-builder stumpwm-with-message-hide-hook "affoa-stumpwm"
 			     `((,stumpwm-themeing . "stumpwm-themeing")
 			       (,stumpwm-pill-cpu . "stumpwm-pill-cpu")
 			       (,stumpwm-pill-temperature . "stumpwm-pill-temperature")
@@ -196,4 +250,13 @@
 			       (,stumpwm-pill-window-list . "stumpwm-pill-window-list")
 			       (,stumpwm-dark-light . "stumpwm-dark-light")
 			       (,stumpwm-logging . "stumpwm-logging")
-			       (,stumpwm-compositor . "stumpwm-compositor"))))
+			       (,stumpwm-compositor . "stumpwm-compositor")
+			       (,stumpwm-screenshot . "stumpwm-command-screenshot")
+			       (,stumpwm-volume . "stumpwm-command-volume")
+			       (,stumpwm-brightness . "stumpwm-command-brightness")
+			       (,sbcl-stumpwm-pamixer . "pamixer")
+
+			       (,sbcl-stumpwm-battery-portable . "battery-portable")
+			       (,sbcl-slynk . "slynk"))))
+
+affoa-stumpwm

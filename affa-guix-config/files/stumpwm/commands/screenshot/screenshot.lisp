@@ -8,18 +8,16 @@
 
 (defun screenshot-path ()
   (format nil "~a/Pictures/Screenshots/~a.png"
-  	  (getenv "HOME")
+  	  (uiop:getenv "HOME")
   	  (timestamp-string)))
 
 ;; Setup bindings for less common aplications which would be opened then closed
-(defcommand screenshot () ()
+(stumpwm:defcommand screenshot () ()
 	    "Take a screenshot and save it to screenshot directory"
 	    (let ((save-path (screenshot-path)))
-	      (run-shell-command (format nil "maim ~a" save-path))
-	      (message (format #f "Saved Screenshot to: ~a" save-path))))
+	      (stumpwm:run-shell-command (format nil "maim ~a" save-path))))
 
-(defcommand screenshot-select () ()
+(stumpwm:defcommand screenshot-select () ()
 	    "Select a area for a screenshot and save it to screenshot directory"
 	    (let ((save-path (screenshot-path)))
-	      (run-shell-command (format nil "maim --select ~a" save-path))
-	      (message (format #f "Saved Screenshot to: ~a" save-path))))
+	      (stumpwm:run-shell-command (format nil "maim --select ~a" save-path))))

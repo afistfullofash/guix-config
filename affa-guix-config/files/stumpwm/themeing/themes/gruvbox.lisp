@@ -1,11 +1,12 @@
 (in-package :stumpwm-themeing)
 
 ;; *** Gruvbox
-(add-theme 'gruvbox
+(add-theme :gruvbox
   	   (let ((fg "#ebdbb2")
   		 (bg "#282828")
   		 (border "#665c54"))
       	     (make-instance 'theme
+			    :name "Gruvbox"
       			    :fg fg
       			    :bg bg
       			    :border border
@@ -17,7 +18,7 @@
       			    :black bg
   			    :white fg)))
 
-(add-theme 'gruvbox-light
+(add-theme :gruvbox-light
   	   (let* ((fg "#3c3836")
   		  (fg4 "#7c6f64")
   		  (bg "#fbf1c7")
@@ -41,6 +42,7 @@
   		  ;; Bright is bg3
   		  (error orange))
       	     (make-instance 'theme
+			    :name "Gruvbox"
       			    :fg fg
       			    :bg bg
       			    :border (car orange)

@@ -1,5 +1,5 @@
 (in-package :stumpwm-themeing)
 
 ;; *** Default
-(add-theme 'default
+(add-theme :default
   	   (make-instance 'theme))
