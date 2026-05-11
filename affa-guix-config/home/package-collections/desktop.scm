@@ -6,6 +6,7 @@
   #:use-module (gnu packages ebook)
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages kde-graphics)
+  #:use-module (gnu packages kde-multimedia)
   #:use-module (gnu packages libreoffice)
   #:use-module (gnu packages mail)
   #:use-module (gnu packages password-utils)
@@ -21,30 +22,36 @@
   
   #:export (desktop-packages))
 
-(define desktop-packages
+(define media-packages
   (list
-   ;; Terminal
-   alacritty
-   ;; Password Management
-   keepassxc
-   ;; Email
-   notmuch
-   lieer
-   ;; Documents
-   libreoffice
-   steam
    ;; Vlc
    vlc
-   calibre
-   pavucontrol
-   ;; Screenshot tool
-   maim
-   ;; Image Viewer
-   sxiv
-   ;; Document Viewer
-   zathura
-   ;; Main browser
-   firefox
-   ;; Wallpaper Setter
-   digikam-wallpaper))
+   amarok))
+
+(define desktop-packages
+  (append
+   (list
+    ;; Terminal
+    alacritty
+    ;; Password Management
+    keepassxc
+    ;; Email
+    notmuch
+    lieer
+    ;; Documents
+    libreoffice
+    steam
+    calibre
+    pavucontrol
+    ;; Screenshot tool
+    maim
+    ;; Image Viewer
+    sxiv
+    ;; Document Viewer
+    zathura
+    ;; Main browser
+    firefox
+    ;; Wallpaper Setter
+    digikam-wallpaper)
+   media-packages))
 
