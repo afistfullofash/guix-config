@@ -99,7 +99,7 @@
 
 (defcommand reload-mode-line-cmd () ()
 	    "Runs reload-mode-line. This allows the themeing etc to be changed"
-	    (reload-mode-line))
+	    (stumpwm-utils:reload-modeline))
 ;; ** Misc
 (defcommand user-switch-to-screen (screen-num) ((:number "Screen Number: "))
 	    "Only works when there is a currently open window on the screen"
