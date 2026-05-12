@@ -18,15 +18,15 @@
 
 (defun low-priority-pill (msg)
   "Set the foreground and background to a low bar"
-  (ml-fmt-colors :light-fg :low msg))
+  (ml-fmt-colors :black :low msg))
 
 (defun medium-priority-pill (msg)
   "Set the foreground and background to a low bar"
-  (ml-fmt-colors :light-fg :medium msg))
+  (ml-fmt-colors :black :medium msg))
 
 (defun high-priority-pill (msg)
   "Set the foreground and background to a low bar"
-  (ml-fmt-colors :light-fg :high msg))
+  (ml-fmt-colors :black :high msg))
 
 (defun focus-pill (msg)
   (ml-fmt-colors :bg :focus msg))
