@@ -22,6 +22,7 @@
   #:use-module (gnu packages commencement)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages texinfo)
+  #:use-module (gnu packages libusb)
   
   #:use-module (gnu packages shells)
   #:use-module (gnu packages wm)
@@ -70,11 +71,12 @@
     (service kernel-module-loader-service-type
 	     '("i2c-dev" "i2c-piix4"))
     (udev-rules-service 'openrgb openrgb)
-        (simple-service
-	 'resolvconf etc-service-type
-	 (list `("resolvconf.conf" ,(mixed-text-file
-				     "resolv.conf"
-				     "name_servers=127.0.0.1"))))
+    (udev-rules-service 'mtp libmtp)
+    (simple-service
+     'resolvconf etc-service-type
+     (list `("resolvconf.conf" ,(mixed-text-file
+				 "resolv.conf"
+				 "name_servers=127.0.0.1"))))
     (service unbound-service-type)
     (service iwd-service-type
 	     (iwd-configuration

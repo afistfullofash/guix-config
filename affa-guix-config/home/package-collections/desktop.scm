@@ -4,11 +4,13 @@
   #:use-module (afistfullofash packages rust-apps)
 
   #:use-module (gnu packages ebook)
+  #:use-module (gnu packages gnome)
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages kde-graphics)
-  #:use-module (gnu packages kde-multimedia)
   #:use-module (gnu packages libreoffice)
+  #:use-module (gnu packages libusb)
   #:use-module (gnu packages mail)
+  #:use-module (gnu packages music)
   #:use-module (gnu packages password-utils)
   #:use-module (gnu packages pdf)
   #:use-module (gnu packages photo)
@@ -26,7 +28,10 @@
   (list
    ;; Vlc
    vlc
-   amarok))
+   strawberry
+   ;; Required for mtp mounting
+   libmtp
+   gvfs))
 
 (define desktop-packages
   (append
