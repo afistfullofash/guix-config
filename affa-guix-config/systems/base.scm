@@ -92,7 +92,7 @@
 		  (enable-network-configuration? #t)
 		  (extra-options '((Country . "AU")))))))))
     (service bluetooth-service-type
-	     (bluetooth-configuration (auto-enable? #t)
+	     (bluetooth-configuration (auto-enable? #f)
 				      (multi-profile 'multiple)))
     (service containerd-service-type)
     (service docker-service-type)
