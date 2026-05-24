@@ -80,6 +80,8 @@
       stumpwm:*message-window-padding* 10
       stumpwm:*message-window-y-padding* 10)
 
+(stumpwm-compositor:toggle-window-dimming)
+
 ;; ** System
  ;;; Shutdown and Reboot
 (defcommand shutdown (confirm) ((:y-or-n "Confirm Shutdown "))
