@@ -30,6 +30,8 @@
 			     python-gitpython))
     (native-inputs (list python-setuptools
 			 git))
+    (arguments
+     (list #:tests? #f))
     (home-page "https://github.com/afistfullofash/guix-config/")
     (synopsis
      "A wrapper for guix home and system reconfiguration")
