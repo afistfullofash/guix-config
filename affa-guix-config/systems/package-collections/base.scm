@@ -7,6 +7,7 @@
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages fontutils)
   #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages file-systems)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages hardware)
   #:use-module (gnu packages linux)
@@ -21,6 +22,10 @@
   #:use-module (nongnu packages mozilla)
   
   #:export (base-operating-system-packages))
+
+
+(define filesystem-packages
+  (list exfatprogs))
 
 (define bluetooth-packages
   (list blueman
@@ -74,6 +79,7 @@
 	  bluetooth-packages
 	  audio-packages
 	  hardware-packages
+	  filesystem-packages
 	  font-packages))
 
 
