@@ -46,7 +46,7 @@
 (setf *window-format* " %n %10c ")  
 (setf *screen-mode-line-format*      
       (list
-       "%M^>%C%H%E"
+       "%M^>%C%H"
        '(:eval (stumpwm-mode-line:focus-pill" %d ") "")
        '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
        		   ;; This looks weird if we don't add a double space after the battery
