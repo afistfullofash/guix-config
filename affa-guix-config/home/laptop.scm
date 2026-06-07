@@ -51,12 +51,10 @@
 (define laptop-home-timers
   (simple-service 'laptop-home-timers
                   home-shepherd-service-type
-                  (list laptop-restic-backup-timer
-			home-mail-sync-timer)))
+                  (list laptop-restic-backup-timer)))
 
 (define laptop-home-services
   (list laptop-environment-variables-service
-	home-hydroxide-service
         laptop-home-timers
 	(service home-picom-service-type)
 	(service home-batsignal-service-type
