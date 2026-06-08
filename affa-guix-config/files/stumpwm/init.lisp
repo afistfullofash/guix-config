@@ -59,6 +59,22 @@
        ;; 		     (error-message-bar "Network Error"))))
        ))
 
+(if nil
+    (setf *screen-mode-line-format*      
+	  (list
+	   "%W^>%C%H"
+	   '(:eval (stumpwm-mode-line:focus-pill " %d ") "")
+	   '(:eval (if (equal (getenv "GUIX_HOME_SYSTEM_FORMAT") "laptop")
+		       ;; This looks weird if we don't add a double space after the battery
+		       " %B "))
+
+	   ;; '(:eval (multiple-value-bind
+	   ;; 		     (output error exit-code)
+	   ;; 		   (uiop:run-program "ping -c 1 8.8.8.8" :ignore-error-status t)
+	   ;; 		 (if (not (equal exit-code 0))
+	   ;; 		     (error-message-bar "Network Error"))))
+	   )))
+
 (init-window-number-fixes)
 
 (stumpwm-utils:toggle-modeline-all-screens)
