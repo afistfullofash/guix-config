@@ -72,7 +72,7 @@
     (service kernel-module-loader-service-type
 	     '("i2c-dev" "i2c-piix4"))
     (udev-rules-service 'openrgb openrgb)
-    (udev-rules-service 'mtkclient mtkclient)
+    (mtkclient-udev-service)
     (udev-rules-service 'mtp libmtp)
     (simple-service
      'resolvconf etc-service-type
