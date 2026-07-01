@@ -36,6 +36,7 @@
   #:use-module (nongnu system linux-initrd)
 
   #:use-module (afistfullofash packages wm)
+  #:use-module (afistfullofash packages flashing-tools)
   
   #:use-module (affa-guix-config systems package-collections base)
 
@@ -71,6 +72,7 @@
     (service kernel-module-loader-service-type
 	     '("i2c-dev" "i2c-piix4"))
     (udev-rules-service 'openrgb openrgb)
+    (udev-rules-service 'mtkclient mtkclient)
     (udev-rules-service 'mtp libmtp)
     (simple-service
      'resolvconf etc-service-type
@@ -148,6 +150,7 @@
 					   "video"
 					   "input"
 					   "docker"
+					   "plugdev"
 					   "lp"
 					   "dialout")))
 		  %base-user-accounts))
