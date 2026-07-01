@@ -44,6 +44,7 @@
 	emacs-lsp-ui
 	emacs-magit
 	emacs-marginalia
+	emacs-meson-mode
 	emacs-notmuch
 	emacs-orderless
 	emacs-prettier
