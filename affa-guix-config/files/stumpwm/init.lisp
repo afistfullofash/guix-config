@@ -98,114 +98,6 @@
 
 (stumpwm-compositor:toggle-window-dimming)
 
-
-;; * User functions
-(defun make-percent-bar (percent &optional title)
-  "Return a string that represents a percent bar"
-  (format nil "~a~%^B~3d%^b [^[^7*~a^]]"
-          title
-    	  percent
-    	  (stumpwm::bar (min 100 percent) 50 #\# #\:)))
-
-(defun reload-rc-clean ()
-  "Restart Slynk and reload source.
-     This is needed if Sly updates while StumpWM is running"
-  (slynk:stop-server 1337)
-  (loadrc)
-  (toggle-modeline-all-screens)
-  (toggle-modeline-all-screens))
-
-;; * Commands
-;; ** Brightness
-(defun show-screen-brightness ()
-  (stumpwm:message (make-percent-bar
-  		    (parse-integer (run-shell-command "sudo brillo -G" t) :junk-allowed t)	    
-  		    "Screen Brightness")))
-
-(defcommand screen-brightness-up () ()
-	    "Increase the brightness of the screen"
-	    (run-shell-command "sudo brillo -A 10")
-	    (show-screen-brightness))
-
-(defcommand screen-brightness-down () ()
-	    "Decrease the brightness of the screen"
-	    (run-shell-command "sudo brillo -U 10")
-	    (show-screen-brightness))  
-
-(defun show-keyboard-brightness ()
-  (stumpwm:message (make-percent-bar
-  		    (parse-integer (run-shell-command "sudo brillo -Gk" t) :junk-allowed t)
-  		    "Keyboard Brightness")))
-
-(defcommand keyboard-brightness-up () ()
-	    "Increase the brightness of the keyboard"
-	    (run-shell-command "sudo brillo -kA 10")
-	    (show-keyboard-brightness))
-
-(defcommand keyboard-brightness-down () ()
-	    "Decrease the brightness of the keyboard"
-	    (run-shell-command "sudo brillo -kU 10")
-	    (show-keyboard-brightness))
-
-;; ** Screenshots
-(defun timestamp-string ()
-  (local-time:format-timestring
-   nil (local-time:now)
-   :format '(:YEAR "-" (:MONTH 2) "-" :DAY "-" :SHORT-WEEKDAY "-" :HOUR12 "_" :MIN "_" :SEC "_" :AMPM)))
-
-(defun screenshot-path ()
-  (format nil "~a/Pictures/Screenshots/~a.png"
-  	  (getenv "HOME")
-  	  (timestamp-string)))
-
-;; Setup bindings for less common aplications which would be opened then closed
-(defcommand screenshot () ()
-	    "Take a screenshot and save it to screenshot directory"
-	    (let ((save-path (screenshot-path)))
-	      (run-shell-command (format nil "maim ~a" save-path))
-	      (message (format #f "Saved Screenshot to: ~a" save-path))))
-
-(defcommand screenshot-select () ()
-	    "Select a area for a screenshot and save it to screenshot directory"
-	    (let ((save-path (screenshot-path)))
-	      (run-shell-command (format nil "maim --select ~a" save-path))
-	      (message (format #f "Saved Screenshot to: ~a" save-path))))
-;; ** Volume
-(setf pamixer:*allow-boost* t)  
-
-(defun run-volume-command (command)
-  "Run a command to modify the volume and show a message of the current volume setting"
-  (let ((muted-message (make-percent-bar 0 "Volume: Muted"))
-	(volume-message (make-percent-bar (pamixer:get-volume) "Volume")))
-    (cond
-      ;; Check if we are toggling muting
-      ((equal command "pamixer-toggle-mute")
-       (run-commands command))
-      ;; If we are not mute
-      ((not (pamixer:get-mute))
-       (run-commands command))
-      (t nil))
-    (stumpwm:message (if (not (pamixer:get-mute))
-			 volume-message
-			 muted-message))))
-
-(defcommand notify-volume-up () ()
-  (run-volume-command "pamixer-volume-up"))
-
-(defcommand notify-volume-down () ()
-  (run-volume-command "pamixer-volume-down"))
-
-(defcommand notify-volume-mute () ()
-  (run-volume-command "pamixer-toggle-mute"))
-
-(defcommand volume-control () ()
-	    "Start volume control"
-	    (run-or-raise "pavucontrol" '(:class "Pavucontrol")))
-
-;; ** Theme
-(defcommand toggle-theme () ()
-	    "Toggle the system theme"
-	    (toggle-system-themeing))
 ;; ** System
  ;;; Shutdown and Reboot
 (defcommand shutdown (confirm) ((:y-or-n "Confirm Shutdown "))
@@ -295,29 +187,15 @@
 
 ;; *** Top Map
 ;; Handle Fn keys for systems like laptops etc
-<<<<<<< HEAD
 (define-key *top-map* (kbd "XF86AudioRaiseVolume") "volume-up")
 (define-key *top-map* (kbd "XF86AudioLowerVolume") "volume-down")
 (define-key *top-map* (kbd "XF86AudioMute") "volume-mute")
-=======
-(defun init-top-map ()
-  (define-key *top-map* (kbd "XF86AudioRaiseVolume") "notify-volume-up")
-  (define-key *top-map* (kbd "XF86AudioLowerVolume") "notify-volume-down")
-  (define-key *top-map* (kbd "XF86AudioMute") "notify-volume-mute")
->>>>>>> 08cbd86 (Clean up some stumpwm keybindings)
 
 (define-key *top-map* (kbd "XF86MonBrightnessUp") "screen-brightness-up")
 (define-key *top-map* (kbd "XF86MonBrightnessDown") "screen-brightness-down")
 
-<<<<<<< HEAD
 (define-key *top-map* (kbd "XF86KbdBrightnessUp") "keyboard-brightness-up")
 (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down")
-=======
-  (define-key *top-map* (kbd "XF86KbdBrightnessUp") "keyboard-brightness-up")
-  (define-key *top-map* (kbd "XF86KbdBrightnessDown") "keyboard-brightness-down")
-
-  (define-key *top-map* (kbd "Print") "screenshot"))
->>>>>>> 08cbd86 (Clean up some stumpwm keybindings)
 
 (define-key *top-map* (kbd "Print") "screenshot")
 
