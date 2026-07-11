@@ -79,7 +79,17 @@
      (list `("resolvconf.conf" ,(mixed-text-file
 				 "resolv.conf"
 				 "name_servers=127.0.0.1"))))
-    (service unbound-service-type)
+    (service unbound-service-type
+	     (unbound-configuration
+              (server
+               (unbound-server
+		(interface '("127.0.0.1" "::1"))
+		(extra-options
+		 '((val-permissive-mode . "yes")))))
+              (remote-control
+               (unbound-remote
+		(control-enable #t)
+		(control-interface "/run/unbound.sock")))))
     (service iwd-service-type
 	     (iwd-configuration
 	      (shepherd-provision '(iwd wireless-daemon))
