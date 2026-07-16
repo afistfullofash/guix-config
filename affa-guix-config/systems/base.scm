@@ -74,11 +74,6 @@
     (udev-rules-service 'openrgb openrgb)
     (udev-rules-service 'mtkclient mtkclient #:groups '("plugdev"))
     (udev-rules-service 'mtp libmtp)
-    (simple-service
-     'resolvconf etc-service-type
-     (list `("resolvconf.conf" ,(mixed-text-file
-				 "resolv.conf"
-				 "name_servers=127.0.0.1"))))
     (service unbound-service-type
 	     (unbound-configuration
               (server
@@ -101,8 +96,12 @@
 
 		(general
 		 (iwd-general-settings
-		  (enable-network-configuration? #t)
+		  (enable-network-configuration? #f)
 		  (extra-options '((Country . "AU")))))))))
+    (service connman-service-type
+                 (connman-configuration
+                  (shepherd-requirement '(iwd))
+                  (disable-vpn? #t)))
     (service bluetooth-service-type
 	     (bluetooth-configuration (auto-enable? #f)
 				      (multi-profile 'multiple)))
@@ -120,13 +119,7 @@
 			   #:options '("ctrl:nocaps"))))))
    (modify-services %desktop-services
      (delete wpa-supplicant-service-type)
-     (network-manager-service-type config =>
-       (network-manager-configuration
-         (inherit config)
-	 (dns "none")
-	 (extra-configuration-files
-	  `(("wifi_backend.conf" ,(plain-file "wifi_backend.conf"
-					      "[device]\nwifi.backend=iwd"))))))
+     (delete network-manager-service-type)
      (guix-service-type config => (guix-configuration
 				   (inherit config)
 				   (substitute-urls
