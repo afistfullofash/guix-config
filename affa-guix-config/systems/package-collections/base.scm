@@ -4,6 +4,7 @@
   #:use-module (gnu packages base)
   #:use-module (gnu packages c)
   #:use-module (gnu packages compression)
+  #:use-module (gnu packages connman)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages fontutils)
   #:use-module (gnu packages freedesktop)
@@ -59,6 +60,9 @@
 	sbcl-local-time
 	waybar))
 
+(define networking-packages
+  (list cmst))
+
 (define misc-packages
   (list bzip2
 	firefox
@@ -78,6 +82,7 @@
 	  font-packages
 	  bluetooth-packages
 	  audio-packages
+	  networking-packages
 	  hardware-packages
 	  filesystem-packages
 	  font-packages))
