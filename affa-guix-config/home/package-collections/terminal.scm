@@ -4,7 +4,7 @@
   #:use-module (gnu packages shellutils)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages video)
-  #:use-module (gnu packages wm)
+  #:use-module (gnu packages window-management)
 
   #:export (terminal-packages
 	    zsh-plugin-packages))

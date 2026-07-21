@@ -25,7 +25,7 @@
   #:use-module (gnu packages libusb)
   
   #:use-module (gnu packages shells)
-  #:use-module (gnu packages wm)
+  #:use-module (gnu packages window-management)
   #:use-module (gnu packages lisp-xyz)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages hardware)
@@ -93,7 +93,6 @@
 		(network
 		 (iwd-network-settings
 		  (name-resolving-service 'resolvconf)))
-
 		(general
 		 (iwd-general-settings
 		  (enable-network-configuration? #f)

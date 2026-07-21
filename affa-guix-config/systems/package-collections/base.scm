@@ -18,7 +18,7 @@
   #:use-module (gnu packages pulseaudio)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages package-management)
-  #:use-module (gnu packages wm)
+  #:use-module (gnu packages window-management)
 
   #:use-module (nongnu packages mozilla)
   

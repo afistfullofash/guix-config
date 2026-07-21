@@ -9,7 +9,7 @@
   #:use-module (gnu packages hardware)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages pulseaudio)
-  #:use-module (gnu packages wm)
+  #:use-module (gnu packages window-management)
   #:use-module (gnu packages lisp-xyz)
 
   #:use-module (afistfullofash packages wm)
