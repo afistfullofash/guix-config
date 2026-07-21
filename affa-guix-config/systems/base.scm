@@ -74,6 +74,12 @@
     (udev-rules-service 'openrgb openrgb)
     (udev-rules-service 'mtkclient mtkclient #:groups '("plugdev"))
     (udev-rules-service 'mtp libmtp)
+    (simple-service 'static-resolv.conf etc-service-type
+		    (list `("resolv.conf"
+			    ,(plain-file "resolv.conf"
+					 "nameserver 127.0.0.1
+nameserver ::1
+")))))
     (service unbound-service-type
 	     (unbound-configuration
               (server
@@ -100,7 +106,7 @@
     (service connman-service-type
                  (connman-configuration
                   (shepherd-requirement '(iwd))
-                  (disable-vpn? #t)))
+                  (disable-vpn? #f)))
     (service bluetooth-service-type
 	     (bluetooth-configuration (auto-enable? #f)
 				      (multi-profile 'multiple)))
