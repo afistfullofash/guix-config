@@ -5,6 +5,7 @@
   #:use-module (gnu packages c)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages connman)
+  #:use-module (gnu packages dns)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages fontutils)
   #:use-module (gnu packages freedesktop)
@@ -61,7 +62,8 @@
 	waybar))
 
 (define networking-packages
-  (list cmst))
+  (list cmst
+	unbound))
 
 (define misc-packages
   (list bzip2
