@@ -44,7 +44,6 @@
 	;; Gives us dunstify for a more powerfull notify-send replacement
 	dunst
         glibc-locales
-	rclone
 	;; xdg-desktop-portals
 	xdg-desktop-portal
 	xdg-desktop-portal-gtk
