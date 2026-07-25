@@ -21,30 +21,12 @@
   #:export (laptop-operating-system))
 
 
-(define home-assistant-system-service
-  (simple-service 'home-assistant-system-service
-                oci-service-type
-                (oci-extension
-                  (containers
-                   (list
-                    (oci-container-configuration
-                     (image "homeassistant/home-assistant:latest")
-		     (network "host")
-		     (volumes (list "/home/natalie/src/home-assistant/config:/config"))
-		     (environment (list '("TZ" . "Australia/Sydney")))
-		     (extra-arguments '("--privileged"))
-		     (auto-start? #f)))))))
-
-(define laptop-system-services
-  (list home-assistant-system-service))
-
 (define laptop-operating-system
   (operating-system
     (inherit base-system-operating-system)
     (host-name "siren")
 
-    (services (append laptop-system-services
-		    base-system-services))
+    (services base-system-services)
     
     (swap-devices (list (swap-space
                         (target (uuid

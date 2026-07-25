@@ -13,8 +13,7 @@
   #:use-module (gnu services networking)
   #:use-module (gnu services ssh)
   #:use-module (gnu services xorg)
-  #:use-module (gnu services docker)
-
+  
   #:use-module (afistfullofash services firmware)
 
   #:use-module (affa-guix-config packages stumpwm)
@@ -109,8 +108,6 @@
     (service bluetooth-service-type
 	     (bluetooth-configuration (auto-enable? #f)
 				      (multi-profile 'multiple)))
-    (service containerd-service-type)
-    (service docker-service-type)
     (service cups-service-type
 	     (cups-configuration
 	      (web-interface? #t)))
@@ -156,7 +153,6 @@
 					   "audio"
 					   "video"
 					   "input"
-					   "docker"
 					   "plugdev"
 					   "lp"
 					   "dialout")))
