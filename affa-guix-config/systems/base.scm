@@ -89,22 +89,6 @@
                (unbound-remote
 		(control-enable #t)
 		(control-interface "/run/unbound.sock")))))
-    (service iwd-service-type
-	     (iwd-configuration
-	      (shepherd-provision '(iwd wireless-daemon))
-	      (config
-	       (iwd-settings
-		(general
-		 (iwd-general-settings
-		  (enable-network-configuration? #f)
-		  (extra-options '((Country . "AU")))))))))
-    (service connman-service-type
-             (connman-configuration
-              (shepherd-requirement '(iwd))
-              (disable-vpn? #f)
-	      (general-configuration
-	       (connman-general-configuration
-		(resolv-conf "/dev/null")))))
     (service bluetooth-service-type
 	     (bluetooth-configuration (auto-enable? #f)
 				      (multi-profile 'multiple)))
@@ -119,8 +103,10 @@
 			   "us"
 			   #:options '("ctrl:nocaps"))))))
    (modify-services %desktop-services
-     (delete wpa-supplicant-service-type)
-     (delete network-manager-service-type)
+     (network-manager-service-type config =>
+        (network-manager-configuration
+         (inherit config)
+         (dns "none")))
      (guix-service-type config => (guix-configuration
 				   (inherit config)
 				   (substitute-urls
