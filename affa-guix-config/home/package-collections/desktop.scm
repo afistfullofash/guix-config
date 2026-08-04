@@ -40,9 +40,6 @@
     alacritty
     ;; Password Management
     keepassxc
-    ;; Email
-    notmuch
-    lieer
     ;; Documents
     libreoffice
     steam
