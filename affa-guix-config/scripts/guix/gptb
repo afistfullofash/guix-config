@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+#
+# gptb: guix package <something> build
+# Build package in the afistfullofash channel from local
+#
+# The package to be built needs to be defined at the bottom of the file
+# 
+# usage: gptb <package-file>
+# where <package-file> is a file in ~/src/afistfullofash/afistfullofash/packages/ 
+#
+#
+PACKAGE_MODULE_NAME=${1}
+CHANNEL_PACKAGE_DIR=${HOME}/src/afistfullofash/afistfullofash/packages
+
+# Guile caches compiled .go files under ~/.cache/guile/ccache by default,
+# and the manual explicitly notes that dependency tracking is imperfect;
+# it recommends GUILE_AUTO_COMPILE=fresh or --fresh-auto-compile to force recompilation.
+GUILE_AUTO_COMPILE=fresh \
+    guix build \
+    -L ~/src/afistfullofash \
+    -K \
+    --no-grafts \
+    -f ${CHANNEL_PACKAGE_DIR}/${PACKAGE_MODULE_NAME}.scm \
+    ${2}

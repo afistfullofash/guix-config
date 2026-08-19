@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+#
+# grn: guix repl now
+# Opens a guix repl in the current directory
+#
+# usage: grn
+#
+guix repl \
+     -L ~/src/guix-config \
+     -L ~/src/afistfullofash

@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+#
+# yt-download
+# Download a youtube file as mp3
+#
+# useage: yt-download <url>
+# 
+#
+#
+
+DOWNLOAD_URL=${1}
+
+guix shell yt-dlp node -- yt-dlp --js-runtimes node --cookies-from-browser firefox -t mp3 "${DOWNLOAD_URL}" --remote-components ejs:github

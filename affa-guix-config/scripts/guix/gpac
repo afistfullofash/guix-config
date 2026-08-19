@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+#
+# gpac
+# guix pull afistfullofash's channel
+# Set the channels.scm to be pinned to the last successfull build and set afistullofash's channel to point to <branch>
+#
+# Useage: gpac <channel>
+#
+#
+cp ~/.config/guix/channels.scm ~/.tmp/guix-channels.bk.scm
+

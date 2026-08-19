@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+#
+# export-gpg-files
+# Exports GPG Files to ~/.backups/gpg
+#
+# useage: export-gpg-files
+# categorys: gpg
+# 
+#
+#
+BACKUP_DIR=~/.backups/gpg
+mkdir -p ${BACKUP_DIR}
+# Export all public keys
+gpg --export --armor > ${BACKUP_DIR}/pubkeys.asc
+# Export all secret keys
+gpg --export-secret-keys --armor > ${BACKUP_DIR}/privatekeys.asc
+# Export trust levels (crucial for database consistency)
+gpg --export-ownertrust > ${BACKUP_DIR}/trust_database.txt

@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+#
+# setup-laptop-screen
+# Sets monitor to only the laptop screen and turns on powersaving
+#
+# usage: setup-laptop-screen
+#
+guix shell xset -- xset s on +dpms
+guix shell lxrandr -- lxrandr

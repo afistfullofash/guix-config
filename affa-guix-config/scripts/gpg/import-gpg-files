@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+#
+# import-gpg-files
+# Import GPG Files from ~/.backups/gpg
+#
+# useage: import-gpg-files
+# categorys: gpg
+# 
+#
+#
+BACKUP_DIR=~/.backups/gpg
+
+gpg --import ${BACKUP_DIR}/pubkeys.asc
+gpg --import ${BACKUP_DIR}/privatekeys.asc
+gpg --import-ownertrust ${BACKUP_DIR}/trust_database.txt

@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+#
+# setup-second-monitor
+# Sets up a second monitor to the right and turns off powersaving
+#
+# usage: setup-second-monitor
+#
+guix shell xset -- xset s off -dpms
+guix shell lxrandr -- lxrandr
