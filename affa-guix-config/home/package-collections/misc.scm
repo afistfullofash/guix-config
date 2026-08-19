@@ -13,7 +13,7 @@
   #:use-module (gnu packages suckless)
   #:use-module (gnu packages sync)
   #:use-module (gnu packages video)
-  #:use-module (gnu packages wm)
+  #:use-module (gnu packages window-management)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages xorg)
   
