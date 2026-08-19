@@ -204,10 +204,12 @@
              (extra-content "allow-loopback-pinentry\nallow-emacs-pinentry")
              (default-cache-ttl 3600)))
    (service home-openssh-service-type ssh-configuration)
-   (service home-files-service-type (append home-file-locations
-					    theme-home-locations))
-   (service home-xdg-configuration-files-service-type (append xdg-config-file-locations
-							      theme-xdg-config-locations))
+   (service home-files-service-type
+	    (append home-file-locations
+		    theme-home-locations))
+   (service home-xdg-configuration-files-service-type
+	    (append xdg-config-file-locations
+		    theme-xdg-config-locations))
    (service home-zsh-service-type
 	    (home-zsh-configuration
 	     (zshrc (list

@@ -29,8 +29,6 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages hardware)
 
-  
-
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd)
 
