@@ -5,6 +5,7 @@
 
   #:use-module (gnu packages ebook)
   #:use-module (gnu packages gnome)
+  #:use-module (gnu packages gstreamer)
   #:use-module (gnu packages image-viewers)
   #:use-module (gnu packages kde-graphics)
   #:use-module (gnu packages libreoffice)
@@ -31,7 +32,9 @@
    strawberry
    ;; Required for mtp mounting
    libmtp
-   gvfs))
+   gvfs
+   gst-plugins-good
+   gst-plugins-ugly))
 
 (define desktop-packages
   (append

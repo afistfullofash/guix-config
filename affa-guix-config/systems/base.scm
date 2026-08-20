@@ -44,7 +44,7 @@
 
 (define %user
   '((short "natalie")
-    (full "Natalie Hekate")))
+    (full "Natalie Atkinson")))
 
 (define sudo-user-programs
   (string-join

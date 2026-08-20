@@ -20,6 +20,7 @@
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages package-management)
   #:use-module (gnu packages window-management)
+  #:use-module (gnu packages vpn)
 
   #:use-module (nongnu packages mozilla)
   
@@ -63,7 +64,8 @@
 
 (define networking-packages
   (list cmst
-	unbound))
+	unbound
+	wireguard-tools))
 
 (define misc-packages
   (list bzip2

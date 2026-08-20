@@ -16,6 +16,9 @@
 (define (home-file-path file)
   (string-append home-directory file))
 
+(define (home-file-paths-from-config path config-paths)
+  )
+
 (define %current-source-directory
   (current-source-directory))
 
